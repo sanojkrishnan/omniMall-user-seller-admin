@@ -40,7 +40,7 @@ export default {
         wheelie: "wheelie 2s ease-in-out infinite",
         ride: "ride 2s ease-in-out infinite",
         width: "width 2s ease-in-out infinite",
-        loopScroll: "loopScroll 25s linear infinite",
+        loopScroll: "loopScroll 5s linear infinite",
       },
     },
   },

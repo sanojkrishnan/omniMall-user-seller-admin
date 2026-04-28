@@ -1,7 +1,8 @@
+import Loading from "./components/ui/Loading"
 
 function App() {
   return (
-    <div>App</div>
+    <div><Loading/></div>
   )
 }
 

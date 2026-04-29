@@ -23,13 +23,13 @@ export default {
           "100%": { transform: "translateX(0)" },
         },
         width: {
-          "0%": { transform: "scaleX(0)" },
-          "5%": { transform: "scaleX(0.5)" },
+          "0%": { transform: "scaleX(0.5)" },
+          "5%": { transform: "scaleX(1)" },
           "20%": { transform: "scaleX(1)" },
           "25%": { transform: "scaleX(0.5)" },
           "40%": { transform: "scaleX(0.2)" },
           "45%": { transform: "scaleX(0.5)" },
-          "100%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(0.8)" },
         },
         loopScroll: {
           from: { transform: "translateX(0)" },

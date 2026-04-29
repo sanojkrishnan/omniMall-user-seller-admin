@@ -1,3 +1,5 @@
+import { ShoppingCart } from "lucide-react";
+
 function Loading() {
   return (
     <div className="flex items-center justify-center w-[100vw] h-[100vh] bg-white">
@@ -19,11 +21,9 @@ function Loading() {
             </div>
           </div>
           <div className="animate-ride">
-            <img
-              className="  w-[30px] h-[30px] animate-wheelie animate-ride origin-bottom "
-              src="/src/assets/logo and other utilities/Empty-Cart-PNG-Pic.png"
-              alt="cart"
-            />
+            <div className="  w-[30px] h-[30px] animate-wheelie origin-bottom animate-ride">
+              <ShoppingCart className="w-full h-full" />
+            </div>
           </div>
         </div>
 

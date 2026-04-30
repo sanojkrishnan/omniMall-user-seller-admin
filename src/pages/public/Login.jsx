@@ -54,10 +54,10 @@ function Login() {
             onBlur={formik.handleBlur}
             value={formik.values.email}
           />
-          <div className="w-full h-8 text-sm">
+          <div className="w-full h-5 text-sm">
             {formik.touched.email && formik.errors.email && (
               <p className="text-red-500">
-                <TriangleAlert className="inline-block" /> {formik.errors.email}
+                <TriangleAlert className="size-3 inline-block" /> {formik.errors.email}
               </p>
             )}
           </div>
@@ -74,10 +74,10 @@ function Login() {
             onBlur={formik.handleBlur}
             value={formik.values.password}
           />
-          <div className="w-full h-8 text-sm flex justify-between">
+          <div className="w-full h-5 text-sm flex justify-between">
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-500 w-full">
-                <TriangleAlert className="inline-block" />{" "}
+                <TriangleAlert className="size-3 inline-block" />{" "}
                 {formik.errors.password}
               </p>
             )}

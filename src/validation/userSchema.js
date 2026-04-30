@@ -13,14 +13,15 @@ export const userSchema = Yup.object({
   gender: Yup.string()
     .oneOf(["male", "female"], "Invalid gender")
     .required("Select your gender"),
-  position: Yup.string()
+  role: Yup.string()
     .oneOf(["user", "seller"], "Invalid position")
     .optional()
     .default("user"),
   conditionCheck: Yup.boolean()
     .required("I agree to the terms and conditions")
     .default(false),
-  profile: Yup.mixed()
+  status: Yup.string().default("active"),
+  profileImage: Yup.mixed()
     .test("fileSize", "File too large", (value) => {
       return value && value.size <= 2 * 1024 * 1024;
     })

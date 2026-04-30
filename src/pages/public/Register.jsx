@@ -16,7 +16,7 @@ function Register() {
   [&::-webkit-scrollbar-thumb]:bg-transparent
  shadow-black/50 shadow-lg bg-gradient-to-br from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl p-8"
         >
-          <div className=" w-full flex justify-center items-center my-4">
+          <div className=" w-full flex justify-center items-center mb-2 mt-4">
             <div>
               <OmniMall />
               <h3 className="text-center pt-2 font-bold text-blue-800">
@@ -34,9 +34,10 @@ function Register() {
               confirmPassword: "",
               dateOfBirth: "",
               gender: "",
-              position: "user",
+              role: "user",
               conditionCheck: false,
-              profile: null,
+              profileImage: null,
+              status: "active",
             }}
             validationSchema={userSchema}
             onSubmit={(values) => {
@@ -46,14 +47,14 @@ function Register() {
             {({ values, setFieldValue }) => (
               <Form>
                 {/* Profile picture */}
-                <div className="w-full flex justify-center items-center py-2">
+                <div className="w-full flex justify-center items-center pb-2">
                   <div>
                     <div className="relative flex w-[80px] h-[80px] justify-center items-center">
                       <label className="flex ml-6 items-center justify-center w-[50px] h-[50px] border-2 border-black/60  rounded-full cursor-pointer hover:border-black/30 transition">
                         <span className="text-gray-600">
-                          {values.profile ? (
+                          {values.profileImage ? (
                             <img
-                              src={URL.createObjectURL(values.profile)}
+                              src={URL.createObjectURL(values.profileImage)}
                               alt="preview"
                               className="w-full h-full object-cover rounded-full"
                             />
@@ -65,7 +66,7 @@ function Register() {
                           className="hidden"
                           accept="image/*"
                           type="file"
-                          name="profile"
+                          name="profileImage"
                           onChange={async (e) => {
                             const file = e.target.files[0];
                             if (!file) return;
@@ -77,8 +78,8 @@ function Register() {
                         />
                       </label>
                       <div
-                        onClick={() => setFieldValue("profile", null)}
-                        className={`absolute right-1 cursor-pointer bottom-3 z-50 ${values.profile ? "block" : "hidden"} rounded-full w-fit h-fit bg-black text-white p-1 `}
+                        onClick={() => setFieldValue("profileImage", null)}
+                        className={`absolute right-1 cursor-pointer bottom-3 z-50 ${values.profileImage ? "block" : "hidden"} rounded-full w-fit h-fit bg-black text-white p-1 `}
                       >
                         <Trash className="size-4" />
                       </div>
@@ -104,7 +105,7 @@ function Register() {
                         name="firstName"
                         render={(msg) => (
                           <p className="text-red-500 text-sm">
-                            <TriangleAlert className="inline-block" /> {msg}
+                            <TriangleAlert className="size-3 inline-block" /> {msg}
                           </p>
                         )}
                       />
@@ -127,7 +128,7 @@ function Register() {
                         name="lastName"
                         render={(msg) => (
                           <p className="text-red-500 text-sm">
-                            <TriangleAlert className="inline-block" /> {msg}
+                            <TriangleAlert className="size-3 inline-block" /> {msg}
                           </p>
                         )}
                       />
@@ -151,7 +152,7 @@ function Register() {
                     name="email"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />
@@ -172,7 +173,7 @@ function Register() {
                     name="password"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />
@@ -193,7 +194,7 @@ function Register() {
                     name="confirmPassword"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />
@@ -214,7 +215,7 @@ function Register() {
                     name="dateOfBirth"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />
@@ -255,12 +256,12 @@ function Register() {
                     name="gender"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />
                 </div>
-                {/* position */}
+                {/* role */}
                 <label className="font-semibold">
                   Are You Here For Selling Products ?
                 </label>
@@ -270,11 +271,11 @@ function Register() {
                     <Field
                       className="cursor-pointer size-5"
                       type="radio"
-                      name="position"
-                      id="positionYes"
+                      name="role"
+                      id="roleYes"
                       value="seller"
                     />
-                    <label className="cursor-pointer" htmlFor="positionYes">
+                    <label className="cursor-pointer" htmlFor="roleYes">
                       Yes
                     </label>
                   </div>
@@ -283,21 +284,21 @@ function Register() {
                     <Field
                       className="cursor-pointer size-5"
                       type="radio"
-                      name="position"
-                      id="positionNo"
+                      name="role"
+                      id="roleNo"
                       value="user"
                     />
-                    <label className="cursor-pointer" htmlFor="positionNo">
+                    <label className="cursor-pointer" htmlFor="roleNo">
                       No
                     </label>
                   </div>
                 </div>
                 <div className="h-5">
                   <ErrorMessage
-                    name="position"
+                    name="role"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
-                        <TriangleAlert className="inline-block" /> {msg}
+                        <TriangleAlert className="size-3 inline-block" /> {msg}
                       </p>
                     )}
                   />

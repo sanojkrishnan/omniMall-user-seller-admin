@@ -21,7 +21,7 @@ function Loading() {
             </div>
           </div>
           <div className="animate-ride">
-            <div className="  w-[30px] h-[30px] animate-wheelie origin-bottom animate-ride">
+            <div className="  w-[30px] h-[30px] animate-wheelie origin-bottom-left ">
               <ShoppingCart className="w-full h-full" />
             </div>
           </div>

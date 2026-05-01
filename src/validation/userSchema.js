@@ -5,7 +5,13 @@ export const userSchema = Yup.object({
   email: Yup.string().email("Invalid email").required("Write your email"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
-    .required("Write your password"),
+    .required("Write your password")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[!@#$%^&*]/,
+      "Password must contain at least one special character",
+    ),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Confirm your password"),

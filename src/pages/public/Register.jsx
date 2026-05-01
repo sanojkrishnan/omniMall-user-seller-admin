@@ -72,7 +72,7 @@ function Register() {
                             if (!file) return;
 
                             const compressed = await handleImage(file);
-                            setFieldValue("profile", compressed);
+                            setFieldValue("profileImage", compressed);
                             e.target.value = null; //resetting the input value so i can select same picture more than one time
                           }}
                         />
@@ -105,7 +105,8 @@ function Register() {
                         name="firstName"
                         render={(msg) => (
                           <p className="text-red-500 text-sm">
-                            <TriangleAlert className="size-3 inline-block" /> {msg}
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {msg}
                           </p>
                         )}
                       />
@@ -128,7 +129,8 @@ function Register() {
                         name="lastName"
                         render={(msg) => (
                           <p className="text-red-500 text-sm">
-                            <TriangleAlert className="size-3 inline-block" /> {msg}
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {msg}
                           </p>
                         )}
                       />
@@ -254,48 +256,6 @@ function Register() {
                 <div className="h-5">
                   <ErrorMessage
                     name="gender"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
-                </div>
-                {/* role */}
-                <label className="font-semibold">
-                  Are You Here For Selling Products ?
-                </label>
-                {/* yes */}
-                <div className="flex justify-start gap-2 items-center mt-2">
-                  <div className="flex justify-start items-center gap-2">
-                    <Field
-                      className="cursor-pointer size-5"
-                      type="radio"
-                      name="role"
-                      id="roleYes"
-                      value="seller"
-                    />
-                    <label className="cursor-pointer" htmlFor="roleYes">
-                      Yes
-                    </label>
-                  </div>
-                  {/* no */}
-                  <div className="flex justify-start items-center gap-2">
-                    <Field
-                      className="cursor-pointer size-5"
-                      type="radio"
-                      name="role"
-                      id="roleNo"
-                      value="user"
-                    />
-                    <label className="cursor-pointer" htmlFor="roleNo">
-                      No
-                    </label>
-                  </div>
-                </div>
-                <div className="h-5">
-                  <ErrorMessage
-                    name="role"
                     render={(msg) => (
                       <p className="text-red-500 text-sm">
                         <TriangleAlert className="size-3 inline-block" /> {msg}

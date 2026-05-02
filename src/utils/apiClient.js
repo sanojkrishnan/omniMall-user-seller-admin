@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AUTH_CONFIG } from "./authConfig"; // your auth config
+import { AUTH_CONFIG } from "../config/app"; // auth config
 import { API_CONFIG } from "../config/app";
 
 // Base URL

@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.SERVER_URL,
-  socketURL: import.meta.env.SOCKET_URL,
+  baseURL: import.meta.env.VITE_SERVER_URL,
+socketURL: import.meta.env.VITE_SOCKET_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

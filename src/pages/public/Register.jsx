@@ -4,9 +4,27 @@ import OmniMall from "../../components/ui/OmniMall";
 import { Trash, TriangleAlert, UserPen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { handleImage } from "../../utils/imageCompressor";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../../redux/slice/authSlice";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
+import Loading from "../../components/ui/Loading";
 
 function Register() {
   const navigate = useNavigate();
+
+  const { isLoading, error, otpSent } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    } else if (otpSent) {
+      navigate(`/otp`);
+      toast.success(otpSent.message);
+    }
+  }, [error, otpSent]);
+
+  const dispatch = useDispatch();
   return (
     <>
       <div className="bg-[url('/logo%20and%20other%20utilities/register.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
@@ -17,7 +35,7 @@ function Register() {
  shadow-black/50 shadow-lg bg-gradient-to-br from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl p-8"
         >
           <div className=" w-full flex justify-center items-center mb-2 mt-4">
-            <div>
+            <div className="text-center">
               <OmniMall />
               <h3 className="text-center pt-2 font-bold text-blue-800">
                 Sign Up
@@ -41,7 +59,21 @@ function Register() {
             }}
             validationSchema={userSchema}
             onSubmit={(values) => {
-              console.log("Register data:", values);
+              // build FormData for multer
+              const formData = new FormData();
+              formData.append("firstName", values.firstName);
+              formData.append("lastName", values.lastName);
+              formData.append("email", values.email);
+              formData.append("password", values.password);
+              formData.append("dateOfBirth", values.dateOfBirth);
+              formData.append("gender", values.gender);
+              formData.append("role", values.role);
+              formData.append("status", values.status);
+              if (values.profileImage) {
+                formData.append("profileImage", values.profileImage);
+              }
+
+              dispatch(registerUser(formData));
             }}
           >
             {({ values, setFieldValue }) => (
@@ -282,7 +314,7 @@ function Register() {
                   type="submit"
                   disabled={!values.conditionCheck}
                 >
-                  Submit
+                  {isLoading ? <Loading /> : "Submit"}
                 </button>
                 <button
                   type="button"

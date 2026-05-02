@@ -20,7 +20,7 @@ export const userSchema = Yup.object({
     .oneOf(["male", "female"], "Invalid gender")
     .required("Select your gender"),
   role: Yup.string()
-    .oneOf(["user", "seller"], "Invalid position")
+    .oneOf(["user"], "Invalid position")
     .optional()
     .default("user"),
   conditionCheck: Yup.boolean()
@@ -28,12 +28,14 @@ export const userSchema = Yup.object({
     .default(false),
   status: Yup.string().default("active"),
   profileImage: Yup.mixed()
+    .nullable()
+    .optional()
     .test("fileSize", "File too large", (value) => {
-      return value && value.size <= 2 * 1024 * 1024;
+      if (!value) return true; // ← no file selected = ok
+      return value.size <= 2 * 1024 * 1024;
     })
     .test("fileType", "Unsupported format", (value) => {
-      return (
-        value && ["image/jpeg", "image/png", "image/webp"].includes(value.type)
-      );
+      if (!value) return true; // ← no file selected = ok
+      return ["image/jpeg", "image/png", "image/webp"].includes(value.type);
     }),
 });

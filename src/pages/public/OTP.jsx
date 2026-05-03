@@ -2,41 +2,74 @@ import { useFormik } from "formik";
 import OmniMall from "../../components/ui/OmniMall";
 import { TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/ui/Button";
+import { FormCard } from "../../components/ui/FormCard";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { verifyOTP } from "../../redux/slice/authSlice";
+import Loading from "../../components/ui/Loading";
 
 function OTP() {
   const navigate = useNavigate();
 
+  const { user, message, isLoading, error, otpSent } = useSelector(
+    (state) => state.auth,
+  );
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!otpSent.status) {
+      navigate("/register");
+    }
+    if (error) {
+      toast.error(error.message);
+    }
+    if (user) {
+      toast.success(message);
+      console.log(message);
+      navigate("/");
+    }
+  }, [error, user, message]);
+
   const formik = useFormik({
     initialValues: {
-      email: "",
+      email: otpSent.sentToMail || "",
       otp: "",
     },
     validate: (values) => {
       const errors = {};
 
-      if (!values.email) {
-        errors.email = "Email is required";
-      } else if (
-        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-      ) {
-        errors.email = "Invalid email address";
-      }
-
       if (!values.otp) {
         errors.otp = "OTP is required";
+      } else if (values.otp.length !== 6) {
+        errors.otp = "OTP must be 6 digits";
+      } else if (!/^\d+$/.test(values.otp)) {
+        errors.otp = "OTP must contain only digits";
       }
 
-
       return errors;
+    },
+    onSubmit: (values) => {
+      console.log("Submitting OTP:", values);
+      console.log("Submitting OTP:", otpSent);
+      if (error) {
+        toast.error("Invalid email address");
+        return;
+      }
+      dispatch(verifyOTP(values));
     },
   });
   return (
     <div className="bg-[url('/logo%20and%20other%20utilities/login%20bg.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
-      <div className="w-[400px] shadow-black/50 shadow-lg bg-gradient-to-br from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl p-8">
+      <FormCard>
         <div className=" w-full flex justify-center items-center my-4">
           <div className="text-center">
             <OmniMall />
-            <h3 className="text-center pt-2 font-bold text-blue-800">Confirm OTP</h3>
+            <h3 className="text-center pt-2 font-bold text-blue-800">
+              Confirm OTP
+            </h3>
           </div>
         </div>
         <form onSubmit={formik.handleSubmit}>
@@ -65,21 +98,11 @@ function OTP() {
             </div>
           </div>
 
-          <button
-            className="bg-black text-white w-full hover:shadow-lg shadow-black p-2 mt-4 rounded-lg"
-            type="submit"
-          >
-            Confirm
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/register")}
-            className="border-[0.5px] border-black/40 shadow-lg hover:bg-white/20 w-full p-2 mt-2 rounded-lg"
-          >
-            Go Back
-          </button>
+          <Button type="submit">
+            {isLoading ? <Loading variant="secondary" /> : "Confirm"}
+          </Button>
         </form>
-      </div>
+      </FormCard>
     </div>
   );
 }

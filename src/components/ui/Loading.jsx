@@ -1,11 +1,18 @@
+import { cn } from "../../utils/CN";
 
-function Loading() {
+const variants = {
+  primary: "w-16 h-16 border-4 border-t-black rounded-full animate-spin",
+  secondary:
+    "w-6 h-6 border-2 border-white border-t-black rounded-full animate-spin",
+};
+
+function Loading({ className, variant = "primary", ...props }) {
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-slate-50">
+      <div className="flex items-center justify-center h-[100%] w-full bg-transparent">
         {/* Outer Spinner Ring */}
         <div className="relative flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className={cn(variants[variant], className)} {...props}></div>
         </div>
       </div>
     </>

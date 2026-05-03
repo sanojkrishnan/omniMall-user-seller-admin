@@ -9,18 +9,24 @@ import { registerUser } from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import Loading from "../../components/ui/Loading";
+import { Button } from "../../components/ui/Button";
+import { FormCard } from "../../components/ui/FormCard";
 
 function Register() {
   const navigate = useNavigate();
 
-  const { isLoading, error, otpSent } = useSelector((state) => state.auth);
+  // getting the auth state from the redux store
+  const { message, isLoading, error, otpSent } = useSelector(
+    (state) => state.auth,
+  );
 
   useEffect(() => {
     if (error) {
       toast.error(error);
-    } else if (otpSent) {
+    } else if (otpSent.status) {
       navigate(`/otp`);
-      toast.success(otpSent.message);
+      toast.success(message);
+      console.log(message);
     }
   }, [error, otpSent]);
 
@@ -28,12 +34,7 @@ function Register() {
   return (
     <>
       <div className="bg-[url('/logo%20and%20other%20utilities/register.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
-        <div
-          className="w-[500px] h-[550px] overflow-y-scroll [&::-webkit-scrollbar]:w-2
-  [&::-webkit-scrollbar-track]:bg-transparent
-  [&::-webkit-scrollbar-thumb]:bg-transparent
- shadow-black/50 shadow-lg bg-gradient-to-br from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl p-8"
-        >
+        <FormCard>
           <div className=" w-full flex justify-center items-center mb-2 mt-4">
             <div className="text-center">
               <OmniMall />
@@ -73,7 +74,7 @@ function Register() {
                 formData.append("profileImage", values.profileImage);
               }
 
-              dispatch(registerUser(formData));
+              dispatch(registerUser({ formData, email: values.email }));
             }}
           >
             {({ values, setFieldValue }) => (
@@ -309,24 +310,24 @@ function Register() {
                   &nbsp; I agree to the terms and conditions
                 </label>
 
-                <button
-                  className="bg-black disabled:bg-gray-700 text-white w-full hover:shadow-lg shadow-black p-2 mt-4 rounded-lg"
+                <Button
+                  variant="primary"
                   type="submit"
                   disabled={!values.conditionCheck}
                 >
-                  {isLoading ? <Loading /> : "Submit"}
-                </button>
-                <button
+                  {isLoading ? <Loading variant="secondary" /> : "Submit"}
+                </Button>
+                <Button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="border-[0.5px] border-black/40 shadow-lg hover:bg-white/20 w-full p-2 mt-2 rounded-lg"
+                  variant="secondary"
                 >
                   Log In
-                </button>
+                </Button>
               </Form>
             )}
           </Formik>
-        </div>
+        </FormCard>
       </div>
     </>
   );

@@ -6,6 +6,8 @@ import Loading from "./components/ui/Loading";
 import OTP from "./pages/public/OTP";
 import { Toastify } from "./utils/toastify";
 import CartLoading from "./components/ui/CartLoading";
+import NotFound from "./components/NotFound";
+import ResetPass from "./pages/public/ResetPass";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
           <Route path="/otp" element={<OTP />} />
           <Route path="/loading" element={<Loading />} />
           <Route path="/cartloading" element={<CartLoading />} />
+          <Route path="/reset-password" element={<ResetPass />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
       <Toastify />

@@ -79,14 +79,13 @@ export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async ({ token, password }, { rejectWithValue }) => {
     try {
-      const data = await AuthAPI.resetPassword(token, password);
+      const data = await AuthAPI.resetPassword({ token, password });
       return data;
     } catch (err) {
       return rejectWithValue(extractError(err, "Password reset failed"));
     }
   },
 );
-
 // Slice
 
 const authSlice = createSlice({

@@ -11,26 +11,18 @@ import Loading from "../../components/ui/Loading";
 import { forgotPassword, loginUser } from "../../redux/slice/authSlice";
 
 function Login() {
-  console.log("1. LOGIN RENDERED");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, message, isLoading, error } = useSelector(
-    (state) => state.auth,
-  );
+  const { user, message, isLoading } = useSelector((state) => state.auth);
 
   const [forgotPassClick, setForgotPassClick] = useState(false);
-
-  useEffect(() => {
-    console.log("2. LOGIN MOUNTED");
-    return () => console.log("3. LOGIN UNMOUNTED");
-  }, []);
 
   useEffect(() => {
     if (user) {
       toast.success(message);
       navigate("/");
     }
-  }, [user]);
+  }, [user, message, navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -97,7 +89,11 @@ function Login() {
             </h3>
           </div>
         </div>
-        <form onSubmit={formik.handleSubmit}>
+        <form
+          onSubmit={
+            forgotPassClick ? forgotFormik.handleSubmit : formik.handleSubmit
+          }
+        >
           {forgotPassClick ? (
             <>
               <label className="font-semibold" htmlFor="forgotEmail">
@@ -129,9 +125,12 @@ function Login() {
                 )}
               </Button>
               <Button
-                onClick={() => setForgotPassClick(false)}
+                onClick={() => {
+                  setForgotPassClick(false);
+                  forgotFormik.resetForm();
+                }}
                 variant="secondary"
-                type="button" // ✅ change to button not submit
+                type="button"
               >
                 Go Back
               </Button>
@@ -166,30 +165,30 @@ function Login() {
                 className="p-2 cursor-pointer placeholder:text-gray-900 rounded-lg bg-transparent border-[0.5px] border-black/50 w-full"
                 type="password"
                 name="password"
-                placeholder="Add You Password"
+                placeholder="Add Your Password"
                 id="password"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
               />
-              <div className="w-full h-5 text-sm flex justify-between">
+              <div className="w-full h-5 text-sm ">
                 {formik.touched.password && formik.errors.password && (
                   <p className="text-red-500 w-full">
                     <TriangleAlert className="size-3 inline-block" />{" "}
                     {formik.errors.password}
                   </p>
                 )}
-                <div className="w-full cursor-pointer flex justify-end">
-                  <p
-                    className="text-blue-600"
-                    onClick={() => setForgotPassClick(true)}
-                  >
-                    Forgot Password
-                  </p>
-                </div>
+              </div>
+              <div className="w-full cursor-pointer flex justify-end">
+                <p
+                  className="text-blue-600"
+                  onClick={() => setForgotPassClick(true)}
+                >
+                  Forgot Password
+                </p>
               </div>
 
-              <Button variant="primary" type="submit">
+              <Button variant="primary" disabled={isLoading} type="submit">
                 {isLoading ? <Loading variant="secondary" /> : "Log In"}
               </Button>
               <Button

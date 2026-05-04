@@ -1,19 +1,32 @@
-import React from "react";
 import { FormCard } from "../../components/ui/FormCard";
 import OmniMall from "../../components/ui/OmniMall";
 import { useFormik } from "formik";
 import { Button } from "../../components/ui/Button";
-import Loading from "../../components/ui/Loading";
 import { TriangleAlert } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { forgotPassword } from "../../redux/slice/authSlice";
+import { resetPassword } from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
+import Loading from "../../components/ui/Loading";
 
 function ResetPass() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading } = useSelector((state) => state.auth);
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
+  const { message, isLoading } = useSelector((state) => state.auth);
+
+  // If no token in URL, show error early
+  if (!token) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-red-500 font-semibold">
+          Invalid or missing reset link. Please request a new one.
+        </p>
+      </div>
+    );
+  }
+
   const formik = useFormik({
     initialValues: {
       newPassword: "",
@@ -21,8 +34,45 @@ function ResetPass() {
     },
     validate: (values) => {
       const errors = {};
+
+      if (!values.newPassword) {
+        errors.newPassword = "New password is required";
+      } else if (values.newPassword.length < 8) {
+        errors.newPassword = "Password must be at least 8 characters";
+      } else if (!values.newPassword.match(/[A-Z]/)) {
+        errors.newPassword =
+          "Password must contain at least one uppercase letter";
+      } else if (!values.newPassword.match(/[0-9]/)) {
+        errors.newPassword = "Password must contain at least one number";
+      } else if (!values.newPassword.match(/[!@#$%^&*]/)) {
+        errors.newPassword =
+          "Password must contain at least one special character";
+      }
+
+      if (!values.confirmPassword) {
+        errors.confirmPassword = "Please confirm your password";
+      } else if (values.newPassword !== values.confirmPassword) {
+        errors.confirmPassword = "Passwords do not match";
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      const result = await dispatch(
+        resetPassword({
+          token,
+          password: values.newPassword,
+        }),
+      );
+
+      if (resetPassword.fulfilled.match(result)) {
+        toast.success(message || "Password reset successful!");
+      } else {
+        toast.error(message || "Reset failed. Link may have expired.");
+      }
     },
   });
+
   return (
     <div className="bg-[url('/logo%20and%20other%20utilities/forgot-pass.jpg')] bg-cover bg-center w-full bg-blue-300 h-screen flex justify-center items-center">
       <FormCard>
@@ -80,7 +130,7 @@ function ResetPass() {
           </div>
 
           <Button type="submit">
-            {/* {isLoading ? <Loading variant="secondary" /> : "Confirm"} */}{" "}
+            {isLoading ? <Loading variant="secondary" /> : "Confirm"}
             Confirm
           </Button>
         </form>

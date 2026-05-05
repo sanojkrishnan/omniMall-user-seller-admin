@@ -1,4 +1,3 @@
-import React from 'react'
 import OmniMall from '../../components/ui/OmniMall'
 
 function Dashboard() {

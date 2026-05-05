@@ -117,7 +117,7 @@ function Login() {
                   </p>
                 )}
               </div>
-              <Button variant="primary" type="submit">
+              <Button variant="primary" disabled={isLoading} type="submit">
                 {isLoading ? (
                   <Loading variant="secondary" />
                 ) : (

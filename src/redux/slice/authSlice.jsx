@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setAuthToken, saveUser, clearTokens } from "../../utils/apiClient";
+import {
+  setAuthToken,
+  saveUser,
+  clearTokens,
+  setAdminToken,
+} from "../../utils/apiClient";
 import { AuthAPI } from "../../services/authService";
 
 const initialState = {
@@ -156,7 +161,14 @@ const authSlice = createSlice({
         state.user = action.payload.data.user;
         state.token = action.payload.data.token;
         state.message = action.payload.message;
-        setAuthToken(action.payload.data.token);
+        const { token, user } = action.payload.data;
+        if (user.role === "admin") {
+          setAdminToken(token);
+        }
+        if (user.role === "user") {
+          setAuthToken(token);
+        }
+
         saveUser(action.payload.data.user);
       })
       .addCase(loginUser.rejected, (state, action) => {

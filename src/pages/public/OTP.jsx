@@ -98,7 +98,7 @@ function OTP() {
             </div>
           </div>
 
-          <Button type="submit">
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? <Loading variant="secondary" /> : "Confirm"}
           </Button>
         </form>

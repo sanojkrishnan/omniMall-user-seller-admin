@@ -23,7 +23,7 @@ function Register() {
   useEffect(() => {
     if (error) {
       toast.error(error);
-    } else if (otpSent.status) {
+    } else if (otpSent?.status) {
       navigate(`/otp`);
       toast.success(message);
       console.log(message);
@@ -313,7 +313,7 @@ function Register() {
                 <Button
                   variant="primary"
                   type="submit"
-                  disabled={!values.conditionCheck}
+                  disabled={!values.conditionCheck || isLoading}
                 >
                   {isLoading ? <Loading variant="secondary" /> : "Submit"}
                 </Button>

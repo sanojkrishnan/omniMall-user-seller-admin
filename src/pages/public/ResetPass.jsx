@@ -129,7 +129,7 @@ function ResetPass() {
               )}
           </div>
 
-          <Button type="submit">
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? <Loading variant="secondary" /> : "Confirm"}
             Confirm
           </Button>

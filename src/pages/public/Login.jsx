@@ -22,7 +22,7 @@ function Login() {
       toast.success(message);
       navigate("/");
     }
-  }, [user, message, navigate]);
+  }, [user, navigate]);
 
   const formik = useFormik({
     initialValues: {

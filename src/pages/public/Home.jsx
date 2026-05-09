@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import OmniMall from "../../components/ui/OmniMall";
 import {
-  ArrowLeft,
-  ArrowLeftIcon,
-  ArrowLeftToLine,
   HomeIcon,
-  LeafIcon,
   SettingsIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,

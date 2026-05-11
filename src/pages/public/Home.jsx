@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import OmniMall from "../../components/ui/OmniMall";
-import {
-  HomeIcon,
-  SettingsIcon,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-} from "lucide-react";
+import Header from "../../components/Header";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -29,53 +23,8 @@ function Home() {
       {/* Carousel */}
       <div className="relative w-full h-[90vh]  overflow-hidden">
         <div className="absolute z-10  flex justify-between items-center w-full">
-          <div className="m-2 ml-4 w-fit ">
-            <OmniMall />
-          </div>
-
-          {/* menu */}
-          <div className="mr-5 hidden sm:block">
-            <div className="w-fit px-2 py-2 text-center text-white rounded-b-3xl bg-black flex justify-evenly">
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <HomeIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <ShoppingBagIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <ShoppingCartIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <SettingsIcon />
-                <p>Home</p>
-              </div>
-            </div>
-          </div>
-
-          {/* mobile menu */}
-          <div className=" fixed top-3 right-0 flex sm:hidden">
-            <div className="w-fit px-2 py-2 text-center text-white rounded-l-3xl bg-black flex flex-col justify-evenly">
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <HomeIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <ShoppingBagIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <ShoppingCartIcon />
-                <p>Home</p>
-              </div>
-              <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
-                <SettingsIcon />
-                <p>Home</p>
-              </div>
-            </div>
-          </div>
+          {/* header */}
+          <Header />
         </div>
         {carouselImages.map((item, index) => (
           <img
@@ -102,7 +51,20 @@ function Home() {
           ))}
         </div>
       </div>
-      <div className="w-full "></div>
+      <div
+        className="w-full h-80 bg-gradient-to-br text-white text-center p-8"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
+        }}
+      >
+        <h1 className="text-3xl font-semibold mb-2">Shop By Category</h1>
+        <p>Explore our wide range of products</p>
+
+        <div>
+          {/* category over here  */}
+        </div>
+      </div>
     </div>
   );
 }

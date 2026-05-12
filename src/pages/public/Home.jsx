@@ -7,6 +7,39 @@ const carouselImages = [
   { image: "/src/assets/carausal/home Pikbest.jfif", alt: "Home" },
 ];
 
+const categoryList = [
+  {
+    category: "Electronics",
+    image: "/src/assets/homeSort/electronics.jpeg",
+    alt: "electronics",
+  },
+  {
+    category: "Home Appliances",
+    image: "/src/assets/homeSort/Kitchen Appliances Setup.jpeg",
+    alt: "home appliances",
+  },
+  {
+    category: "Beauty",
+    image: "/src/assets/homeSort/beauty.jpeg",
+    alt: "beauty",
+  },
+  {
+    category: "Fashion",
+    image: "/src/assets/homeSort/fashion.jpeg",
+    alt: "fashion",
+  },
+  {
+    category: "Accessories",
+    image: "/src/assets/homeSort/accessories.jpeg",
+    alt: "accessories",
+  },
+  {
+    category: "Beverages",
+    image: "/src/assets/homeSort/beverages.jpeg",
+    alt: "beverages",
+  },
+];
+
 function Home() {
   const [current, setCurrent] = useState(0);
 
@@ -51,6 +84,8 @@ function Home() {
           ))}
         </div>
       </div>
+
+      {/* shop by category */}
       <div
         className="w-full h-80 bg-gradient-to-br text-white text-center p-8"
         style={{
@@ -60,9 +95,33 @@ function Home() {
       >
         <h1 className="text-3xl font-semibold mb-2">Shop By Category</h1>
         <p>Explore our wide range of products</p>
+        <div className="flex px-20 overflow-x-auto justify-evenly loopScroll mt-10 ">
+          {categoryList.map((item, index) => {
+            return (
+              <div
+                className="relative min-w-28 h-40 mr-10 cursor-pointer overflow-hidden"
+                key={index}
+              >
+                <img
+                  className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                  src={item.image}
+                  alt={item.alt}
+                />
+                <div className="absolute z-50 w-full h-full hover:scale-110 hover:shadow-[inset_0_-70px_70px_rgba(0,0,0,100)] transition-all duration-500 rounded-lg shadow-[inset_0_-50px_50px_rgba(0,0,0,100)] flex items-end justify-center">
+                  <p className="text-center w-fit mb-2 px-4">{item.category}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-        <div>
-          {/* category over here  */}
+      {/* featured products  */}
+      <div className="w-full text-center p-8">
+        <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
+        <p>Handpicked favorites just for you</p>
+        <div className="grid grid-cols-3">
+          {/* featured products here  */}
         </div>
       </div>
     </div>

@@ -4,12 +4,12 @@ import OmniMall from './ui/OmniMall';
 function Header() {
   return (
     <>
-    <div className="m-2 ml-4 w-fit ">
+    <div className="m-2 ml-4 w-fit">
             <OmniMall />
           </div>
 
           {/* menu */}
-          <div className="mr-5 hidden sm:block">
+          <div className="mr-5 hidden sm:block ">
             <div className="w-fit px-2 py-2 text-center text-white rounded-b-3xl bg-black flex justify-evenly">
               <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer">
                 <HomeIcon />

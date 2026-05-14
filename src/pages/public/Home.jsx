@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import { FormCard } from "../../components/ui/FormCard";
-import { Star } from "lucide-react";
+import { HeartIcon, Star } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 
 const carouselImages = [
@@ -239,12 +239,10 @@ function Home() {
                     src={item.productImages[0].image}
                     alt=""
                   />
-                  <div className="absolute flex items-end justify-center w-full h-1/2 bottom-0 rounded-b-lg bg-gradient-to-t from-gray-900 to-white/0">
-                    {item.productImages.map(() => (
-                      <div
-                        className={`w-2 h-2 rounded-full bg-white border border-black mx-1 my-5`}
-                      ></div>
-                    ))}
+                  <div className="absolute flex items-end justify-end w-full h-1/2 bottom-0 rounded-b-lg bg-gradient-to-t from-gray-900 to-white/0">
+                    <button className="m-4 mb-2 text-red-500 cursor-pointer" onClick={() => {}}>
+                      <HeartIcon className="fill-red-500"/>
+                    </button>
                   </div>
                 </div>
                 <div class="p-6">

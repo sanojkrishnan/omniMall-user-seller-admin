@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
-import { HeartIcon } from "lucide-react";
+import { HeartIcon, ShoppingCart } from "lucide-react";
 
 function ProductCard({ products }) {
   return (
@@ -44,7 +44,7 @@ function ProductCard({ products }) {
                 <h5 className="text-green-500 text-3xl">{item.offerPrice}$</h5>
                 <div className="pt-4">
                   <Button>Buy Now</Button>
-                  <Button variant="secondary">Add To Cart</Button>
+                  <Button variant="secondary"><ShoppingCart /> Add To Cart</Button>
                 </div>
               </div>
             </div>

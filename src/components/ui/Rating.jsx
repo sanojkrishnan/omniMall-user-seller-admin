@@ -10,7 +10,7 @@ export const Rating = ({ className, rating }) => {
         <Star
           key={star}
           className={
-            star <= rating ? "fill-yellow-600 text-yellow-600" : "text-black"
+            star <= rating ? "fill-yellow-500 text-yellow-500" : "text-black"
           }
         />
       ))}

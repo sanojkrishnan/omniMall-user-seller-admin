@@ -222,13 +222,13 @@ function Home() {
       </div>
 
       {/* featured products  */}
-      <div className="w-full text-center sm:p-8 p-4 py-12 sm:py-24">
+      <div className="w-full text-center sm:p-8 p-4 py-12 sm:py-16">
         <div className="pb-10">
           <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
           <p>Handpicked favorites just for you</p>
         </div>
         <ProductCard products={featuredProducts} />
-        <div className="flex justify-center items-center mt-16">
+        <div className="flex justify-center items-center mt-10">
           <Button
             variant="secondary"
             className={"w-fit"}
@@ -236,8 +236,24 @@ function Home() {
               navigate("/shop");
             }}
           >
-            Show more
+            view more
           </Button>
+        </div>
+      </div>
+
+      {/* coupons  */}
+
+      <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-5 sm:py-5">
+        <div className="pb-10">
+          <h1 className="text-3xl font-semibold mb-2">
+            Special Offers And Coupons
+          </h1>
+          <p>Save more with our exclusive deals</p>
+        </div>
+
+        <div>
+
+          
         </div>
       </div>
     </div>

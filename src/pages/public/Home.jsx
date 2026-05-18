@@ -251,10 +251,7 @@ function Home() {
           <p>Save more with our exclusive deals</p>
         </div>
 
-        <div>
-
-          
-        </div>
+        <div></div>
       </div>
     </div>
   );

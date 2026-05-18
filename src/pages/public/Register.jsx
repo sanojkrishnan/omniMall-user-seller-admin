@@ -43,6 +43,9 @@ function Register() {
               </h3>
             </div>
           </div>
+          <div className="">
+            <div className="w-10 h-10 rounded-full bg-green-500 animate-pulse"></div>
+          </div>
 
           <Formik
             initialValues={{

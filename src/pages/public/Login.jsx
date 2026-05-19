@@ -17,12 +17,13 @@ function Login() {
 
   const [forgotPassClick, setForgotPassClick] = useState(false);
 
+  //  Handle post-login redirect
   useEffect(() => {
-    if (user) {
+    if (user && message) {
       toast.success(message);
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, message]);
 
   const formik = useFormik({
     initialValues: {
@@ -112,7 +113,7 @@ function Login() {
               <div className="w-full h-5 text-sm">
                 {forgotFormik.touched.email && forgotFormik.errors.email && (
                   <p className="text-red-500">
-                    <TriangleAlert className="size-3 inline-block" />{" "}
+                    <TriangleAlert className="size-3 inline-block" />
                     {forgotFormik.errors.email}
                   </p>
                 )}

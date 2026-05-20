@@ -111,12 +111,12 @@ function Login() {
                 value={forgotFormik.values.email}
               />
               <div className="w-full h-5 text-sm">
-                {forgotFormik.touched.email && forgotFormik.errors.email && (
+                {forgotFormik.submitCount !== 0 && forgotFormik.errors.email ? (
                   <p className="text-red-500">
                     <TriangleAlert className="size-3 inline-block" />
                     {forgotFormik.errors.email}
                   </p>
-                )}
+                ) : null}
               </div>
               <Button variant="primary" disabled={isLoading} type="submit">
                 {isLoading ? (
@@ -152,12 +152,12 @@ function Login() {
                 value={formik.values.email}
               />
               <div className="w-full h-5 text-sm">
-                {formik.touched.email && formik.errors.email && (
+                {formik.submitCount !== 0 && formik.errors.email ? (
                   <p className="text-red-500">
-                    <TriangleAlert className="size-3 inline-block" />{" "}
+                    <TriangleAlert className="size-3 inline-block" />
                     {formik.errors.email}
                   </p>
-                )}
+                ) : null}
               </div>
               <label className="font-semibold" htmlFor="password">
                 Password :
@@ -173,7 +173,7 @@ function Login() {
                 value={formik.values.password}
               />
               <div className="w-full h-5 text-sm ">
-                {formik.touched.password && formik.errors.password && (
+                {formik.submitCount !== 0 && formik.errors.password && (
                   <p className="text-red-500 w-full">
                     <TriangleAlert className="size-3 inline-block" />{" "}
                     {formik.errors.password}

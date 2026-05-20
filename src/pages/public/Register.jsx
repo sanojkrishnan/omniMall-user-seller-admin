@@ -80,7 +80,7 @@ function Register() {
               dispatch(registerUser({ formData, email: values.email }));
             }}
           >
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, submitCount }) => (
               <Form>
                 {/* Profile picture */}
                 <div className="w-full flex justify-center items-center pb-2">
@@ -137,15 +137,17 @@ function Register() {
                       placeholder="Your First Name"
                     />
                     <div className="h-5">
-                      <ErrorMessage
-                        name="firstName"
-                        render={(msg) => (
-                          <p className="text-red-500 text-sm">
-                            <TriangleAlert className="size-3 inline-block" />{" "}
-                            {msg}
-                          </p>
-                        )}
-                      />
+                      {submitCount > 0 && (
+                        <ErrorMessage
+                          name="firstName"
+                          render={(msg) => (
+                            <p className="text-red-500 text-sm">
+                              <TriangleAlert className="size-3 inline-block" />{" "}
+                              {msg}
+                            </p>
+                          )}
+                        />
+                      )}
                     </div>
                   </div>
                   <div>
@@ -161,15 +163,17 @@ function Register() {
                       placeholder="Your last Name"
                     />
                     <div className="h-5">
-                      <ErrorMessage
-                        name="lastName"
-                        render={(msg) => (
-                          <p className="text-red-500 text-sm">
-                            <TriangleAlert className="size-3 inline-block" />{" "}
-                            {msg}
-                          </p>
-                        )}
-                      />
+                      {submitCount > 0 && (
+                        <ErrorMessage
+                          name="firstName"
+                          render={(msg) => (
+                            <p className="text-red-500 text-sm">
+                              <TriangleAlert className="size-3 inline-block" />{" "}
+                              {msg}
+                            </p>
+                          )}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -186,14 +190,17 @@ function Register() {
                   placeholder="Your Email"
                 />
                 <div className="h-5">
-                  <ErrorMessage
-                    name="email"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
+                  {submitCount > 0 && (
+                    <ErrorMessage
+                      name="firstName"
+                      render={(msg) => (
+                        <p className="text-red-500 text-sm">
+                          <TriangleAlert className="size-3 inline-block" />{" "}
+                          {msg}
+                        </p>
+                      )}
+                    />
+                  )}
                 </div>
                 {/* password */}
                 <label className="font-semibold" htmlFor="password">
@@ -207,14 +214,17 @@ function Register() {
                   placeholder="Password"
                 />
                 <div className="h-5">
-                  <ErrorMessage
-                    name="password"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
+                  {submitCount > 0 && (
+                    <ErrorMessage
+                      name="firstName"
+                      render={(msg) => (
+                        <p className="text-red-500 text-sm">
+                          <TriangleAlert className="size-3 inline-block" />{" "}
+                          {msg}
+                        </p>
+                      )}
+                    />
+                  )}
                 </div>
                 {/* confirm password */}
                 <label className="font-semibold" htmlFor="confirmPassword">
@@ -228,14 +238,17 @@ function Register() {
                   placeholder="Confirm Password"
                 />
                 <div className="h-5">
-                  <ErrorMessage
-                    name="confirmPassword"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
+                  {submitCount > 0 && (
+                    <ErrorMessage
+                      name="firstName"
+                      render={(msg) => (
+                        <p className="text-red-500 text-sm">
+                          <TriangleAlert className="size-3 inline-block" />{" "}
+                          {msg}
+                        </p>
+                      )}
+                    />
+                  )}
                 </div>
                 {/* date of birth */}
                 <label className="font-semibold" htmlFor="date">
@@ -249,14 +262,17 @@ function Register() {
                   placeholder="Your DAte Of Birth"
                 />
                 <div className="h-5">
-                  <ErrorMessage
-                    name="dateOfBirth"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
+                  {submitCount > 0 && (
+                    <ErrorMessage
+                      name="firstName"
+                      render={(msg) => (
+                        <p className="text-red-500 text-sm">
+                          <TriangleAlert className="size-3 inline-block" />{" "}
+                          {msg}
+                        </p>
+                      )}
+                    />
+                  )}
                 </div>
                 {/* gender */}
 
@@ -290,14 +306,17 @@ function Register() {
                   </label>
                 </div>
                 <div className="h-5">
-                  <ErrorMessage
-                    name="gender"
-                    render={(msg) => (
-                      <p className="text-red-500 text-sm">
-                        <TriangleAlert className="size-3 inline-block" /> {msg}
-                      </p>
-                    )}
-                  />
+                  {submitCount > 0 && (
+                    <ErrorMessage
+                      name="firstName"
+                      render={(msg) => (
+                        <p className="text-red-500 text-sm">
+                          <TriangleAlert className="size-3 inline-block" />{" "}
+                          {msg}
+                        </p>
+                      )}
+                    />
+                  )}
                 </div>
                 {/* terms and conditions */}
                 <Field

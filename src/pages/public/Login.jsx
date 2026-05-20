@@ -21,7 +21,7 @@ function Login() {
   useEffect(() => {
     if (user && message) {
       toast.success(message);
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [user, message]);
 

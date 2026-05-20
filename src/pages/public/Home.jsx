@@ -243,7 +243,7 @@ function Home() {
 
       {/* coupons  */}
 
-      <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-5 sm:py-5">
+      <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-16">
         <div className="pb-10">
           <h1 className="text-3xl font-semibold mb-2">
             Special Offers And Coupons

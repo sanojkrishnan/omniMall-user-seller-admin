@@ -1,9 +1,6 @@
-import { useNavigate } from "react-router-dom";
-
 function OmniMall() {
-  const navigate = useNavigate();
   return (
-    <div className="cursor-pointer" onClick={navigate("/")}>
+    <div className="cursor-pointer" >
       <h1 className="font-mono font-semibold">
         <span className="text-black bg-white border-[0.25px] border-black rounded-s-md pl-1 py-1">
           Omni

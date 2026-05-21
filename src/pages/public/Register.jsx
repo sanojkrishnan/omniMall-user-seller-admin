@@ -28,7 +28,7 @@ function Register() {
       toast.success(message);
       console.log(message);
     }
-  }, [error, otpSent]);
+  }, [error, otpSent, navigate, message]);
 
   const dispatch = useDispatch();
   return (
@@ -165,7 +165,7 @@ function Register() {
                     <div className="h-5">
                       {submitCount > 0 && (
                         <ErrorMessage
-                          name="firstName"
+                          name="lastName"
                           render={(msg) => (
                             <p className="text-red-500 text-sm">
                               <TriangleAlert className="size-3 inline-block" />{" "}
@@ -192,7 +192,7 @@ function Register() {
                 <div className="h-5">
                   {submitCount > 0 && (
                     <ErrorMessage
-                      name="firstName"
+                      name="email"
                       render={(msg) => (
                         <p className="text-red-500 text-sm">
                           <TriangleAlert className="size-3 inline-block" />{" "}
@@ -216,7 +216,7 @@ function Register() {
                 <div className="h-5">
                   {submitCount > 0 && (
                     <ErrorMessage
-                      name="firstName"
+                      name="password"
                       render={(msg) => (
                         <p className="text-red-500 text-sm">
                           <TriangleAlert className="size-3 inline-block" />{" "}
@@ -240,7 +240,7 @@ function Register() {
                 <div className="h-5">
                   {submitCount > 0 && (
                     <ErrorMessage
-                      name="firstName"
+                      name="confirmPassword"
                       render={(msg) => (
                         <p className="text-red-500 text-sm">
                           <TriangleAlert className="size-3 inline-block" />{" "}
@@ -264,7 +264,7 @@ function Register() {
                 <div className="h-5">
                   {submitCount > 0 && (
                     <ErrorMessage
-                      name="firstName"
+                      name="date"
                       render={(msg) => (
                         <p className="text-red-500 text-sm">
                           <TriangleAlert className="size-3 inline-block" />{" "}
@@ -308,7 +308,7 @@ function Register() {
                 <div className="h-5">
                   {submitCount > 0 && (
                     <ErrorMessage
-                      name="firstName"
+                      name="gender"
                       render={(msg) => (
                         <p className="text-red-500 text-sm">
                           <TriangleAlert className="size-3 inline-block" />{" "}

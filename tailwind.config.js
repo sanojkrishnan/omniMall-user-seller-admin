@@ -36,6 +36,10 @@ export default {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
+        drawTick: {
+          "0%": { opacity: "0", transform: "scale(0)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         wheelie: "wheelie 3s linear infinite",

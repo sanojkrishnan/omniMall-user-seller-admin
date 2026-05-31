@@ -1,4 +1,4 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import { userSchema } from "../../validation/userSchema";
 import OmniMall from "../../components/ui/OmniMall";
 import { Trash, TriangleAlert, UserPen } from "lucide-react";
@@ -7,13 +7,15 @@ import { handleImage } from "../../utils/imageCompressor";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../../components/ui/Loading";
 import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
 
 function Register() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [stepErrors, setStepErrors] = useState({});
 
   // getting the auth state from the redux store
   const { message, isLoading, error, otpSent } = useSelector(
@@ -43,11 +45,49 @@ function Register() {
               </h3>
             </div>
           </div>
-          <div className="">
-            <div className="w-10 h-10 rounded-full bg-green-500 animate-pulse"></div>
+          {/* Step indicator */}
+          <div className="relative mb-8">
+            <div className="flex justify-between items-center w-full">
+              {[0, 1, 2, 3].map((i) => (
+                <div className="w-10 h-10 flex justify-center items-center">
+                  <div
+                    key={i}
+                    className={` rounded-full border-2 flex items-center justify-center transition-all duration-500
+          ${i < step ? "w-10 h-10 border-green-500 bg-green-500" : i === step ? "w-10 h-10 bg-green-500 animate-pulse border-green-500" : "w-2 h-2 bg-white border-white"}`}
+                  >
+                    {i < step && (
+                      <svg
+                        className="w-5 h-5 text-white animate-[drawTick_0.3s_ease-in-out]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-evenly items-center absolute top-1/2 w-full">
+              <div
+                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 0 ? "bg-green-500" : ""}`}
+              ></div>
+              <div
+                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 1 ? "bg-green-500" : ""}`}
+              ></div>
+              <div
+                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 2 ? "bg-green-500" : ""}`}
+              ></div>
+            </div>
           </div>
 
           <Formik
+            validateOnBlur={false}
+            validateOnChange={false}
             initialValues={{
               firstName: "",
               lastName: "",
@@ -80,271 +120,317 @@ function Register() {
               dispatch(registerUser({ formData, email: values.email }));
             }}
           >
-            {({ values, setFieldValue, submitCount }) => (
+            {({ values, setFieldValue, validateForm, submitForm }) => (
               <Form>
-                {/* Profile picture */}
-                <div className="w-full flex justify-center items-center pb-2">
-                  <div>
-                    <div className="relative flex w-[80px] h-[80px] justify-center items-center">
-                      <label className="flex ml-6 items-center justify-center w-[50px] h-[50px] border-2 border-black/60  rounded-full cursor-pointer hover:border-black/30 transition">
-                        <span className="text-gray-600">
-                          {values.profileImage ? (
-                            <img
-                              src={URL.createObjectURL(values.profileImage)}
-                              alt="preview"
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <UserPen />
-                          )}
-                        </span>
-                        <input
-                          className="hidden"
-                          accept="image/*"
-                          type="file"
-                          name="profileImage"
-                          onChange={async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
+                <div className="overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-500"
+                    style={{ transform: `translateX(-${step * 100}%)` }}
+                  >
+                    {/* first set */}
+                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                      <div className="sm:flex justify-between">
+                        <div>
+                          {/* First Name : */}
+                          <label
+                            className="font-semibold block"
+                            htmlFor="firstName"
+                          >
+                            First Name :
+                          </label>
+                          <Field
+                            className="p-2 cursor-pointer w-full rounded-lg bg-transparent border-[0.5px] border-black/50 placeholder:text-gray-900"
+                            type="text"
+                            name="firstName"
+                            id="firstName"
+                            placeholder="Your First Name"
+                          />
 
-                            const compressed = await handleImage(file);
-                            setFieldValue("profileImage", compressed);
-                            e.target.value = null; //resetting the input value so i can select same picture more than one time
-                          }}
-                        />
+                          <div className="h-5">
+                            {stepErrors.firstName && (
+                              <p className="text-red-500 text-sm">
+                                <TriangleAlert className="size-3 inline-block" />{" "}
+                                {stepErrors.firstName}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          {/* last Name  */}
+                          <label
+                            className="block font-semibold"
+                            htmlFor="lastName"
+                          >
+                            Last Name :
+                          </label>
+                          <Field
+                            className="p-2 cursor-pointer w-full rounded-lg bg-transparent border-[0.5px] border-black/50 placeholder:text-gray-900"
+                            type="text"
+                            name="lastName"
+                            id="lastName"
+                            placeholder="Your last Name"
+                          />
+                          <div className="h-5">
+                            {stepErrors.lastName && (
+                              <p className="text-red-500 text-sm">
+                                <TriangleAlert className="size-3 inline-block" />{" "}
+                                {stepErrors.lastName}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {/* email */}
+                      <label className="font-semibold" htmlFor="email">
+                        Email :
                       </label>
-                      <div
-                        onClick={() => setFieldValue("profileImage", null)}
-                        className={`absolute right-1 cursor-pointer bottom-3 z-50 ${values.profileImage ? "block" : "hidden"} rounded-full w-fit h-fit bg-black text-white p-1 `}
-                      >
-                        <Trash className="size-4" />
+
+                      <Field
+                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                        type="email"
+                        name="email"
+                        id="email"
+                        placeholder="Your Email"
+                      />
+                      <div className="h-5">
+                        {stepErrors.email && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.email}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <h2 className="font-semibold">Profile picture</h2>
-                  </div>
-                </div>
-                <div className="sm:flex justify-between">
-                  <div>
-                    {/* First Name : */}
-                    <label className="font-semibold block" htmlFor="firstName">
-                      First Name :
-                    </label>
-                    <Field
-                      className="p-2 cursor-pointer w-full rounded-lg bg-transparent border-[0.5px] border-black/50 placeholder:text-gray-900"
-                      type="text"
-                      name="firstName"
-                      id="firstName"
-                      placeholder="Your First Name"
-                    />
-                    <div className="h-5">
-                      {submitCount > 0 && (
-                        <ErrorMessage
-                          name="firstName"
-                          render={(msg) => (
-                            <p className="text-red-500 text-sm">
-                              <TriangleAlert className="size-3 inline-block" />{" "}
-                              {msg}
-                            </p>
-                          )}
+
+                    {/* second set */}
+
+                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                      {/* date of birth */}
+                      <label className="font-semibold" htmlFor="date">
+                        Date Of Birth :
+                      </label>
+                      <Field
+                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                        type="date"
+                        name="dateOfBirth"
+                        id="date"
+                        placeholder="Your DAte Of Birth"
+                      />
+                      <div className="h-5">
+                        {stepErrors.dateOfBirth && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.dateOfBirth}
+                          </p>
+                        )}
+                      </div>
+                      {/* gender */}
+
+                      <label className="font-semibold">Gender :</label>
+                      {/* male */}
+                      <div className="flex justify-start items-center gap-2 mt-2">
+                        <Field
+                          className="cursor-pointer size-5"
+                          type="radio"
+                          name="gender"
+                          id="male"
+                          value="male"
+                          placeholder="Date Of Birth"
                         />
-                      )}
+                        <label className="cursor-pointer" htmlFor="male">
+                          Male
+                        </label>
+                      </div>
+                      {/* female */}
+                      <div className="flex justify-start items-center gap-2">
+                        <Field
+                          className="cursor-pointer size-5"
+                          type="radio"
+                          name="gender"
+                          id="female"
+                          value="female"
+                          placeholder="Date Of Birth"
+                        />
+                        <label className="cursor-pointer" htmlFor="female">
+                          Female
+                        </label>
+                      </div>
+                      <div className="h-5">
+                        {stepErrors.gender && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.gender}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* third set */}
+                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                      {/* Profile picture */}
+                      <div className="w-full flex justify-center items-center">
+                        <div>
+                          <div className="relative flex w-[80px] h-[80px] justify-center items-center">
+                            <label className="flex  items-center justify-center w-[50px] h-[50px] border-2 border-black/60  rounded-full cursor-pointer hover:border-black/30 transition">
+                              <span className="text-gray-600">
+                                {values.profileImage ? (
+                                  <img
+                                    src={URL.createObjectURL(
+                                      values.profileImage,
+                                    )}
+                                    alt="preview"
+                                    className="w-full h-full object-cover rounded-full"
+                                  />
+                                ) : (
+                                  <UserPen />
+                                )}
+                              </span>
+                              <input
+                                className="hidden"
+                                accept="image/*"
+                                type="file"
+                                name="profileImage"
+                                onChange={async (e) => {
+                                  const file = e.target.files[0];
+                                  if (!file) return;
+
+                                  const compressed = await handleImage(file);
+                                  setFieldValue("profileImage", compressed);
+                                  e.target.value = null; //resetting the input value so i can select same picture more than one time
+                                }}
+                              />
+                            </label>
+                            <div
+                              onClick={() =>
+                                setFieldValue("profileImage", null)
+                              }
+                              className={`absolute right-1 cursor-pointer bottom-3 z-50 ${values.profileImage ? "block" : "hidden"} rounded-full w-fit h-fit bg-black text-white p-1 `}
+                            >
+                              <Trash className="size-4" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <h2 className="font-semibold mb-6">Profile picture</h2>
+                        <p>
+                          Add your profile picture here. The profile picture is
+                          not mandatory, click next to skip
+                        </p>
+                      </div>
+                    </div>
+                    {/* fourth set */}
+                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                      {/* password */}
+                      <label className="font-semibold" htmlFor="password">
+                        Password :
+                      </label>
+                      <Field
+                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Password"
+                      />
+                      <div className="h-5">
+                        {stepErrors.password && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.password}
+                          </p>
+                        )}
+                      </div>
+                      {/* confirm password */}
+                      <label
+                        className="font-semibold"
+                        htmlFor="confirmPassword"
+                      >
+                        Confirm Password :
+                      </label>
+                      <Field
+                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                        type="password"
+                        name="confirmPassword"
+                        id="confirmPassword"
+                        placeholder="Confirm Password"
+                      />
+                      <div className="h-5">
+                        {stepErrors.confirmPassword && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.confirmPassword}
+                          </p>
+                        )}
+                      </div>
+                      {/* terms and conditions */}
+                      <Field
+                        className="cursor-pointer"
+                        id="condition"
+                        type="checkbox"
+                        name="conditionCheck"
+                      />
+                      <label
+                        className={`cursor-pointer font-semibold ${values.conditionCheck ? "text-black" : "text-red-500"}`}
+                        htmlFor="condition"
+                      >
+                        &nbsp; I agree to the terms and conditions
+                      </label>
                     </div>
                   </div>
-                  <div>
-                    {/* last Name  */}
-                    <label className="block font-semibold" htmlFor="lastName">
-                      Last Name :
-                    </label>
-                    <Field
-                      className="p-2 cursor-pointer w-full rounded-lg bg-transparent border-[0.5px] border-black/50 placeholder:text-gray-900"
-                      type="text"
-                      name="lastName"
-                      id="lastName"
-                      placeholder="Your last Name"
-                    />
-                    <div className="h-5">
-                      {submitCount > 0 && (
-                        <ErrorMessage
-                          name="lastName"
-                          render={(msg) => (
-                            <p className="text-red-500 text-sm">
-                              <TriangleAlert className="size-3 inline-block" />{" "}
-                              {msg}
-                            </p>
-                          )}
-                        />
-                      )}
-                    </div>
-                  </div>
                 </div>
-                {/* email */}
-                <label className="font-semibold" htmlFor="email">
-                  Email :
-                </label>
-
-                <Field
-                  className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                  type="email"
-                  name="email"
-                  id="email"
-                  placeholder="Your Email"
-                />
-                <div className="h-5">
-                  {submitCount > 0 && (
-                    <ErrorMessage
-                      name="email"
-                      render={(msg) => (
-                        <p className="text-red-500 text-sm">
-                          <TriangleAlert className="size-3 inline-block" />{" "}
-                          {msg}
-                        </p>
-                      )}
-                    />
-                  )}
-                </div>
-                {/* password */}
-                <label className="font-semibold" htmlFor="password">
-                  Password :
-                </label>
-                <Field
-                  className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                  type="password"
-                  name="password"
-                  id="password"
-                  placeholder="Password"
-                />
-                <div className="h-5">
-                  {submitCount > 0 && (
-                    <ErrorMessage
-                      name="password"
-                      render={(msg) => (
-                        <p className="text-red-500 text-sm">
-                          <TriangleAlert className="size-3 inline-block" />{" "}
-                          {msg}
-                        </p>
-                      )}
-                    />
-                  )}
-                </div>
-                {/* confirm password */}
-                <label className="font-semibold" htmlFor="confirmPassword">
-                  Confirm Password :
-                </label>
-                <Field
-                  className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                  type="password"
-                  name="confirmPassword"
-                  id="confirmPassword"
-                  placeholder="Confirm Password"
-                />
-                <div className="h-5">
-                  {submitCount > 0 && (
-                    <ErrorMessage
-                      name="confirmPassword"
-                      render={(msg) => (
-                        <p className="text-red-500 text-sm">
-                          <TriangleAlert className="size-3 inline-block" />{" "}
-                          {msg}
-                        </p>
-                      )}
-                    />
-                  )}
-                </div>
-                {/* date of birth */}
-                <label className="font-semibold" htmlFor="date">
-                  Date Of Birth :
-                </label>
-                <Field
-                  className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                  type="date"
-                  name="dateOfBirth"
-                  id="date"
-                  placeholder="Your DAte Of Birth"
-                />
-                <div className="h-5">
-                  {submitCount > 0 && (
-                    <ErrorMessage
-                      name="date"
-                      render={(msg) => (
-                        <p className="text-red-500 text-sm">
-                          <TriangleAlert className="size-3 inline-block" />{" "}
-                          {msg}
-                        </p>
-                      )}
-                    />
-                  )}
-                </div>
-                {/* gender */}
-
-                <label className="font-semibold">Gender :</label>
-                {/* male */}
-                <div className="flex justify-start items-center gap-2 mt-2">
-                  <Field
-                    className="cursor-pointer size-5"
-                    type="radio"
-                    name="gender"
-                    id="male"
-                    value="male"
-                    placeholder="Date Of Birth"
-                  />
-                  <label className="cursor-pointer" htmlFor="male">
-                    Male
-                  </label>
-                </div>
-                {/* female */}
-                <div className="flex justify-start items-center gap-2">
-                  <Field
-                    className="cursor-pointer size-5"
-                    type="radio"
-                    name="gender"
-                    id="female"
-                    value="female"
-                    placeholder="Date Of Birth"
-                  />
-                  <label className="cursor-pointer" htmlFor="female">
-                    Female
-                  </label>
-                </div>
-                <div className="h-5">
-                  {submitCount > 0 && (
-                    <ErrorMessage
-                      name="gender"
-                      render={(msg) => (
-                        <p className="text-red-500 text-sm">
-                          <TriangleAlert className="size-3 inline-block" />{" "}
-                          {msg}
-                        </p>
-                      )}
-                    />
-                  )}
-                </div>
-                {/* terms and conditions */}
-                <Field
-                  className="cursor-pointer"
-                  id="condition"
-                  type="checkbox"
-                  name="conditionCheck"
-                />
-                <label
-                  className={`cursor-pointer font-semibold ${values.conditionCheck ? "text-black" : "text-red-500"}`}
-                  htmlFor="condition"
-                >
-                  &nbsp; I agree to the terms and conditions
-                </label>
-
                 <Button
                   variant="primary"
-                  type="submit"
-                  disabled={!values.conditionCheck || isLoading}
+                  type={"button"}
+                  disabled={(step === 3 && !values.conditionCheck) || isLoading}
+                  onClick={async () => {
+                    const stepFields = [
+                      ["firstName", "lastName", "email"],
+                      ["dateOfBirth", "gender"],
+                      [],
+                      ["password", "confirmPassword", "conditionCheck"],
+                    ][step];
+
+                    const errors = await validateForm();
+
+                    const currentErrors = {};
+                    stepFields.forEach((f) => {
+                      if (errors[f]) currentErrors[f] = errors[f];
+                    });
+
+                    if (Object.keys(currentErrors).length > 0) {
+                      setStepErrors(currentErrors);
+                      return;
+                    }
+
+                    setStepErrors({});
+
+                    if (step === 3) {
+                      submitForm();
+                      return;
+                    }
+
+                    setStep((prev) => prev + 1);
+                  }}
                 >
-                  {isLoading ? <Loading variant="secondary" /> : "Submit"}
+                  {isLoading ? (
+                    <Loading variant="secondary" />
+                  ) : step === 3 ? (
+                    "Send OTP"
+                  ) : (
+                    "Next"
+                  )}
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => navigate("/login")}
+                  onClick={() => {
+                    setStepErrors({});
+                    step === 0
+                      ? navigate("/login")
+                      : setStep((prev) => prev - 1);
+                  }}
                   variant="secondary"
                 >
-                  Log In
+                  {step === 0 ? "Go To Login" : "Go Back"}
                 </Button>
               </Form>
             )}

@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import Loading from "../../components/ui/Loading";
 import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
+import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 
 function Register() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ function Register() {
     <>
       <div className="bg-[url('/logo%20and%20other%20utilities/register.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
         <FormCard>
-          <div className=" w-full flex justify-center items-center mb-2 mt-4">
+          <div className=" w-full flex justify-center items-center mb-2 mt-2">
             <div className="text-center">
               <OmniMall />
               <h3 className="text-center pt-2 font-bold text-blue-800">
@@ -46,18 +47,18 @@ function Register() {
             </div>
           </div>
           {/* Step indicator */}
-          <div className="relative mb-8">
-            <div className="flex justify-between items-center w-full">
+          <div className="relative mb-6">
+            <div className="flex  items-center justify-center w-full">
               {[0, 1, 2, 3].map((i) => (
-                <div className="w-10 h-10 flex justify-center items-center">
+                <div className="w-fit h-10 flex justify-center items-center">
                   <div
                     key={i}
-                    className={` rounded-full border-2 flex items-center justify-center transition-all duration-500
-          ${i < step ? "w-10 h-10 border-green-500 bg-green-500" : i === step ? "w-10 h-10 bg-green-500 animate-pulse border-green-500" : "w-2 h-2 bg-white border-white"}`}
+                    className={` rounded-full flex items-center justify-center transition-all duration-500
+          ${i < step ? "w-5 h-5 border-green-500 bg-green-500" : i === step ? "w-5 h-5 bg-green-500 animate-pulse border-green-500" : "w-0"}`}
                   >
                     {i < step && (
                       <svg
-                        className="w-5 h-5 text-white animate-[drawTick_0.3s_ease-in-out]"
+                        className="w-3 h-4 text-white animate-[drawTick_0.3s_ease-in-out]"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -69,19 +70,15 @@ function Register() {
                       </svg>
                     )}
                   </div>
+                  {i < 3 && (
+                    <div
+                      className={` h-1 rounded-xl transition-all duration-500 ${
+                        step > i ? "bg-green-500 w-12 sm:w-24" : "w-0"
+                      }`}
+                    />
+                  )}
                 </div>
               ))}
-            </div>
-            <div className="flex justify-evenly items-center absolute top-1/2 w-full">
-              <div
-                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 0 ? "bg-green-500" : ""}`}
-              ></div>
-              <div
-                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 1 ? "bg-green-500" : ""}`}
-              ></div>
-              <div
-                className={`w-24 h-1 rounded-xl transition-all duration-500 ${step > 2 ? "bg-green-500" : ""}`}
-              ></div>
             </div>
           </div>
 
@@ -432,6 +429,9 @@ function Register() {
                 >
                   {step === 0 ? "Go To Login" : "Go Back"}
                 </Button>
+                <div className="rounded-xl mt-2 overflow-hidden">
+                  <GoogleSignInButton text={"signup_with"} />
+                </div>
               </Form>
             )}
           </Formik>

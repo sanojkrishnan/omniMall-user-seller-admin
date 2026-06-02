@@ -25,4 +25,8 @@ export const AuthAPI = {
     console.log("Forgot password email:", email);
     return api.post("auth/forgot-password", { email });
   },
+  googleRegister: async (data) => {
+    console.log("google register/login", data);
+    return api.post("auth/google", data);
+  },
 };

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "../../components/ui/Loading";
 import { forgotPassword, loginUser } from "../../redux/slice/authSlice";
+import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 
 function Login() {
   const navigate = useNavigate();
@@ -199,6 +200,9 @@ function Login() {
               >
                 Sign Up
               </Button>
+              <div className="rounded-xl mt-2 overflow-hidden">
+                  <GoogleSignInButton text={"signin_with"}/>
+                </div>
             </>
           )}
         </form>

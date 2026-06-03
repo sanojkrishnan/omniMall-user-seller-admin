@@ -25,7 +25,7 @@ export const userSchema = Yup.object({
     .default("user"),
   conditionCheck: Yup.boolean()
     .required("I agree to the terms and conditions")
-    .default(false),
+    .default(false), 
   status: Yup.string().default("active"),
   profileImage: Yup.mixed()
     .nullable()

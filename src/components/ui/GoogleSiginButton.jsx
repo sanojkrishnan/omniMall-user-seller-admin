@@ -14,15 +14,15 @@ function GoogleSignInButton({ text }) {
       });
 
       if (response.success) {
-        setAuthToken(response.token);
-        saveUser(response.user);
+        setAuthToken(response.data.token);
+        saveUser(response.data.user);
 
         toast.success("Login successful");
         navigate("/");
       }
     } catch (error) {
       toast.error(
-        error?.response?.data?.message || "Google authentication failed",
+        error?.response?.message || "Google authentication failed",
       );
     }
   };

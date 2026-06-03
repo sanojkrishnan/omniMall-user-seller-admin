@@ -54,7 +54,7 @@ function Register() {
                   <div
                     key={i}
                     className={` rounded-full flex items-center justify-center transition-all duration-500
-          ${i < step ? "w-5 h-5 border-green-500 bg-green-500" : i === step ? "w-5 h-5 bg-green-500 animate-pulse border-green-500" : "w-0"}`}
+          ${i < step ? "w-5 h-5 border-blue-400 bg-blue-400" : i === step ? "w-5 h-5 bg-blue-400 animate-pulse border-blue-400" : "w-0"}`}
                   >
                     {i < step && (
                       <svg
@@ -73,7 +73,7 @@ function Register() {
                   {i < 3 && (
                     <div
                       className={` h-1 rounded-xl transition-all duration-500 ${
-                        step > i ? "bg-green-500 w-12 sm:w-24" : "w-0"
+                        step > i ? "bg-blue-400 w-12 sm:w-24" : "w-0"
                       }`}
                     />
                   )}
@@ -367,7 +367,7 @@ function Register() {
                         name="conditionCheck"
                       />
                       <label
-                        className={`cursor-pointer font-semibold ${values.conditionCheck ? "text-black" : "text-red-500"}`}
+                        className={`cursor-pointer font-semibold  text-black `}
                         htmlFor="condition"
                       >
                         &nbsp; I agree to the terms and conditions

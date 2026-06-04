@@ -19,7 +19,7 @@ function Register() {
   const [stepErrors, setStepErrors] = useState({});
 
   // getting the auth state from the redux store
-  const { message, isLoading, error, otpSent } = useSelector(
+  const { message, isLoading, error, otpSent, data } = useSelector(
     (state) => state.auth,
   );
 
@@ -31,6 +31,8 @@ function Register() {
       toast.success(message);
       console.log(message);
     }
+
+    console.log(data);
   }, [error, otpSent, navigate, message]);
 
   const dispatch = useDispatch();

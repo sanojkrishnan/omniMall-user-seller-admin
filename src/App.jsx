@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import CartLoading from "./components/ui/CartLoading";
 import { ProtectedRoute, PublicRoute } from "./components/ProtectedRoute";
 import SellerPanel from "./pages/seller/SellerPanel";
+import ProfileComplete from "./pages/user/ProfileComplete";
 
 function App() {
   return (
@@ -49,6 +50,14 @@ function App() {
               element={
                 <PublicRoute>
                   <ResetPass />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/profile_complete"
+              element={
+                <PublicRoute>
+                  <ProfileComplete />
                 </PublicRoute>
               }
             />

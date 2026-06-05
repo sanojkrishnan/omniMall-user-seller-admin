@@ -1,19 +1,38 @@
 import { Field, Form, Formik } from "formik";
 import { FormCard } from "../../components/ui/FormCard";
-import { Trash, TriangleAlert, UserPen } from "lucide-react";
-import { userSchema } from "../../validation/userSchema";
-import { useDispatch } from "react-redux";
-import { registerUser } from "../../redux/slice/authSlice";
+import { TriangleAlert } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import OmniMall from "../../components/ui/OmniMall";
 import { Button } from "../../components/ui/Button";
-import { handleImage } from "../../utils/imageCompressor";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
+
+//google profile completion schema
+const googleProfileSchema = Yup.object({
+  dateOfBirth: Yup.date().required("Give us your date of birth"),
+
+  gender: Yup.string().oneOf(["male", "female"]).required("Select your gender"),
+
+  conditionCheck: Yup.boolean().oneOf(
+    [true],
+    "You must agree to the terms and conditions",
+  ),
+});
 
 function ProfileComplete() {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    
-  })
+    console.log("User from Redux:", user);
+
+    if (user.dateOfBirth || user.provider === "local") {
+      navigate("/"); // if user already has dateOfBirth or is local provider, redirect to home
+    }
+  },[user]);
+
   return (
     <div className="bg-[url('/logo%20and%20other%20utilities/lipstick_profile.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
       <FormCard>
@@ -29,94 +48,23 @@ function ProfileComplete() {
           validateOnBlur={false}
           validateOnChange={false}
           initialValues={{
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
             dateOfBirth: "",
             gender: "",
-            role: "user",
             conditionCheck: false,
-            profileImage: null,
-            status: "active",
           }}
-          validationSchema={userSchema}
+          validationSchema={googleProfileSchema}
           onSubmit={(values) => {
-            // build FormData for multer
-            const formData = new FormData();
-            formData.append("firstName", values.firstName);
-            formData.append("lastName", values.lastName);
-            formData.append("email", values.email);
-            formData.append("password", values.password);
-            formData.append("dateOfBirth", values.dateOfBirth);
-            formData.append("gender", values.gender);
-            formData.append("role", values.role);
-            formData.append("status", values.status);
-            if (values.profileImage) {
-              formData.append("profileImage", values.profileImage);
-            }
-
-            dispatch(registerUser({ formData, email: values.email }));
           }}
         >
-          {({ values, errors, setFieldValue, submitCount }) => (
+          {({ errors, submitCount }) => (
             <Form>
               <div className=" overflow-y-scroll [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent w-full max-h-100 p-2 border-[0.5px] border-black/40 rounded-xl">
-                {/* profile picture  */}
-                <div className="w-full flex justify-center items-center">
-                  <div>
-                    <div className="relative flex w-[80px] h-[80px] justify-center items-center">
-                      <label className="flex  items-center justify-center w-[50px] h-[50px] border-2 border-black/60  rounded-full cursor-pointer hover:border-black/30 transition">
-                        <span className="text-gray-600">
-                          {values.profileImage ? (
-                            <img
-                              src={URL.createObjectURL(values.profileImage)}
-                              alt="preview"
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <UserPen />
-                          )}
-                        </span>
-                        <input
-                          className="hidden"
-                          accept="image/*"
-                          type="file"
-                          name="profileImage"
-                          onChange={async (e) => {
-                            const file = e.target.files[0];
-                            if (!file) return;
-
-                            const compressed = await handleImage(file);
-                            setFieldValue("profileImage", compressed);
-                            e.target.value = null; //resetting the input value so i can select same picture more than one time
-                          }}
-                        />
-                      </label>
-                      <div
-                        onClick={() => setFieldValue("profileImage", null)}
-                        className={`absolute right-1 cursor-pointer bottom-3 z-50 ${values.profileImage ? "block" : "hidden"} rounded-full w-fit h-fit bg-black text-white p-1 `}
-                      >
-                        <Trash className="size-4" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <h2 className="font-semibold mb-2">Profile picture</h2>
-                  <p className="text-sm">
-                    Add your profile picture here. The profile picture is not
-                    mandatory, click next to skip
-                  </p>
-                </div>
-                <hr className=" m-2 border-black" />
                 {/* date of birth */}
                 <label className="font-semibold" htmlFor="date">
                   Date Of Birth :
                 </label>
                 <Field
-                  className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                  className="p-2 cursor-pointer mb-4 rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
                   type="date"
                   name="dateOfBirth"
                   id="date"
@@ -140,7 +88,7 @@ function ProfileComplete() {
                   </label>
                 </div>
                 {/* female */}
-                <div className="flex justify-start items-center gap-2">
+                <div className="flex justify-start items-center gap-2 mb-4">
                   <Field
                     className="cursor-pointer size-5"
                     type="radio"
@@ -161,7 +109,7 @@ function ProfileComplete() {
                   name="conditionCheck"
                 />
                 <label
-                  className={`cursor-pointer font-semibold  text-black `}
+                  className={`cursor-pointer font-semibold text-black `}
                   htmlFor="condition"
                 >
                   &nbsp; I agree to the terms and conditions

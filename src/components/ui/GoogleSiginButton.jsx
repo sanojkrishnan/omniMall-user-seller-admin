@@ -1,29 +1,28 @@
 import { GoogleLogin } from "@react-oauth/google";
-import { saveUser, setAuthToken } from "../../utils/apiClient";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { AuthAPI } from "../../services/authService";
+import { useDispatch } from "react-redux";
+import { googleRegister } from "../../redux/slice/authSlice";
 
 function GoogleSignInButton({ text }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      const response = await AuthAPI.googleRegister({
-        credential: credentialResponse.credential,
-      });
+      const result = await dispatch(
+        googleRegister(credentialResponse.credential),
+      ).unwrap();
 
-      if (response.success) {
-        setAuthToken(response.data.token);
-        saveUser(response.data.user);
-
-        toast.success("Login successful");
-        navigate("/");
+      toast.success(result.message);
+      if (
+        result.data.user.provider === "google" &&
+        !result.data.user.dateOfBirth
+      ) {
+        navigate("/profile_complete");
       }
     } catch (error) {
-      toast.error(
-        error?.response?.message || "Google authentication failed",
-      );
+      toast.error(error || "Google authentication failed");
     }
   };
 

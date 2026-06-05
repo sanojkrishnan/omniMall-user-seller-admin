@@ -19,7 +19,7 @@ function Register() {
   const [stepErrors, setStepErrors] = useState({});
 
   // getting the auth state from the redux store
-  const { message, isLoading, error, otpSent, data } = useSelector(
+  const { message, isLoading, error, otpSent } = useSelector(
     (state) => state.auth,
   );
 
@@ -31,8 +31,6 @@ function Register() {
       toast.success(message);
       console.log(message);
     }
-
-    console.log(data);
   }, [error, otpSent, navigate, message]);
 
   const dispatch = useDispatch();
@@ -56,7 +54,7 @@ function Register() {
                   <div
                     key={i}
                     className={` rounded-full flex items-center justify-center transition-all duration-500
-          ${i < step ? "w-5 h-5 border-blue-400 bg-blue-400" : i === step ? "w-5 h-5 bg-blue-400 animate-pulse border-blue-400" : "w-0"}`}
+          ${i < step ? "w-5 h-5 border-black bg-black" : i === step ? "w-5 h-5 border-4 animate-pulse border-black" : "w-0"}`}
                   >
                     {i < step && (
                       <svg
@@ -75,7 +73,7 @@ function Register() {
                   {i < 3 && (
                     <div
                       className={` h-1 rounded-xl transition-all duration-500 ${
-                        step > i ? "bg-blue-400 w-12 sm:w-24" : "w-0"
+                        step > i ? "bg-black w-12 sm:w-24" : "w-0"
                       }`}
                     />
                   )}

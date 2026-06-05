@@ -21,12 +21,19 @@ export const AuthAPI = {
     console.log("Reset password data:", data);
     return api.post("auth/reset-password", data);
   },
+  // forgot password
   forgotPassword: async (email) => {
     console.log("Forgot password email:", email);
     return api.post("auth/forgot-password", { email });
   },
+  //google login/register
   googleRegister: async (data) => {
     console.log("google register/login", data);
     return api.post("auth/google", data);
+  },
+  //google profile completion
+  completeGoogleProfile: async (data) => {
+    console.log("Google profile completion data:", data);
+    return api.patch("auth/complete-profile", data);
   },
 };

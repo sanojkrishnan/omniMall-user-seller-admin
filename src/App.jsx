@@ -53,14 +53,16 @@ function App() {
                 </PublicRoute>
               }
             />
+
             <Route
               path="/profile_complete"
               element={
-                <PublicRoute>
+                <ProtectedRoute allowedRoles={["seller", "user"]}>
                   <ProfileComplete />
-                </PublicRoute>
+                </ProtectedRoute>
               }
             />
+
             <Route
               path="/admin/dashboard"
               element={

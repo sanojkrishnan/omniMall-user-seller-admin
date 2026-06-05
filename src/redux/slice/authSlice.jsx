@@ -66,6 +66,30 @@ export const loginUser = createAsyncThunk(
   },
 );
 
+// Google login
+export const googleRegister = createAsyncThunk(
+  "auth/googleRegister",
+  async (credential, { rejectWithValue }) => {
+    try {
+      const data = await AuthAPI.googleRegister({ credential });
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Google login failed"));
+    }
+  },
+);
+export const googleProfileCompletion = createAsyncThunk(
+  "auth/googleProfileCompletion",
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const data = await AuthAPI.completeGoogleProfile(profileData);
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Google profile completion failed"));
+    }
+  },
+);
+
 //forgot password
 
 export const forgotPassword = createAsyncThunk(
@@ -157,6 +181,38 @@ const authSlice = createSlice({
         state.error = action.payload;
       });
 
+    // google register
+    builder
+      .addCase(googleRegister.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleRegister.fulfilled, (state, action) => {
+        console.log("GOOGLE FULFILLED");
+        console.log(action.payload);
+        state.isLoading = false;
+        state.user = action.payload.data.user;
+        state.token = action.payload.data.token;
+        state.message = action.payload.message;
+
+        const { token, user } = action.payload.data;
+
+        if (user.role === "admin") {
+          setAdminToken(token);
+        }
+
+        if (user.role === "user") {
+          setAuthToken(token);
+        }
+
+        saveUser(user);
+        console.log("USER SAVED:", state.user);
+      })
+      .addCase(googleRegister.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
+
     // login
     builder
       .addCase(loginUser.pending, (state) => {
@@ -165,6 +221,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
+
         state.user = action.payload.data.user;
         state.token = action.payload.data.token;
         state.message = action.payload.message;

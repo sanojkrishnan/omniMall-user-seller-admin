@@ -5,8 +5,11 @@ import {
   UserCog,
 } from "lucide-react";
 import OmniMall from "./ui/OmniMall";
+import { useSelector } from "react-redux";
 
 function Header() {
+  const { user } = useSelector((state) => state.auth);
+  console.log("Header user:", user);
   return (
     <>
       <div className="m-2 ml-4 w-fit">
@@ -29,10 +32,26 @@ function Header() {
             <p>Cart</p>
           </div>
           <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer">
-            <div className="w-fit h-fit p-1 rounded-full bg-white text-black">
-              <UserCog className="size-5" />
+            <div
+              className={`w-fit h-fit ${user ? "p-0" : "p-1"} bg-white rounded-full text-black`}
+            >
+              {user && user.provider === "google" && user.profileImage.url ? (
+                <img
+                  src={user.profileImage.url}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : user && user.provider === "local" && user.profileImage.url ? (
+                <img
+                  src={URL.createObjectURL(user.profileImage)}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : (
+                <UserCog className="size-6 " />
+              )}
             </div>
-            <p>Profile</p>
+            {user ? <p>Profile</p> : <p>Login</p>}
           </div>
         </div>
       </div>

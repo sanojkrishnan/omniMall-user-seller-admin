@@ -7,6 +7,8 @@ import { Button } from "../../components/ui/Button";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { googleProfileCompletion } from "../../redux/slice/authSlice";
+import { toast } from "react-toastify";
 
 //google profile completion schema
 const googleProfileSchema = Yup.object({
@@ -22,16 +24,19 @@ const googleProfileSchema = Yup.object({
 
 function ProfileComplete() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
+  const { user, message } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("User from Redux:", user);
 
-    if (user.dateOfBirth || user.provider === "local") {
+    if (user.status !== "incomplete" || user.provider === "local") {
       navigate("/"); // if user already has dateOfBirth or is local provider, redirect to home
     }
-  },[user]);
+    if (user.status === "active" && user.provider === "google") {
+      toast.success(message || "Profile completed successfully");
+    }
+  }, [user, navigate, message]);
 
   return (
     <div className="bg-[url('/logo%20and%20other%20utilities/lipstick_profile.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
@@ -50,10 +55,19 @@ function ProfileComplete() {
           initialValues={{
             dateOfBirth: "",
             gender: "",
+            profileId: "",
             conditionCheck: false,
           }}
           validationSchema={googleProfileSchema}
           onSubmit={(values) => {
+            console.log("Submitting:", values);
+            dispatch(
+              googleProfileCompletion({
+                dateOfBirth: values.dateOfBirth,
+                gender: values.gender,
+                profileId: user._id,
+              }),
+            );
           }}
         >
           {({ errors, submitCount }) => (

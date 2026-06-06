@@ -85,7 +85,9 @@ export const googleProfileCompletion = createAsyncThunk(
       const data = await AuthAPI.completeGoogleProfile(profileData);
       return data;
     } catch (err) {
-      return rejectWithValue(extractError(err, "Google profile completion failed"));
+      return rejectWithValue(
+        extractError(err, "Google profile completion failed"),
+      );
     }
   },
 );
@@ -209,6 +211,27 @@ const authSlice = createSlice({
         console.log("USER SAVED:", state.user);
       })
       .addCase(googleRegister.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
+
+    //google user profile completion
+    builder
+      .addCase(googleProfileCompletion.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleProfileCompletion.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log("PROFILE COMPLETION RESPONSE");
+        console.log(action.payload);
+
+        state.user = action.payload.data;
+        state.message = action.payload.message;
+
+        saveUser(action.payload.data);
+      })
+      .addCase(googleProfileCompletion.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

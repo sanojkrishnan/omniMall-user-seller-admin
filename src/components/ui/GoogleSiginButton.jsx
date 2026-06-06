@@ -17,7 +17,7 @@ function GoogleSignInButton({ text }) {
       toast.success(result.message);
       if (
         result.data.user.provider === "google" &&
-        !result.data.user.dateOfBirth
+        result.data.user.status === "incomplete"
       ) {
         navigate("/profile_complete");
       }

@@ -7,13 +7,11 @@ import { store } from "./redux/store.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      {" "}
-      {/*for google authentication*/}
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </GoogleOAuthProvider>
-  </StrictMode>,
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    {" "}
+    {/*for google authentication*/}
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </GoogleOAuthProvider>,
 );

@@ -117,9 +117,14 @@ apiClient.interceptors.response.use(
       "An unexpected error occurred";
 
     if (status === 401) {
-      clearTokens();
-      toast.error("Session expired. Please login again.");
-      window.location.href = "/login";
+      const isLoginRequest = error.config?.url?.includes("auth/login");
+
+      if (!isLoginRequest) {
+        clearTokens();
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/login";
+      }
+
       return Promise.reject(error);
     }
 

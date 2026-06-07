@@ -1,7 +1,7 @@
 import { Field, Form, Formik } from "formik";
 import { userSchema } from "../../validation/userSchema";
 import OmniMall from "../../components/ui/OmniMall";
-import { Trash, TriangleAlert, UserPen } from "lucide-react";
+import { Eye, EyeOff, Trash, TriangleAlert, UserPen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { handleImage } from "../../utils/imageCompressor";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +17,8 @@ function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [stepErrors, setStepErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false); //for password showing
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); //for confirm password showing
 
   // getting the auth state from the redux store
   const { message, isLoading, error, otpSent } = useSelector(
@@ -322,13 +324,26 @@ function Register() {
                       <label className="font-semibold" htmlFor="password">
                         Password :
                       </label>
-                      <Field
-                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                        type="password"
-                        name="password"
-                        id="password"
-                        placeholder="Password"
-                      />
+                      <div className="relative">
+                        <Field
+                          className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          id="password"
+                          placeholder="Password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-6 top-1/2 -translate-y-1/2"
+                        >
+                          {showPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
                       <div className="h-5">
                         {stepErrors.password && (
                           <p className="text-red-500 text-sm">
@@ -344,13 +359,28 @@ function Register() {
                       >
                         Confirm Password :
                       </label>
-                      <Field
-                        className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
-                        type="password"
-                        name="confirmPassword"
-                        id="confirmPassword"
-                        placeholder="Confirm Password"
-                      />
+                      <div className="relative">
+                        <Field
+                          className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-900"
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          id="confirmPassword"
+                          placeholder="Confirm Password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                          className="absolute right-6 top-1/2 -translate-y-1/2"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
+                      </div>
                       <div className="h-5">
                         {stepErrors.confirmPassword && (
                           <p className="text-red-500 text-sm">
@@ -372,6 +402,14 @@ function Register() {
                       >
                         &nbsp; I agree to the terms and conditions
                       </label>
+                      <div className="h-5">
+                        {stepErrors.conditionCheck && (
+                          <p className="text-red-500 text-sm">
+                            <TriangleAlert className="size-3 inline-block" />{" "}
+                            {stepErrors.conditionCheck}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

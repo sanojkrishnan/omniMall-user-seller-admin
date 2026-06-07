@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import OmniMall from "../../components/ui/OmniMall";
-import { TriangleAlert } from "lucide-react";
+import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
@@ -14,17 +14,24 @@ import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, message, isLoading } = useSelector((state) => state.auth);
+  const { user, message, error, isLoading } = useSelector(
+    (state) => state.auth,
+  );
 
   const [forgotPassClick, setForgotPassClick] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); //for password showing
 
   //  Handle post-login redirect
   useEffect(() => {
+    console.log("ERROR CHANGED:", error);
     if (user && message) {
       toast.success(message);
       navigate("/", { replace: true });
     }
-  }, [user, message]);
+    if (error) {
+      toast.error(error);
+    }
+  }, [user, error, message]);
 
   const formik = useFormik({
     initialValues: {
@@ -51,7 +58,11 @@ function Login() {
       return errors;
     },
     onSubmit: async (values) => {
-      dispatch(loginUser(values));
+      console.log("FORM SUBMITTED");
+
+      const result = await dispatch(loginUser(values));
+
+      console.log("RESULT:", result);
     },
   });
 
@@ -163,16 +174,25 @@ function Login() {
               <label className="font-semibold" htmlFor="password">
                 Password :
               </label>
-              <input
-                className="p-2 cursor-pointer placeholder:text-gray-900 rounded-lg bg-transparent border-[0.5px] border-black/50 w-full"
-                type="password"
-                name="password"
-                placeholder="Add Your Password"
-                id="password"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.password}
-              />
+              <div>
+                <input
+                  className="p-2 cursor-pointer placeholder:text-gray-900 rounded-lg bg-transparent border-[0.5px] border-black/50 w-full"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Add Your Password"
+                  id="password"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-12 top-1/2 -translate-y-1/2"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <div className="w-full h-5 text-sm ">
                 {formik.submitCount !== 0 && formik.errors.password && (
                   <p className="text-red-500 w-full">
@@ -201,8 +221,8 @@ function Login() {
                 Sign Up
               </Button>
               <div className="rounded-xl mt-2 overflow-hidden">
-                  <GoogleSignInButton text={"signin_with"}/>
-                </div>
+                <GoogleSignInButton text={"signin_with"} />
+              </div>
             </>
           )}
         </form>

@@ -151,7 +151,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.otpSent.status = true; // trigger OTP screen
         state.otpSent.sentToMail = action.payload.email;
-        state.message = action.payload.message;
+        state.message = action.payload.data.message;
         state.data = action.payload.data.user;
       })
       .addCase(registerUser.rejected, (state, action) => {

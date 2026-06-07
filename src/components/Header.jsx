@@ -33,7 +33,7 @@ function Header() {
           </div>
           <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer">
             <div
-              className={`w-fit h-fit ${user ? "p-0" : "p-1"} bg-white rounded-full text-black`}
+              className={`w-fit h-fit p-1 bg-white rounded-full text-black`}
             >
               {user && user.provider === "google" && user.profileImage.url ? (
                 <img

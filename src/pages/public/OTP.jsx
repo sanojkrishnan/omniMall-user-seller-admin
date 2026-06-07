@@ -24,6 +24,7 @@ function OTP() {
       navigate("/register");
     }
     if (error) {
+      console.log("OTP error:", error);
       toast.error(error.message);
     }
     if (user) {

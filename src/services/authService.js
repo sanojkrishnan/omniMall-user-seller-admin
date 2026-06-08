@@ -11,10 +11,15 @@ export const AuthAPI = {
     console.log("Register data:", data);
     return api.post("auth/register", data);
   },
-  // verify otp  ← add this
+  // verify otp
   verifyOTP: async (data) => {
     console.log("OTP data:", data);
     return api.post("auth/verify-otp", data);
+  },
+  //resent otp
+  resendOTP: async (data) => {
+    console.log("OTP data:", data);
+    return api.post("auth/resend-otp", data);
   },
   // reset password
   resetPassword: async (data) => {

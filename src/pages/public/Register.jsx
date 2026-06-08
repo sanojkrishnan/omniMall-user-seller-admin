@@ -49,7 +49,7 @@ function Register() {
             </div>
           </div>
           {/* Step indicator */}
-          <div className="relative mb-6">
+          <div className="relative mb-2">
             <div className="flex  items-center justify-center w-full">
               {[0, 1, 2, 3].map((i) => (
                 <div className="w-fit h-10 flex justify-center items-center">

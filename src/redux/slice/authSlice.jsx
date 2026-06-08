@@ -13,7 +13,11 @@ const initialState = {
   isLoading: false,
   error: null,
   message: null,
-  otpSent: { sentToMail: null, status: false },
+  otpSent: {
+    sentToMail: null,
+    status: false,
+    lastSentAt: null,
+  },
   isVerified: false,
 };
 
@@ -117,6 +121,18 @@ export const resetPassword = createAsyncThunk(
     }
   },
 );
+//resent OTP
+export const resendOTP = createAsyncThunk(
+  "auth/resendOTP",
+  async (email, { rejectWithValue }) => {
+    try {
+      const data = await AuthAPI.resendOTP(email);
+      return { ...data, email };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to resend OTP"));
+    }
+  },
+);
 // Slice
 
 const authSlice = createSlice({
@@ -135,7 +151,11 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.token = null;
-      state.otpSent = { sentToMail: null, status: false };
+      state.otpSent = {
+        sentToMail: null,
+        status: false,
+        lastSentAt: null,
+      };
       state.isVerified = false;
       clearTokens(); // uses existing apiClient helper
     },
@@ -149,10 +169,14 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.otpSent.status = true; // trigger OTP screen
-        state.otpSent.sentToMail = action.payload.email;
+
+        state.otpSent = {
+          status: true,
+          sentToMail: action.payload.email,
+          lastSentAt: Date.now(),
+        };
+
         state.message = action.payload.data.message;
-        state.data = action.payload.data.user;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -168,6 +192,11 @@ const authSlice = createSlice({
       .addCase(verifyOTP.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isVerified = true;
+        state.otpSent = {
+          sentToMail: null,
+          status: false,
+          lastSentAt: null,
+        };
         state.user = action.payload.data.user;
         state.token = action.payload.data.token;
         state.message =
@@ -179,6 +208,26 @@ const authSlice = createSlice({
         saveUser(action.payload.data.user);
       })
       .addCase(verifyOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
+
+    //resend OTP
+    builder
+      .addCase(resendOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendOTP.fulfilled, (state, action) => {
+        state.otpSent = {
+          status: true,
+          sentToMail: action.payload.email,
+          lastSentAt: Date.now(),
+        };
+        state.isLoading = false;
+        state.message = action.payload.message;
+      })
+      .addCase(resendOTP.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

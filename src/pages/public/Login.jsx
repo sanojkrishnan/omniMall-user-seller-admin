@@ -8,7 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "../../components/ui/Loading";
-import { forgotPassword, loginUser } from "../../redux/slice/authSlice";
+import {
+  clearError,
+  forgotPassword,
+  loginUser,
+} from "../../redux/slice/authSlice";
 import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 
 function Login() {
@@ -23,15 +27,16 @@ function Login() {
 
   //  Handle post-login redirect
   useEffect(() => {
-    console.log("ERROR CHANGED:", error);
     if (user && message) {
       toast.success(message);
       navigate("/", { replace: true });
     }
+
     if (error) {
       toast.error(error);
+      dispatch(clearError()); // clear after showing toast
     }
-  }, [user, error, message]);
+  }, [user, error, message, dispatch, navigate]);
 
   const formik = useFormik({
     initialValues: {

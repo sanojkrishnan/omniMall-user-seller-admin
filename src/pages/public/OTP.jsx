@@ -5,17 +5,31 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { verifyOTP } from "../../redux/slice/authSlice";
+import { verifyOTP, resendOTP } from "../../redux/slice/authSlice";
 import Loading from "../../components/ui/Loading";
 
 function OTP() {
   const navigate = useNavigate();
+  const [resentButton, setResentButton] = useState(true);
 
   const { user, message, isLoading, error, otpSent } = useSelector(
     (state) => state.auth,
   );
+
+  console.log("OTP Component - OTP Sent State:", otpSent);
+  useEffect(() => {
+    if (otpSent.status) {
+      setResentButton(true);
+
+      const timer = setTimeout(() => {
+        setResentButton(false);
+      }, 30000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [otpSent.lastSentAt]);
 
   const dispatch = useDispatch();
 
@@ -33,6 +47,10 @@ function OTP() {
       navigate("/");
     }
   }, [error, user, message]);
+
+  const handleResendOtp = () => {
+    dispatch(resendOTP(otpSent));
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -95,7 +113,21 @@ function OTP() {
               </p>
             )}
             <div className="w-full cursor-pointer flex justify-end">
-              <p className="text-blue-600">Resend OTP</p>
+              <button
+                type="button"
+                className="text-blue-600 disabled:text-gray-500"
+                disabled={resentButton}
+                onClick={handleResendOtp}
+              >
+                Resend OTP
+              </button>
+              {resentButton && (
+                <div className="ml-2 flex items-center justify-center h-5 w-5 bg-transparent">
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-3 h-3 border-2 border-black border-t-white rounded-full animate-spin"></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -12,44 +12,60 @@ import Loading from "../../components/ui/Loading";
 
 function OTP() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [resentButton, setResentButton] = useState(true);
+  const [secondsLeft, setSecondsLeft] = useState(30);
 
   const { user, message, isLoading, error, otpSent } = useSelector(
     (state) => state.auth,
   );
 
-  console.log("OTP Component - OTP Sent State:", otpSent);
   useEffect(() => {
-    if (otpSent.status) {
-      setResentButton(true);
+    if (!otpSent.status) return;
 
-      const timer = setTimeout(() => {
-        setResentButton(false);
-      }, 30000);
+    setResentButton(true);
+    setSecondsLeft(30);
 
-      return () => clearTimeout(timer);
-    }
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setResentButton(false);
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [otpSent.lastSentAt]);
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!otpSent.status) {
       navigate("/register");
     }
+  }, [otpSent.status, navigate]);
+
+  useEffect(() => {
     if (error) {
-      console.log("OTP error:", error);
-      toast.error(error.message);
+      toast.error(error);
     }
+  }, [error]);
+
+  useEffect(() => {
     if (user) {
       toast.success(message);
-      console.log(message);
       navigate("/");
     }
-  }, [error, user, message]);
+  }, [user, message, navigate]);
 
   const handleResendOtp = () => {
-    dispatch(resendOTP(otpSent));
+    dispatch(
+      resendOTP({
+        email: otpSent.sentToMail,
+      }),
+    );
   };
 
   const formik = useFormik({
@@ -72,11 +88,6 @@ function OTP() {
     },
     onSubmit: (values) => {
       console.log("Submitting OTP:", values);
-      console.log("Submitting OTP:", otpSent);
-      if (error) {
-        toast.error("Invalid email address");
-        return;
-      }
       dispatch(verifyOTP(values));
     },
   });
@@ -119,15 +130,8 @@ function OTP() {
                 disabled={resentButton}
                 onClick={handleResendOtp}
               >
-                Resend OTP
+                {resentButton ? `Resend in ${secondsLeft}s` : "Resend OTP"}
               </button>
-              {resentButton && (
-                <div className="ml-2 flex items-center justify-center h-5 w-5 bg-transparent">
-                  <div className="relative flex items-center justify-center">
-                    <div className="w-3 h-3 border-2 border-black border-t-white rounded-full animate-spin"></div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

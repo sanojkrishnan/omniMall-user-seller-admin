@@ -124,10 +124,14 @@ export const resetPassword = createAsyncThunk(
 //resent OTP
 export const resendOTP = createAsyncThunk(
   "auth/resendOTP",
-  async (email, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const data = await AuthAPI.resendOTP(email);
-      return { ...data, email };
+      const data = await AuthAPI.resendOTP(payload);
+
+      return {
+        ...data,
+        email: payload.email,
+      };
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to resend OTP"));
     }

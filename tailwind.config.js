@@ -3,6 +3,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        hurricane: ["Hurricane", "cursive"],
+      },
       keyframes: {
         wheelie: {
           "0%": { transform: "translateX(0) translateY(0) rotate(0deg)" },

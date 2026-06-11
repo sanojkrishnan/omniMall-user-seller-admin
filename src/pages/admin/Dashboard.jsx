@@ -1,9 +1,18 @@
-import OmniMall from '../../components/ui/OmniMall'
+import AdminHeader from "../../components/ui/AdminHeader";
+import AdminSidePanel from "../../components/ui/AdminSidePanel";
 
 function Dashboard() {
   return (
-    <div><OmniMall /> Dashboard</div>
-  )
+    <>
+      <div>
+        {/* header and notification */}
+        <AdminHeader />
+        {/* side section */}
+        <AdminSidePanel />
+        
+      </div>
+    </>
+  );
 }
 
-export default Dashboard
+export default Dashboard;

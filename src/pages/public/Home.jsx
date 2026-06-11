@@ -3,7 +3,6 @@ import Header from "../../components/Header";
 import ProductCard from "../../components/ui/ProductCard";
 import { Button } from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },

@@ -7,7 +7,7 @@ import {
   UserSearch,
   Van,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const dashMenu = [
   "Dashboard",
@@ -20,15 +20,25 @@ const dashMenu = [
 ];
 
 function AdminSidePanel({ setSelection, selection }) {
-  const [menuClick, setMenuClick] = useState(false);
+  const [menuClick, setMenuClick] = useState(window.innerWidth <= 1000);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setMenuClick(window.innerWidth <= 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
-    <>
-    
+    <div className={` sticky h-screen  top-0 left-0 z-50 w-24 xl:w-[340px]`}>
       <div
-        className={` ${menuClick ? "w-24 sticky" : "w-[250px] fixed xl:sticky"} top-0 z-50 transition-all p-6 duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
+        className={` ${menuClick ? "w-24" : "w-[350px] "} fixed transition-all p-6 duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
       >
-        
         <div
           onClick={() => setMenuClick((prev) => !prev)}
           className={` ${menuClick ? "m-9" : "m-4"}  xl:hidden flex flex-col justify-center items-center transition-all duration-500 absolute right-0 top-0 mt-5 w-5 bg-transparent cursor-pointer`}
@@ -66,7 +76,7 @@ function AdminSidePanel({ setSelection, selection }) {
           >
             {dashMenu.map((item, index) => (
               <li
-                className={`${selection === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-evenly ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg  hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+                className={`${selection === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg  hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
                 key={index}
                 onClick={() => setSelection(item)}
               >
@@ -88,14 +98,14 @@ function AdminSidePanel({ setSelection, selection }) {
                     menuClick ? "w-0 opacity-0" : "opacity-100"
                   } transition-all duration-500 `}
                 >
-                  &nbsp;&nbsp;{item}
+                  &nbsp;&nbsp;&nbsp;&nbsp;{item}
                 </p>
               </li>
             ))}
           </ul>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -20,9 +20,10 @@ export default function PyChartCard({ category }) {
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={100}
             fill="#8884d8"
             labelLine={false}
+            innerRadius={60}
+            outerRadius={100}
           >
             {category.map((entry, index) => (
               <Cell

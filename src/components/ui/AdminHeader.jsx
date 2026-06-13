@@ -22,7 +22,7 @@ function AdminHeader({ selection }) {
   }, []);
 
   return (
-    <div className="w-full py-4 px-6 sticky top-0 z-50 bg-white items-center flex justify-between border-b shadow-lg">
+    <div className="w-full py-4 px-6 sticky top-0 z-40 bg-white items-center flex justify-between border-b shadow-lg">
       <h1 className="text-black md:ml-14 text-2xl font-bold">{selection}</h1>
       <div className="flex justify-start items-center mr-4">
         <div ref={divRef} className="relative">

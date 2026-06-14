@@ -1,8 +1,10 @@
 import {
   ChartBarStacked,
   LayoutDashboard,
+  LogOut,
   Logs,
   Puzzle,
+  Settings,
   ShoppingBasket,
   UserSearch,
   Van,
@@ -17,6 +19,7 @@ const dashMenu = [
   "Order",
   "Users",
   "Sellers",
+  "Settings",
 ];
 
 function AdminSidePanel({ setSelection, selection }) {
@@ -24,7 +27,7 @@ function AdminSidePanel({ setSelection, selection }) {
 
   useEffect(() => {
     const handleResize = () => {
-      setMenuClick(window.innerWidth <= 1000);
+      setMenuClick(window.innerWidth <= 1280);
     };
 
     window.addEventListener("resize", handleResize);
@@ -53,7 +56,7 @@ function AdminSidePanel({ setSelection, selection }) {
             className={`${menuClick ? "w-5" : "w-1"} transition-all duration-700 h-1 rounded-full mb-1 bg-white`}
           ></div>
         </div>
-        <div>
+        <div className="grid grid-cols-1 place-items-center">
           <h2
             className={`${menuClick ? "text-sm font-semibold mt-16" : "text-2xl font-bold"} transition-all duration-500 text font-hurricane`}
           >
@@ -67,6 +70,20 @@ function AdminSidePanel({ setSelection, selection }) {
             Admin Panel
           </p>
 
+          {/* logout button */}
+          <button
+            className={`flex justify-start ${menuClick ? "p-2 my-1" : "p-3 my-2"} mt-8 w-fit bg-[#5f0000] rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+          >
+            <p
+              className={`overflow-hidden whitespace-nowrap text-sm ${
+                menuClick ? "opacity-0 w-0" : "opacity-100"
+              } transition-all duration-500 `}
+            >
+              LogOut &nbsp;&nbsp;&nbsp;&nbsp;
+            </p>
+            <LogOut className="size-5" />
+          </button>
+
           <div className="w-full h-[0.5px] rounded-full bg-white mt-10"></div>
         </div>
         {/* menu view */}
@@ -76,7 +93,7 @@ function AdminSidePanel({ setSelection, selection }) {
           >
             {dashMenu.map((item, index) => (
               <li
-                className={`${selection === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg  hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+                className={`${selection === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
                 key={index}
                 onClick={() => setSelection(item)}
               >
@@ -93,6 +110,9 @@ function AdminSidePanel({ setSelection, selection }) {
                 <Logs className={item === "Order" ? "block" : "hidden"} />
                 <UserSearch className={item === "Users" ? "block" : "hidden"} />
                 <Van className={item === "Sellers" ? "block" : "hidden"} />
+                <Settings
+                  className={item === "Settings" ? "block" : "hidden"}
+                />
                 <p
                   className={`overflow-hidden whitespace-nowrap ${
                     menuClick ? "w-0 opacity-0" : "opacity-100"

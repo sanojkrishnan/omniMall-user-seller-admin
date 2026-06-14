@@ -4,6 +4,8 @@ import { BellIcon } from "lucide-react";
 
 function AdminHeader({ selection }) {
   const [showNotification, setShowNotification] = useState(false);
+  const [notificationDot, setNotificationDot] = useState(true);
+  const [ringKey, setRingKey] = useState(0);
 
   const divRef = useRef(null);
 
@@ -30,20 +32,31 @@ function AdminHeader({ selection }) {
             variant="secondary"
             className="rounded-full w-fit"
             onMouseDown={(e) => {
-              e.stopPropagation(); // block document mousedown handler
+              e.stopPropagation();
               setShowNotification((prev) => !prev);
+              setNotificationDot(false);
+              setRingKey((prev) => prev + 1);
             }}
           >
-            <BellIcon className="size-4" />
+            <div key={ringKey} className="relative">
+              <BellIcon className="size-4 origin-top animate-bellRing" />
+              <div
+                className={`
+                absolute -top-1 -right-1 p-1 rounded-full bg-red-500
+                transition-all duration-300
+                ${notificationDot ? "scale-100 opacity-100" : "scale-0 opacity-0"}
+              `}
+              />
+            </div>
           </Button>
 
           {/* notification bar */}
 
-          {showNotification && (
-            <div className="border absolute top-16 right-[-130px] rounded-lg rounded-t-none p-2 text-center shadow-lg w-80 min-h-4 bg-white">
-              <p className="text-gray-500">No notifications</p>
-            </div>
-          )}
+          <div
+            className={`border absolute top-16 right-[-130px] rounded-lg p-2 text-center shadow-lg w-80 min-h-4 ${showNotification ? "scale-100" : "scale-0"} transition-all duration-500 bg-white`}
+          >
+            <p className="text-gray-500">No notifications</p>
+          </div>
         </div>
 
         {/* admin id */}

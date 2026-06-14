@@ -16,6 +16,7 @@ export const Button = ({
 }) => {
   return (
     <button
+      disabled={disabled}
       className={cn(
         // base styles (shared by all variants)
         "px-4 py-2 font-medium hover:scale-105 transition-colors w-full mt-4 rounded-lg",

@@ -1,8 +1,10 @@
+import { TriangleAlert } from "lucide-react";
 import BarChartCard from "../../components/ui/BarChartCard";
 import { FormCard } from "../../components/ui/FormCard";
 import LineChart from "../../components/ui/LineChartCard";
-import { useState } from "react";
 import PyChartCard from "../../components/ui/PyChartCard";
+import SelectionButton from "../../components/ui/SelectionButton";
+import { Button } from "../../components/ui/Button";
 
 const data = [
   { month: "Jan", revenue: 4000 },
@@ -127,6 +129,73 @@ const childrenDupe = [
   },
 ];
 
+const products = [
+  {
+    productName: "lenovo laptop",
+    productImage:
+      "../../../public/logo and other utilities/lipstick_profile.jpg",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    productImage:
+      "../../../public/logo and other utilities/lipstick_profile.jpg",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    productImage:
+      "../../../public/logo and other utilities/lipstick_profile.jpg",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    productImage:
+      "../../../public/logo and other utilities/lipstick_profile.jpg",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    productImage:
+      "../../../public/logo and other utilities/lipstick_profile.jpg",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "delivered",
+  },
+  {
+    productName: "lenovo laptop",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+  {
+    productName: "lenovo laptop",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "canceled",
+  },
+  {
+    productName: "lenovo laptop",
+    category: "Electronics",
+    paymentType: "COD",
+    status: "pending",
+  },
+];
+
 const category = [
   { name: "Electronics", value: 400 },
   { name: "Fashion", value: 100 },
@@ -145,17 +214,20 @@ const pyColors = [
   "#0088FE", // Blue
 ];
 
-function Dashboard() {
-  const [pelletData, setPelletData] = useState(childrenDupe);
+const filter = ["daily", "weekly", "monthly", "yearly"];
 
+function Dashboard() {
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center mb-6">
-        {pelletData.map((children, index) => {
+        {childrenDupe.map((children, index) => {
           return <LineChart key={index} children={children} index={index} />;
         })}
       </div>
       <div className="w-full h-[0.5px] border mb-6"></div>
+      <div className="flex justify-end mr-10">
+        <SelectionButton defaultValue={filter[0]}>{filter}</SelectionButton>
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 place-items-center ">
         {/* Sales Overview */}
@@ -197,7 +269,7 @@ function Dashboard() {
             "flex-col items-center border min-w-[400px] p-2 justify-center mt-6"
           }
         >
-          <div className=" p-1 mb-4 text-center border-b ">
+          <div className=" p-2 mb-4 text-center border-b ">
             <h1>Category Based Sales Report</h1>
           </div>
           <div className="w-[400px] mb-4 overflow-hidden flex h-[250px]">
@@ -248,6 +320,221 @@ function Dashboard() {
             </div>
           </div>
         </FormCard>
+        {/* recent orders  */}
+        <FormCard className="flex-col overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+          {/* Header */}
+          <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
+            <h1 className="justify-self-start">Recent Orders</h1>
+            <Button
+              className={
+                "w-fit text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
+              }
+              variant="secondary"
+            >
+              View All
+            </Button>
+          </div>
+
+          <div className="w-full flex-1  px-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+            <ul className="w-full h-[370px] overflow-y-hidden">
+              {products.map(
+                (item, index) =>
+                  index <= 6 && (
+                    <li
+                      key={index}
+                      className="py-2 w-full flex border-y justify-between items-center"
+                    >
+                      {item.productImage ? (
+                        <div className="w-8 h-8 overflow-hidden rounded-full">
+                          <img
+                            className="w-full h-full object-cover rounded-full"
+                            src={item.productImage}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 overflow-hidden flex items-center justify-center border rounded-full">
+                          <TriangleAlert className="size-4" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-sm">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs">{item.category}</p>
+                      </div>
+                      <p className="text-sm">{item.paymentType}</p>
+                      <p
+                        className={`text-xs border p-1 px-2 rounded-lg ${
+                          item.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-500 border-yellow-500"
+                            : item.status === "canceled"
+                              ? "bg-red-500/10 text-red-500 border-red-500"
+                              : "bg-green-500/10 text-green-500 border-green-500"
+                        }`}
+                      >
+                        {item.status}
+                      </p>
+                    </li>
+                  ),
+              )}
+            </ul>
+          </div>
+          <div className="w-[450px] flex overflow-x-auto border-t mt-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
+            {[
+              { label: "Pending Orders", value: "129" },
+              { label: "Delivered", value: "1200" },
+              { label: "Canceled", value: "11" },
+              { label: "Grand Total", value: "1340" },
+            ].map((cat, i, arr) => (
+              <div
+                key={i}
+                className={`flex-1 text-center text-xs p-2 ${i < arr.length - 1 ? "border-r" : ""}`}
+              >
+                <h5>{cat.label}</h5>
+                <p className="text-md font-bold mt-3 whitespace-nowrap">
+                  {cat.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </FormCard>
+        {/* Sellers List  */}
+        <FormCard className="flex-col overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+          {/* Header */}
+          <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
+            <h1 className="justify-self-start">Top Sellers</h1>
+            <Button
+              className={
+                "w-fit text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
+              }
+              variant="secondary"
+            >
+              View All
+            </Button>
+          </div>
+
+          <div className="w-full flex-1  px-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+            <ul className="w-full h-[370px] overflow-y-hidden">
+              {products.map(
+                (item, index) =>
+                  index <= 6 && (
+                    <li
+                      key={index}
+                      className="py-2 w-full flex border-y justify-between items-center"
+                    >
+                      {item.productImage ? (
+                        <div className="w-8 h-8 overflow-hidden rounded-full">
+                          <img
+                            className="w-full h-full object-cover rounded-full"
+                            src={item.productImage}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 overflow-hidden flex items-center justify-center border rounded-full">
+                          <TriangleAlert className="size-4" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-sm">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs">{item.category}</p>
+                      </div>
+                      <p className="text-sm">{item.paymentType}</p>
+                      <p
+                        className={`text-xs border p-1 px-2 rounded-lg ${
+                          item.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-500 border-yellow-500"
+                            : item.status === "canceled"
+                              ? "bg-red-500/10 text-red-500 border-red-500"
+                              : "bg-green-500/10 text-green-500 border-green-500"
+                        }`}
+                      >
+                        {item.status}
+                      </p>
+                    </li>
+                  ),
+              )}
+            </ul>
+          </div>
+          <div className="w-[450px] flex overflow-x-auto border-t mt-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
+            {[
+              { label: "Pending Orders", value: "129" },
+              { label: "Delivered", value: "1200" },
+              { label: "Canceled", value: "11" },
+              { label: "Grand Total", value: "1340" },
+            ].map((cat, i, arr) => (
+              <div
+                key={i}
+                className={`flex-1 text-center text-xs p-2 ${i < arr.length - 1 ? "border-r" : ""}`}
+              >
+                <h5>{cat.label}</h5>
+                <p className="text-md font-bold mt-3 whitespace-nowrap">
+                  {cat.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </FormCard>
+      </div>
+
+      {/* top selling product */}
+      <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+        {/* Header */}
+        <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
+          <h1 className="justify-self-start">Top Selling Product</h1>
+          <Button
+            className="w-fit text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
+            variant="secondary"
+          >
+            View All
+          </Button>
+        </div>
+
+        <div className="w-full flex-1 overflow-y-auto px-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+          <ul className="w-full">
+            {products.map(
+              (item, index) =>
+                index <= 6 && (
+                  <li
+                    key={index}
+                    className="py-2 w-full flex border-y justify-between items-center"
+                  >
+                    {item.productImage ? (
+                      <div className="w-12 h-12 overflow-hidden">
+                        <img
+                          className="w-full h-full object-cover"
+                          src={item.productImage}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 overflow-hidden flex items-center justify-center border rounded-full">
+                        <TriangleAlert className="size-6" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {item.productName}
+                      </p>
+                      <p className="text-xs">{item.category}</p>
+                    </div>
+                    <p className="text-sm">{item.paymentType}</p>
+                    <p
+                      className={`text-xs border p-1 px-2 rounded-lg ${
+                        item.status === "pending"
+                          ? "bg-yellow-500/10 text-yellow-500 border-yellow-500"
+                          : item.status === "canceled"
+                            ? "bg-red-500/10 text-red-500 border-red-500"
+                            : "bg-green-500/10 text-green-500 border-green-500"
+                      }`}
+                    >
+                      {item.status}
+                    </p>
+                  </li>
+                ),
+            )}
+          </ul>
+        </div>
       </div>
     </>
   );

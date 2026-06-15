@@ -53,9 +53,13 @@ function AdminHeader({ selection }) {
           {/* notification bar */}
 
           <div
-            className={`border absolute top-16 right-[-130px] rounded-lg p-2 text-center shadow-lg w-80 min-h-4 ${showNotification ? "scale-100" : "scale-0"} transition-all duration-500 bg-white`}
+            className={`border absolute top-16 right-[-130px] rounded-b-lg p-2 text-center shadow-lg w-80 min-h-4 ${showNotification ? "scale-y-100 " : "scale-y-0 "} origin-top transition-all duration-500 bg-white`}
           >
-            <p className="text-gray-500">No notifications</p>
+            <p
+              className={`${showNotification ? "opacity-100" : "opacity-0"} transition-all duration-200 text-gray-500`}
+            >
+              No notifications
+            </p>
           </div>
         </div>
 

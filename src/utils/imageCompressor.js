@@ -1,31 +1,33 @@
 import imageCompression from "browser-image-compression";
 
-export const handleImage = async (file) => {
+export const handleImage = async (file, type = "product") => {
   try {
-    //  load image
     const image = new Image();
     const imageURL = URL.createObjectURL(file);
     image.src = imageURL;
 
     await new Promise((resolve) => (image.onload = resolve));
+    URL.revokeObjectURL(imageURL);
 
-    //  define rectangle ratio (example: 4:3)
-    const aspectRatio = 1 / 1;
+    // aspect ratio based on type
+    let aspectRatio;
+    if (type === "profile") {
+      aspectRatio = 1 / 1; // square
+    } else {
+      aspectRatio = 4 / 3; // landscape
+    }
 
     let cropWidth = image.width;
     let cropHeight = image.width / aspectRatio;
 
-    // if height is smaller, adjust
     if (cropHeight > image.height) {
       cropHeight = image.height;
       cropWidth = image.height * aspectRatio;
     }
 
-    // center crop
     const cropX = (image.width - cropWidth) / 2;
     const cropY = (image.height - cropHeight) / 2;
 
-    //  draw on canvas
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -44,7 +46,6 @@ export const handleImage = async (file) => {
       cropHeight,
     );
 
-    //  convert to file
     const croppedFile = await new Promise((resolve) => {
       canvas.toBlob(
         (blob) => {
@@ -55,10 +56,9 @@ export const handleImage = async (file) => {
       );
     });
 
-    // compress (max 2MB)
     const compressed = await imageCompression(croppedFile, {
       maxSizeMB: 2,
-      maxWidthOrHeight: 1024,
+      maxWidthOrHeight: type === "profile" ? 512 : 1024, // smaller for profile
       useWebWorker: true,
     });
 

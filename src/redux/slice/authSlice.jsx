@@ -6,6 +6,7 @@ import {
   setAdminToken,
 } from "../../utils/apiClient";
 import { AuthAPI } from "../../services/authService";
+import { extractError } from "../../utils/errorExtractor";
 
 const initialState = {
   user: null,
@@ -21,12 +22,6 @@ const initialState = {
   isVerified: false,
 };
 
-//  helper to extract error message from axios error
-const extractError = (err, fallback) =>
-  err.response?.data?.error?.message ||
-  err.response?.data?.message ||
-  err.message ||
-  fallback;
 
 //  Thunks
 

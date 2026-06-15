@@ -293,9 +293,17 @@ function Register() {
                                   const file = e.target.files[0];
                                   if (!file) return;
 
-                                  const compressed = await handleImage(file);
+                                  const type =
+                                    e.target.name === "profileImage"
+                                      ? "profile"
+                                      : "product";
+                                  const compressed = await handleImage(
+                                    file,
+                                    type,
+                                  );
+
                                   setFieldValue("profileImage", compressed);
-                                  e.target.value = null; //resetting the input value so i can select same picture more than one time
+                                  e.target.value = null;
                                 }}
                               />
                             </label>

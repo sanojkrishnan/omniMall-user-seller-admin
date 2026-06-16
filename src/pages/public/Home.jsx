@@ -3,6 +3,8 @@ import Header from "../../components/Header";
 import ProductCard from "../../components/ui/ProductCard";
 import { Button } from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
+import { SearchBar } from "../../components/ui/SearchBar";
+import { Filter } from "lucide-react";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -226,6 +228,12 @@ function Home() {
         <div className="pb-10">
           <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
           <p>Handpicked favorites just for you</p>
+        </div>
+        <div className="flex items-center mb-10 border-b-[0.5px] pb-10">
+          <SearchBar className={"border-black"} />
+          <Button className={"w-fit px-6 m-0 ml-4"}>
+            <Filter className="size-4 " /> Filter
+          </Button>
         </div>
         <ProductCard products={featuredProducts} />
         <div className="flex justify-center items-center mt-10">

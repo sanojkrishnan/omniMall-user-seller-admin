@@ -5,6 +5,7 @@ import LineChart from "../../components/ui/LineChartCard";
 import PyChartCard from "../../components/ui/PyChartCard";
 import SelectionButton from "../../components/ui/SelectionButton";
 import { Button } from "../../components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
 const data = [
   { month: "Jan", revenue: 4000 },
@@ -217,6 +218,7 @@ const pyColors = [
 const filter = ["daily", "weekly", "monthly", "yearly"];
 
 function Dashboard() {
+  const navigate = useNavigate()
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center mb-6">
@@ -342,7 +344,7 @@ function Dashboard() {
                   index <= 6 && (
                     <li
                       key={index}
-                      className="py-2 w-full flex border-y justify-between items-center"
+                      className={` ${index % 2 === 0 ? "bg-slate-50" : "bg-white"} py-2 px-2 w-full flex border-y justify-between items-center`}
                     >
                       {item.productImage ? (
                         <div className="w-8 h-8 overflow-hidden rounded-full">
@@ -420,7 +422,7 @@ function Dashboard() {
                   index <= 6 && (
                     <li
                       key={index}
-                      className="py-2 w-full flex border-y justify-between items-center"
+                      className={` ${index % 2 === 0 ? "bg-slate-50" : "bg-white"} py-2 px-2 w-full flex border-y justify-between items-center`}
                     >
                       {item.productImage ? (
                         <div className="w-8 h-8 overflow-hidden rounded-full">
@@ -486,6 +488,7 @@ function Dashboard() {
           <Button
             className="w-fit text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
             variant="secondary"
+            onClick={() => navigate("/admin/products")}
           >
             View All
           </Button>
@@ -493,45 +496,54 @@ function Dashboard() {
 
         <div className="w-full flex-1 overflow-y-auto px-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
           <ul className="w-full">
-            {products.map(
-              (item, index) =>
-                index <= 6 && (
-                  <li
-                    key={index}
-                    className="py-2 w-full flex border-y justify-between items-center"
-                  >
-                    {item.productImage ? (
-                      <div className="w-12 h-12 overflow-hidden">
-                        <img
-                          className="w-full h-full object-cover"
-                          src={item.productImage}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 overflow-hidden flex items-center justify-center border rounded-full">
-                        <TriangleAlert className="size-6" />
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold text-sm">
-                        {item.productName}
-                      </p>
-                      <p className="text-xs">{item.category}</p>
-                    </div>
-                    <p className="text-sm">{item.paymentType}</p>
-                    <p
-                      className={`text-xs border p-1 px-2 rounded-lg ${
-                        item.status === "pending"
-                          ? "bg-yellow-500/10 text-yellow-500 border-yellow-500"
-                          : item.status === "canceled"
-                            ? "bg-red-500/10 text-red-500 border-red-500"
-                            : "bg-green-500/10 text-green-500 border-green-500"
-                      }`}
+            {products.length !== 0 ? (
+              products.map(
+                (item, index) =>
+                  index <= 6 && (
+                    <li
+                      key={index}
+                      className={` ${index % 2 === 0 ? "bg-slate-50" : "bg-white"} py-2 px-2 w-full flex border-y justify-between items-center`}
                     >
-                      {item.status}
-                    </p>
-                  </li>
-                ),
+                      {item.productImage ? (
+                        <div className="w-12 h-12 overflow-hidden">
+                          <img
+                            className="w-full h-full object-cover"
+                            src={item.productImage}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 overflow-hidden flex items-center justify-center border rounded-full">
+                          <TriangleAlert className="size-6" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-sm">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs">{item.category}</p>
+                      </div>
+                      <p className="text-sm">{item.paymentType}</p>
+                      <p
+                        className={`text-xs border p-1 px-2 rounded-lg ${
+                          item.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-500 border-yellow-500"
+                            : item.status === "canceled"
+                              ? "bg-red-500/10 text-red-500 border-red-500"
+                              : "bg-green-500/10 text-green-500 border-green-500"
+                        }`}
+                      >
+                        {item.status}
+                      </p>
+                    </li>
+                  ),
+              )
+            ) : (
+              <div
+                className="flex justify-center items-center w-full p-5 text-gray-500 text-sm font-thin
+              "
+              >
+                No Products Available I'm Sorry... ) ;{" "}
+              </div>
             )}
           </ul>
         </div>

@@ -10,6 +10,7 @@ import {
   Van,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const dashMenu = [
   "Dashboard",
@@ -23,7 +24,18 @@ const dashMenu = [
 ];
 
 function AdminSidePanel({ setSelection, selection }) {
-  const [menuClick, setMenuClick] = useState(window.innerWidth <= 1000);
+  const [menuClick, setMenuClick] = useState(window.innerWidth <= 1280);
+  const navigate = useNavigate();
+
+  const location = useLocation();
+  const activeItem =
+    dashMenu.find(
+      (item) => location.pathname === `/admin/${item.toLowerCase()}`,
+    ) || selection;
+
+  useEffect(() => {
+    if (activeItem) setSelection(activeItem);
+  }, [activeItem]); // sync parent whenever URL changes
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,6 +48,11 @@ function AdminSidePanel({ setSelection, selection }) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  const handleClick = (item) => {
+    setSelection(item);
+    navigate(`/admin/${item.toLowerCase()}`);
+  };
 
   return (
     <div className={` sticky h-screen  top-0 left-0 z-50 w-24 xl:w-[340px]`}>
@@ -93,9 +110,9 @@ function AdminSidePanel({ setSelection, selection }) {
           >
             {dashMenu.map((item, index) => (
               <li
-                className={`${selection === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+                className={`${activeItem === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
                 key={index}
-                onClick={() => setSelection(item)}
+                onClick={() => handleClick(item)}
               >
                 <LayoutDashboard
                   className={item === "Dashboard" ? "block" : "hidden"}

@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./slice/authSlice";
+import productSlice from "./slice/productSlice";
 import { getStoredUser } from "../utils/apiClient";
 
 const storedUser = getStoredUser(); // reads "user" OR "seller" OR "admin" key correctly
@@ -12,6 +13,7 @@ const token =
 export const store = configureStore({
   reducer: {
     auth: authSlice,
+    product: productSlice,
   },
   preloadedState: {
     auth: {

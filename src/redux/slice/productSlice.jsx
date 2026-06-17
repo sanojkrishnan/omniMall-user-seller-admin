@@ -3,7 +3,7 @@ import { extractError } from "../../utils/errorExtractor";
 import { productAPI } from "../../services/productService";
 
 const initialState = {
-  product: null,
+  products: [],
   isLoading: false,
   error: null,
   message: null,
@@ -21,6 +21,17 @@ export const addProduct = createAsyncThunk(
   },
 );
 
+export const fetchAllProducts = createAsyncThunk(
+  "product/fetchAllProduct",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const data = await productAPI.fetchAllProduct({ page, limit });
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "fetch product failed"));
+    }
+  },
+);
 const productSlice = createSlice({
   name: "product",
   initialState,
@@ -31,10 +42,11 @@ const productSlice = createSlice({
     clearProductState(state) {
       state.message = null;
       state.error = null;
-      state.product = null;
+      state.products = null;
     },
   },
   extraReducers: (builder) => {
+    //register product
     builder
       .addCase(addProduct.pending, (state) => {
         state.isLoading = true;
@@ -42,11 +54,32 @@ const productSlice = createSlice({
       })
       .addCase(addProduct.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.product = action.payload.product;
+        state.products = action.payload.product;
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      });
+    //fetching all products
+    builder
+      .addCase(fetchAllProducts.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        state.products = action.payload.data;
+
+        console.log("FULFILLED PAYLOAD:", action.payload);
+        state.hasNextPage = action.payload.page;
+        state.totalPages = action.payload.totalPages;
+        state.totalProducts = action.payload.totalProducts;
+        state.limit = action.payload.limit;
+      })
+      .addCase(fetchAllProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Failed to fetch products";
       });
   },
 });

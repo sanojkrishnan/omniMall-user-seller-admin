@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
 import { HeartIcon, ShoppingCart } from "lucide-react";

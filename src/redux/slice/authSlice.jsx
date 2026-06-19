@@ -9,11 +9,14 @@ import { AuthAPI } from "../../services/authService";
 import { extractError } from "../../utils/errorExtractor";
 
 const initialState = {
-  user: null,
+  user: [],
   token: null,
   isLoading: false,
   error: null,
   message: null,
+  page: 0,
+  totalPages: 0,
+  totalUser: 0,
   otpSent: {
     sentToMail: null,
     status: false,
@@ -21,7 +24,6 @@ const initialState = {
   },
   isVerified: false,
 };
-
 
 //  Thunks
 
@@ -92,7 +94,6 @@ export const googleProfileCompletion = createAsyncThunk(
 );
 
 //forgot password
-
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
@@ -132,8 +133,20 @@ export const resendOTP = createAsyncThunk(
     }
   },
 );
-// Slice
+//fetch seller separately
+export const fetchAllSeller = createAsyncThunk(
+  "auth/fetchSeller",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const data = await AuthAPI.fetchSeller(payload);
 
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch seller"));
+    }
+  },
+);
+// Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -338,6 +351,27 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      });
+    //fetch seller
+    builder
+      .addCase(fetchAllSeller.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllSeller.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.data;
+
+        console.log("FULFILLED PAYLOAD:", action.payload);
+        state.hasNextPage = action.payload.page;
+        state.totalPages = action.payload.totalPages;
+        state.totalUser = action.payload.totalUser;
+        state.limit = action.payload.limit;
+      })
+      .addCase(fetchAllSeller.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Failed to fetch products";
+        state.user = null;
       });
   },
 });

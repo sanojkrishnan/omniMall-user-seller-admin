@@ -2,95 +2,51 @@ import { Filter, Plus, TriangleAlert } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllProducts } from "../../redux/slice/productSlice";
+import { clearError, fetchAllProducts } from "../../redux/slice/productSlice";
 import CartLoading from "../../components/ui/CartLoading";
-import { useEffect } from "react";
-
-// const sampleProducts = [
-//   {
-//     productName: "lenovo laptop",
-//     productImage:
-//       "../../../public/logo and other utilities/lipstick_profile.jpg",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     productImage:
-//       "../../../public/logo and other utilities/lipstick_profile.jpg",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     productImage:
-//       "../../../public/logo and other utilities/lipstick_profile.jpg",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     productImage:
-//       "../../../public/logo and other utilities/lipstick_profile.jpg",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     productImage:
-//       "../../../public/logo and other utilities/lipstick_profile.jpg",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "delivered",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "canceled",
-//   },
-//   {
-//     productName: "lenovo laptop",
-//     category: "Electronics",
-//     paymentType: "COD",
-//     status: "pending",
-//   },
-// ];
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import SingleProductList from "../../components/SingleProductList";
 
 function Products() {
   const dispatch = useDispatch();
 
-  const { products, page, totalPages, isLoading, error } = useSelector(
-    (state) => state.product,
-  );
+  const { products, page, totalPages, isProductLoading, productError } =
+    useSelector((state) => state.product);
+
+  const { user } = useSelector((state) => state.auth);
+
+  const [openProduct, setOpenProduct] = useState(false);
+  const [singleProduct, setSingleProduct] = useState([]);
 
   useEffect(() => {
     dispatch(fetchAllProducts({ page: 1, limit: 15 }));
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("print products", products);
-  }, [products]);
+    if (products.length !== 0) {
+      console.log("print products", products);
+    }
+    if (productError) {
+      toast.error(productError);
+      dispatch(clearError());
+    }
+  }, [products, productError]);
 
   return (
     <>
       <div className="flex items-center">
+        <div
+          className={`${openProduct ? "scale-100" : "scale-0"} transition-all duration-300 fixed inset-0 z-50 flex items-center justify-center`}
+        >
+          <SingleProductList
+            openProduct={openProduct}
+            setOpenProduct={setOpenProduct}
+            product={singleProduct}
+            setProduct={setSingleProduct}
+          />
+        </div>
+
         <SearchBar />
         <Button className={"w-fit px-6 m-0 ml-4 bg-[#5f0000]"}>
           <Filter className="size-4 " /> Filter
@@ -104,12 +60,12 @@ function Products() {
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
         {/* Header */}
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
-          {isLoading && !products && !error && (
-            <div className="w-full h-screen">
+          {isProductLoading && !productError && (
+            <div className="w-full h-[70vh] flex items-center justify-center">
               <CartLoading />
             </div>
           )}
-          {!isLoading && products && (
+          {!isProductLoading && products.length !== 0 && (
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -136,6 +92,10 @@ function Products() {
                         className={`${
                           index % 2 === 0 ? "bg-white" : "bg-slate-50"
                         } hover:bg-slate-200 cursor-pointer border-b`}
+                        onClick={() => {
+                          setOpenProduct(true);
+                          setSingleProduct(item);
+                        }}
                       >
                         <td className="p-3">
                           {item.productImage ? (
@@ -198,6 +158,7 @@ function Products() {
                         className={`${
                           index % 2 === 0 ? "bg-slate-50" : "bg-white"
                         } hover:bg-slate-200 cursor-pointer border-y`}
+                        onClick={() => setOpenProduct(true)}
                       >
                         <td className="p-2">
                           {item.productImage ? (
@@ -243,8 +204,8 @@ function Products() {
               </tbody>
             </table>
           )}
-          {error && (
-            <div className="w-full h-screen flex items-center justify-center text-center">
+          {productError && products.length === 0 && !isProductLoading && (
+            <div className="w-full h-[70vh] flex items-center justify-center text-center">
               Sorry, Something Went Wrong... );{" "}
             </div>
           )}

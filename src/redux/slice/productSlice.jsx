@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { extractError } from "../../utils/errorExtractor";
+import { extractError } from "../../utils/ErrorExtractor";
 import { productAPI } from "../../services/productService";
 
 const initialState = {
   products: [],
-  isLoading: false,
-  error: null,
-  message: null,
+  isProductLoading: false,
+  productError: null,
+  page: 0,
+  totalPages: 0,
 };
 
 export const addProduct = createAsyncThunk(
@@ -37,11 +38,11 @@ const productSlice = createSlice({
   initialState,
   reducers: {
     clearError(state) {
-      state.error = null;
+      state.productError = null;
     },
     clearProductState(state) {
       state.message = null;
-      state.error = null;
+      state.productError = null;
       state.products = null;
     },
   },
@@ -49,26 +50,25 @@ const productSlice = createSlice({
     //register product
     builder
       .addCase(addProduct.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.isProductLoading = true;
+        state.productError = null;
       })
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isProductLoading = false;
         state.products = action.payload.product;
       })
       .addCase(addProduct.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.isProductLoading = false;
+        state.productError = action.payload;
       });
     //fetching all products
     builder
       .addCase(fetchAllProducts.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.productError = null;
+        state.isProductLoading = true;
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
-        state.isLoading = false;
-
+        state.isProductLoading = false;
         state.products = action.payload.data;
 
         console.log("FULFILLED PAYLOAD:", action.payload);
@@ -78,8 +78,9 @@ const productSlice = createSlice({
         state.limit = action.payload.limit;
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Failed to fetch products";
+        state.isProductLoading = false;
+        state.productError = action.payload || "Failed to fetch products";
+        state.products = [];
       });
   },
 });

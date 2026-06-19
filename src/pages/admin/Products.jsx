@@ -18,6 +18,7 @@ function Products() {
 
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
+  const [hadError, setHadError] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllProducts({ page: 1, limit: 15 }));
@@ -29,10 +30,10 @@ function Products() {
     }
     if (productError) {
       toast.error(productError);
+      setHadError(true);
       dispatch(clearError());
     }
-  }, [products, productError]);
-
+  }, [products, productError, dispatch]);
   return (
     <>
       <div className="flex items-center">
@@ -204,7 +205,7 @@ function Products() {
               </tbody>
             </table>
           )}
-          {productError && products.length === 0 && !isProductLoading && (
+          {hadError && products.length === 0 && !isProductLoading && (
             <div className="w-full h-[70vh] flex items-center justify-center text-center">
               Sorry, Something Went Wrong... );{" "}
             </div>

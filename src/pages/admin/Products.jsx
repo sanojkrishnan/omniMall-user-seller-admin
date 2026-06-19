@@ -3,6 +3,7 @@ import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllProducts } from "../../redux/slice/productSlice";
+import CartLoading from "../../components/ui/CartLoading";
 import { useEffect } from "react";
 
 // const sampleProducts = [
@@ -103,26 +104,31 @@ function Products() {
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
         {/* Header */}
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th colSpan={6} className="text-lg p-6 border-b">
-                  Top Selling Products
-                </th>
-              </tr>
-              <tr className="bg-slate-100 border-b">
-                <th className="p-3 text-left">Image</th>
-                <th className="p-3 text-left">Product Name</th>
-                <th className="p-3 text-left">Seller</th>
-                <th className="p-3 text-left">Stock</th>
-                <th className="p-3 text-left">MRP</th>
-                <th className="p-3 text-left">Seller Price</th>
-              </tr>
-            </thead>
+          {isLoading && !products && !error && (
+            <div className="w-full h-screen">
+              <CartLoading />
+            </div>
+          )}
+          {!isLoading && products && (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th colSpan={6} className="text-lg p-6 border-b">
+                    Top Selling Products
+                  </th>
+                </tr>
+                <tr className="bg-slate-100 border-b">
+                  <th className="p-3 text-left">Image</th>
+                  <th className="p-3 text-left">Product Name</th>
+                  <th className="p-3 text-left">Seller</th>
+                  <th className="p-3 text-left">Stock</th>
+                  <th className="p-3 text-left">MRP</th>
+                  <th className="p-3 text-left">Seller Price</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {products.length !== 0 ? (
-                products.map(
+              <tbody>
+                {products.map(
                   (item, index) =>
                     index <= 6 && (
                       <tr
@@ -162,37 +168,29 @@ function Products() {
 
                         <td className="p-3">
                           <span className="text-xs border p-1 px-2 rounded-lg">
-                            ₹{item.mrp}
+                            ₹ {item.mrp}
                           </span>
                         </td>
                         <td className="p-3">
                           <span className="text-xs border p-1 px-2 rounded-lg">
-                            ₹{item.offerPrice}
+                            ₹ {item.offerPrice}
                           </span>
                         </td>
                       </tr>
                     ),
-                )
-              ) : (
+                )}
+              </tbody>
+
+              <thead>
                 <tr>
-                  <td colSpan={5} className="text-center p-5 text-gray-500">
-                    No Products Available I'm Sorry... )
-                  </td>
+                  <th colSpan={6} className="text-lg p-6 border-b">
+                    All Products
+                  </th>
                 </tr>
-              )}
-            </tbody>
+              </thead>
 
-            <thead>
-              <tr>
-                <th colSpan={6} className="text-lg p-6 border-b">
-                  All Products
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {products.length !== 0 ? (
-                products.map(
+              <tbody>
+                {products.map(
                   (item, index) =>
                     index <= 6 && (
                       <tr
@@ -231,29 +229,25 @@ function Products() {
 
                         <td className="p-2">
                           <span className="text-xs border p-1 px-2 rounded-lg">
-                            ₹{item.mrp}
+                            ₹ {item.mrp}
                           </span>
                         </td>
                         <td className="p-2">
                           <span className="text-xs border p-1 px-2 rounded-lg">
-                            ₹{item.offerPrice}
+                            ₹ {item.offerPrice}
                           </span>
                         </td>
                       </tr>
                     ),
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="text-center p-5 text-gray-500 text-sm font-thin"
-                  >
-                    No Products Available I'm Sorry... )
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
+          {error && (
+            <div className="w-full h-screen flex items-center justify-center text-center">
+              Sorry, Something Went Wrong... );{" "}
+            </div>
+          )}
         </div>
       </div>
     </>

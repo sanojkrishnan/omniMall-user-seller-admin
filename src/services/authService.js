@@ -41,8 +41,4 @@ export const AuthAPI = {
     console.log("Google profile completion data:", data);
     return api.patch("auth/complete-profile", data);
   },
-  //fetch seller separately
-  fetchSeller: async (data) => {
-    return api.get("admin/seller", data);
-  },
 };

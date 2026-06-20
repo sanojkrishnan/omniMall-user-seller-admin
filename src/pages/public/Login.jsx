@@ -29,7 +29,15 @@ function Login() {
   useEffect(() => {
     if (user && message) {
       toast.success(message);
-      navigate("/", { replace: true });
+      if (user.role === "user") {
+        navigate("/", { replace: true });
+      }
+      if (user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      }
+      if (user.role === "seller") {
+        navigate("/seller/panel", { replace: true });
+      }
     }
 
     if (error) {

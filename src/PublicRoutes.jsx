@@ -1,6 +1,6 @@
 import Home from "./pages/public/Home";
 import { Route } from "react-router-dom";
-import { PublicRoute } from "./components/ProtectedRoute";
+import { PublicRoute, RestrictRoles } from "./components/ProtectedRoute";
 import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import OTP from "./pages/public/OTP";
@@ -8,7 +8,14 @@ import ResetPass from "./pages/public/ResetPass";
 
 const publicRoutes = (
   <>
-    <Route path="/" element={<Home />} />
+    <Route
+      path="/"
+      element={
+        <RestrictRoles blockedRoles={["admin", "seller"]}>
+          <Home />
+        </RestrictRoles>
+      }
+    />
     <Route
       path="/login"
       element={

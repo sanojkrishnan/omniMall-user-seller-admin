@@ -18,7 +18,7 @@ function SingleProductList(props) {
       <div>
         <div className="relative w-full h-fit">
           <img
-            class="rounded-t-base object-cover h-56 w-full"
+            class="rounded-t-base object-cover h-60 w-full"
             src={product.productImage}
             alt={product.productName}
           />

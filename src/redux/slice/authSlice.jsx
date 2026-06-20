@@ -360,8 +360,7 @@ const authSlice = createSlice({
       })
       .addCase(fetchAllSeller.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.data;
-
+        state.sellers = action.payload.data;
         console.log("FULFILLED PAYLOAD:", action.payload);
         state.hasNextPage = action.payload.page;
         state.totalPages = action.payload.totalPages;

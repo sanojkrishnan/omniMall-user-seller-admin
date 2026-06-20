@@ -2,6 +2,8 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
+//private route
+
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, token } = useSelector((state) => state.auth);
 
@@ -17,7 +19,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   return children;
 }
-
+// public route
 function PublicRoute({ children }) {
   const { user, token } = useSelector((state) => state.auth);
 
@@ -34,4 +36,18 @@ function PublicRoute({ children }) {
   return children;
 }
 
-export { ProtectedRoute, PublicRoute };
+//restricted route (only for some pages that can access for guests and users but not for admin and seller. eg: home page)
+function RestrictRoles({ children, blockedRoles }) {
+  const { user, token } = useSelector((state) => state.auth);
+  const isAuthenticated = !!token && !!user;
+
+  if (isAuthenticated && blockedRoles?.includes(user.role)) {
+    if (user.role === "admin")
+      return <Navigate to="/admin/dashboard" replace />;
+    if (user.role === "seller") return <Navigate to="/seller/panel" replace />;
+  }
+
+  return children;
+}
+
+export { ProtectedRoute, PublicRoute, RestrictRoles };

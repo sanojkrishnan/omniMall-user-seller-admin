@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { clearTokens } from "../../utils/apiClient";
+import { logout } from "../../redux/slice/authSlice";
+import { useDispatch } from "react-redux";
 
 const dashMenu = [
   "Dashboard",
@@ -26,7 +29,7 @@ const dashMenu = [
 function AdminSidePanel({ setSelection, selection }) {
   const [menuClick, setMenuClick] = useState(window.innerWidth <= 1280);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const location = useLocation();
   const activeItem =
     dashMenu.find(
@@ -90,6 +93,10 @@ function AdminSidePanel({ setSelection, selection }) {
           {/* logout button */}
           <button
             className={`flex justify-start ${menuClick ? "p-2 my-1" : "p-3 my-2"} mt-8 w-fit bg-[#5f0000] rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+            onClick={() => {
+              dispatch(logout());
+              navigate("/login", { replace: true });
+            }}
           >
             <p
               className={`overflow-hidden whitespace-nowrap text-sm ${

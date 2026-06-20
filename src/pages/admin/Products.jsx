@@ -11,10 +11,9 @@ import SingleProductList from "../../components/SingleProductList";
 function Products() {
   const dispatch = useDispatch();
 
-  const { products, page, totalPages, isProductLoading, productError } =
-    useSelector((state) => state.product);
-
-  const { user } = useSelector((state) => state.auth);
+  const { products, isProductLoading, productError } = useSelector(
+    (state) => state.product,
+  );
 
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
@@ -66,6 +65,7 @@ function Products() {
               <CartLoading />
             </div>
           )}
+          {/* top selling products  */}
           {!isProductLoading && products.length !== 0 && (
             <table className="w-full border-collapse">
               <thead>
@@ -142,6 +142,7 @@ function Products() {
                 )}
               </tbody>
 
+              {/* all products  */}
               <thead>
                 <tr>
                   <th colSpan={6} className="text-lg p-6 border-b">
@@ -171,8 +172,8 @@ function Products() {
                               />
                             </div>
                           ) : (
-                            <div className="w-12 h-12 overflow-hidden flex items-center justify-center border rounded-full">
-                              <TriangleAlert className="size-6" />
+                            <div className="w-full h-[100%] overflow-hidden flex items-center justify-center border rounded-full">
+                              <TriangleAlert className="size-10" />
                             </div>
                           )}
                         </td>

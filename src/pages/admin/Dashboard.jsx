@@ -218,7 +218,7 @@ const pyColors = [
 const filter = ["daily", "weekly", "monthly", "yearly"];
 
 function Dashboard() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center mb-6">

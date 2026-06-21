@@ -13,31 +13,31 @@ const initialState = {
 
 export const fetchAllSellers = createAsyncThunk(
   "seller/fetchAllSellers",
-  async ({ pagination }, { rejectWithValue }) => {
+  async ({ pagination, uniqueSellers }, { rejectWithValue }) => {
     try {
-      const data = await sellerAPI.addProduct(pagination);
+      const data = await sellerAPI.fetchSeller({ pagination, uniqueSellers });
       return { ...data };
     } catch (err) {
-      return rejectWithValue(extractError(err, "Add product failed"));
+      return rejectWithValue(extractError(err, "Fetch sellers failed"));
     }
   },
 );
 
 const sellerSlice = createSlice({
-  name: "product",
+  name: "seller",
   initialState,
   reducers: {
     clearError(state) {
-      state.productError = null;
+      state.sellerError = null;
     },
     clearSellerState(state) {
       state.message = null;
-      state.productError = null;
-      state.products = null;
+      state.sellerError = null;
+      state.seller = null;
     },
   },
   extraReducers: (builder) => {
-    //fetching all products
+    //fetching all seller
     builder
       .addCase(fetchAllSellers.pending, (state) => {
         state.sellerError = null;
@@ -45,17 +45,16 @@ const sellerSlice = createSlice({
       })
       .addCase(fetchAllSellers.fulfilled, (state, action) => {
         state.isSellerLoading = false;
-        state.seller = action.payload.data;
-
-        console.log("FULFILLED PAYLOAD:", action.payload);
-        state.hasNextPage = action.payload.page;
-        state.totalPages = action.payload.totalPages;
-        state.totalSellers = action.payload.totalSellers;
-        state.limit = action.payload.limit;
+        state.seller = action.payload?.data?.data ?? [];
+        state.hasNextPage =
+          action.payload?.data?.pagination?.hasNextPage ?? false;
+        state.totalPages = action.payload?.data?.pagination?.totalPages ?? 0;
+        state.totalSellers = action.payload?.data?.pagination?.total ?? 0;
+        state.limit = action.payload?.data?.pagination?.limit ?? 15;
       })
       .addCase(fetchAllSellers.rejected, (state, action) => {
         state.isSellerLoading = false;
-        state.sellerError = action.payload || "Failed to fetch products";
+        state.sellerError = action.payload || "Failed to fetch sellers";
         state.seller = [];
       });
   },

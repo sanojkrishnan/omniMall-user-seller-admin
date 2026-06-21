@@ -1,11 +1,29 @@
 import { Edit, Trash, X } from "lucide-react";
 import { FormCard } from "./ui/FormCard";
 import { Button } from "./ui/Button";
+import { useEffect, useRef } from "react";
 
 function SingleProductList(props) {
   const { openProduct, setOpenProduct, product, setProduct } = props;
+
+  const divRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (divRef.current && !divRef.current.contains(event.target)) {
+        setOpenProduct(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <FormCard className={"p-2"}>
+    <FormCard className={"p-2"} ref={divRef}>
       <div className="w-full flex products-start justify-end mb-1">
         <Button
           variant="secondary"
@@ -39,6 +57,35 @@ function SingleProductList(props) {
               </h5>
               <p>13% off</p>
               <h5 className="text-xl">Seller Price :{product.offerPrice}$</h5>
+            </div>
+            <div>
+              <div>
+                Category: &nbsp;
+                {product.categoryData ? (
+                  <a className="text-blue-500" href="">
+                    {product.categoryData?.name}
+                  </a>
+                ) : (
+                  "Unknown Category"
+                )}
+              </div>
+              <div>
+                Sold by: &nbsp;
+                {product.sellerData ? (
+                  <a className="text-blue-500" href="">
+                    {product.sellerData.firstName} {product.sellerData.lastName}
+                  </a>
+                ) : (
+                  "Unknown Seller"
+                )}
+              </div>
+              {product.sellerData?.profileImage?.url && (
+                <img
+                  src={product.sellerData.profileImage.url}
+                  alt="Seller"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              )}
             </div>
             <div className="pt-4">
               <Button>

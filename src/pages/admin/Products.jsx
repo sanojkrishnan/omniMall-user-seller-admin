@@ -1,18 +1,33 @@
-import { Filter, Plus, TriangleAlert } from "lucide-react";
+import { AlertTriangle, Filter, Plus, TriangleAlert } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import { clearError, fetchAllProducts } from "../../redux/slice/productSlice";
+import {
+  fetchAllSellers,
+  clearError as clearSellerError,
+} from "../../redux/slice/sellerSlice";
+import {
+  fetchAllCategories,
+  clearError as clearCategoryError,
+} from "../../redux/slice/categorySlice";
 import CartLoading from "../../components/ui/CartLoading";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import SingleProductList from "../../components/SingleProductList";
+import Loading from "../../components/ui/Loading";
 
 function Products() {
   const dispatch = useDispatch();
 
   const { products, isProductLoading, productError } = useSelector(
     (state) => state.product,
+  );
+  const { seller, isSellerLoading, sellerError } = useSelector(
+    (state) => state.seller,
+  );
+  const { category, isCategoryLoading, categoryError } = useSelector(
+    (state) => state.category,
   );
 
   const [openProduct, setOpenProduct] = useState(false);
@@ -23,16 +38,93 @@ function Products() {
     dispatch(fetchAllProducts({ page: 1, limit: 15 }));
   }, [dispatch]);
 
+  const lastFetchedIdsRef = useRef("");
+
   useEffect(() => {
-    if (products.length !== 0) {
-      console.log("print products", products);
+    if (products.length > 0) {
+      const uniqueSellerIds = [
+        ...new Set(
+          products
+            .map((item) =>
+              typeof item.sellerId === "object"
+                ? item.sellerId._id
+                : item.sellerId,
+            )
+            .filter(Boolean),
+        ),
+      ];
+      const uniqueCategoryIds = [
+        ...new Set(
+          products
+            .map((item) =>
+              typeof item.categoryId === "object"
+                ? item.categoryId._id
+                : item.categoryId,
+            )
+            .filter(Boolean),
+        ),
+      ];
+
+      const idsKey = uniqueSellerIds.sort().join(",");
+
+      const idcKey = uniqueCategoryIds.sort().join(",");
+
+      if (uniqueSellerIds.length > 0 && idsKey !== lastFetchedIdsRef.current) {
+        lastFetchedIdsRef.current = idsKey;
+        dispatch(
+          fetchAllSellers({
+            pagination: { page: 1, limit: uniqueSellerIds.length },
+            uniqueSellers: uniqueSellerIds,
+          }),
+        );
+      }
+      if (
+        uniqueCategoryIds.length > 0 &&
+        idcKey !== lastFetchedIdsRef.current
+      ) {
+        lastFetchedIdsRef.current = idcKey;
+        dispatch(
+          fetchAllCategories({
+            pagination: { page: 1, limit: uniqueCategoryIds.length },
+            uniqueCategories: uniqueCategoryIds,
+          }),
+        );
+      }
     }
+  }, [products, dispatch]);
+  // sellerId - seller, O(1) lookup instead of .find() inside the row loop
+  const sellerMap = useMemo(() => {
+    const map = {};
+    (seller || []).forEach((item) => {
+      map[item._id] = item;
+    });
+    return map;
+  }, [seller]);
+
+  const categoryMap = useMemo(() => {
+    const map = {};
+    (category || []).forEach((item) => {
+      map[item._id] = item;
+    });
+    return map;
+  }, [category]);
+
+  useEffect(() => {
     if (productError) {
       toast.error(productError);
       setHadError(true);
       dispatch(clearError());
     }
-  }, [products, productError, dispatch]);
+    if (sellerError) {
+      toast.error(sellerError);
+      dispatch(clearSellerError());
+    }
+  }, [productError, sellerError, dispatch]);
+
+  const getSellerName = (sellerId) => {
+    const s = sellerMap[sellerId];
+    return s ? `${s.firstName} ${s.lastName}` : "Unknown Seller";
+  };
   return (
     <>
       <div className="flex items-center">
@@ -58,14 +150,13 @@ function Products() {
         </Button>
       </div>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
-        {/* Header */}
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
           {isProductLoading && !productError && (
             <div className="w-full h-[70vh] flex items-center justify-center">
               <CartLoading />
             </div>
           )}
-          {/* top selling products  */}
+
           {!isProductLoading && products.length !== 0 && (
             <table className="w-full border-collapse">
               <thead>
@@ -89,13 +180,17 @@ function Products() {
                   (item, index) =>
                     index <= 6 && (
                       <tr
-                        key={index}
+                        key={item._id ?? index}
                         className={`${
                           index % 2 === 0 ? "bg-white" : "bg-slate-50"
                         } hover:bg-slate-200 cursor-pointer border-b`}
                         onClick={() => {
                           setOpenProduct(true);
-                          setSingleProduct(item);
+                          setSingleProduct({
+                            ...item,
+                            sellerData: sellerMap[item.sellerId] ?? null,
+                            categoryData: categoryMap[item.categoryId] ?? null,
+                          });
                         }}
                       >
                         <td className="p-3">
@@ -118,12 +213,50 @@ function Products() {
                           <p className="font-semibold text-sm">
                             {item.productName}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {item.category}
-                          </p>
+                          <div className="text-xs text-gray-500">
+                            {isCategoryLoading ? (
+                              <div className="w-6 h-6">
+                                <Loading
+                                  variant="secondary"
+                                  className="size-3 border-2 border-gray-500"
+                                />
+                              </div>
+                            ) : categoryError ? (
+                              ""
+                            ) : (
+                              (categoryMap[item.categoryId]?.name ??
+                              "Unknown Category")
+                            )}
+                          </div>
                         </td>
 
-                        <td className="p-3 text-sm">{item.category}</td>
+                        <td className="p-3 text-sm">
+                          {isSellerLoading ? (
+                            <Loading className="size-6 border" />
+                          ) : sellerError ? (
+                            "Failed to fetch seller"
+                          ) : (
+                            (() => {
+                              const sellerObj = sellerMap[item.sellerId];
+                              return (
+                                <div className="flex w-fit gap-2 border p-1 pr-2 rounded-full justify-center items-center">
+                                  <div className="w-8 h-8 rounded-full border flex justify-center items-center text-center">
+                                    {sellerObj?.profileImage?.url ? (
+                                      <img
+                                        className="w-8 h-8 rounded-full object-cover"
+                                        src={sellerObj.profileImage.url}
+                                        alt={getSellerName(item.sellerId)}
+                                      />
+                                    ) : (
+                                      <AlertTriangle className="size-4" />
+                                    )}
+                                  </div>
+                                  {getSellerName(item.sellerId)}
+                                </div>
+                              );
+                            })()
+                          )}
+                        </td>
 
                         <td className="p-3 text-sm">{item.stock}</td>
 
@@ -142,7 +275,6 @@ function Products() {
                 )}
               </tbody>
 
-              {/* all products  */}
               <thead>
                 <tr>
                   <th colSpan={6} className="text-lg p-6 border-b">
@@ -156,11 +288,14 @@ function Products() {
                   (item, index) =>
                     index <= 6 && (
                       <tr
-                        key={index}
+                        key={`all-${item._id ?? index}`}
                         className={`${
                           index % 2 === 0 ? "bg-slate-50" : "bg-white"
                         } hover:bg-slate-200 cursor-pointer border-y`}
-                        onClick={() => setOpenProduct(true)}
+                        onClick={() => {
+                          setOpenProduct(true);
+                          setSingleProduct(item);
+                        }}
                       >
                         <td className="p-2">
                           {item.productImage ? (
@@ -182,12 +317,50 @@ function Products() {
                           <p className="font-semibold text-sm">
                             {item.productName}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {item.category}
-                          </p>
+                          <div className="text-xs text-gray-500">
+                            {isCategoryLoading ? (
+                              <div className="w-6 h-6">
+                                <Loading
+                                  variant="secondary"
+                                  className="size-3 border-2 border-gray-500"
+                                />
+                              </div>
+                            ) : categoryError ? (
+                              ""
+                            ) : (
+                              (categoryMap[item.categoryId]?.name ??
+                              "Unknown Category")
+                            )}
+                          </div>
                         </td>
-                        <td className="p-3 text-sm">{item.category}</td>
 
+                        <td className="p-3 text-sm">
+                          {isSellerLoading ? (
+                            <Loading className="size-6 border" />
+                          ) : sellerError ? (
+                            "Failed to fetch seller"
+                          ) : (
+                            (() => {
+                              const sellerObj = sellerMap[item.sellerId];
+                              return (
+                                <div className="flex w-fit gap-2 border p-1 pr-2 rounded-full justify-center items-center">
+                                  <div className="w-8 h-8 rounded-full border flex justify-center items-center text-center">
+                                    {sellerObj?.profileImage?.url ? (
+                                      <img
+                                        className="w-8 h-8 rounded-full object-cover"
+                                        src={sellerObj.profileImage.url}
+                                        alt={getSellerName(item.sellerId)}
+                                      />
+                                    ) : (
+                                      <AlertTriangle className="size-4" />
+                                    )}
+                                  </div>
+                                  {getSellerName(item.sellerId)}
+                                </div>
+                              );
+                            })()
+                          )}
+                        </td>
                         <td className="p-2 text-sm">{item.stock}</td>
 
                         <td className="p-2">
@@ -208,7 +381,7 @@ function Products() {
           )}
           {hadError && products.length === 0 && !isProductLoading && (
             <div className="w-full h-[70vh] flex items-center justify-center text-center">
-              Sorry, Something Went Wrong... );{" "}
+              Sorry, Something Went Wrong...
             </div>
           )}
         </div>

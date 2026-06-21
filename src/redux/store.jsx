@@ -1,6 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./slice/authSlice";
 import productSlice from "./slice/productSlice";
+import sellerSlice from "./slice/sellerSlice";
+import categorySlice from "./slice/categorySlice";
 import { getStoredUser } from "../utils/apiClient";
 
 const storedUser = getStoredUser(); // reads "user" OR "seller" OR "admin" key correctly
@@ -14,6 +16,8 @@ export const store = configureStore({
   reducer: {
     auth: authSlice,
     product: productSlice,
+    seller: sellerSlice,
+    category: categorySlice,
   },
   preloadedState: {
     auth: {

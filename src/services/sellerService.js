@@ -1,7 +1,11 @@
 import { api } from "../utils/apiClient";
 
 export const sellerAPI = {
-  fetchSeller: async (data) => {
-    return api.get("seller/fetch", data);
+  //fetch all sellers
+  fetchSeller: async ({ pagination, uniqueSellers }) => {
+    return api.post(
+      `seller/fetch?page=${pagination.page}&limit=${pagination.limit}`,
+      { uniqueSellers },
+    );
   },
 };

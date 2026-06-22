@@ -10,7 +10,7 @@ const initialState = {
   totalPages: 0,
 };
 
-export const addProduct = createAsyncThunk(
+export const addAProduct = createAsyncThunk(
   "product/addProduct",
   async ({ formData }, { rejectWithValue }) => {
     try {
@@ -33,6 +33,19 @@ export const fetchAllProducts = createAsyncThunk(
     }
   },
 );
+
+export const deleteSingleProduct = createAsyncThunk(
+  "product/deleteProduct",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      await productAPI.deleteProduct(id);
+      return { id };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "deletion failed"));
+    }
+  },
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState,
@@ -43,21 +56,21 @@ const productSlice = createSlice({
     clearProductState(state) {
       state.message = null;
       state.productError = null;
-      state.products = null;
+      state.products = [];
     },
   },
   extraReducers: (builder) => {
     //register product
     builder
-      .addCase(addProduct.pending, (state) => {
+      .addCase(addAProduct.pending, (state) => {
         state.isProductLoading = true;
         state.productError = null;
       })
-      .addCase(addProduct.fulfilled, (state, action) => {
+      .addCase(addAProduct.fulfilled, (state, action) => {
         state.isProductLoading = false;
         state.products = action.payload.product;
       })
-      .addCase(addProduct.rejected, (state, action) => {
+      .addCase(addAProduct.rejected, (state, action) => {
         state.isProductLoading = false;
         state.productError = action.payload;
       });
@@ -69,18 +82,36 @@ const productSlice = createSlice({
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.isProductLoading = false;
-        state.products = action.payload.data;
 
         console.log("FULFILLED PAYLOAD:", action.payload);
-        state.hasNextPage = action.payload.page;
-        state.totalPages = action.payload.totalPages;
-        state.totalProducts = action.payload.totalProducts;
-        state.limit = action.payload.limit;
+
+        state.products = action.payload.data?.data ?? [];
+
+        state.hasNextPage = action.payload.data.pagination?.hasNextPage;
+        state.totalPages = action.payload.data.pagination?.totalPages;
+        state.totalProducts = action.payload.data.pagination?.total;
+        state.limit = action.payload.data.pagination?.itemsPerPage;
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.isProductLoading = false;
         state.productError = action.payload || "Failed to fetch products";
         state.products = [];
+      });
+    //delete products
+    builder
+      .addCase(deleteSingleProduct.pending, (state) => {
+        state.productError = null;
+        state.isProductLoading = true;
+      })
+      .addCase(deleteSingleProduct.fulfilled, (state, action) => {
+        state.isProductLoading = false;
+        state.products = state.products.filter(
+          (product) => product._id !== action.payload.id,
+        );
+      })
+      .addCase(deleteSingleProduct.rejected, (state, action) => {
+        state.isProductLoading = false;
+        state.productError = action.payload || "Deletion failed";
       });
   },
 });

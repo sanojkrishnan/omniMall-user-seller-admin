@@ -23,7 +23,7 @@ export const Button = ({
         // pick the variant
         variants[variant],
         // disabled state
-        disabled && "opacity-70 cursor-not-allowed hover:scale-100",
+        disabled && "opacity-50 cursor-not-allowed hover:scale-100",
         // parent override
         className,
       )}

@@ -2,8 +2,11 @@ import * as Yup from "yup";
 export const productSchema = Yup.object({
   productName: Yup.string().required("Add the product name here"),
   brand: Yup.string().required("Give the brand name"),
-  productDesc: Yup.string().required("Description is must"),
-  categoryId: Yup.string().required("Add the product category here"),
+  productDesc: Yup.string()
+    .min(10, "Description must contain at least 10 characters")
+    .max(200, "Description cannot exceed 200 characters")
+    .required("Description is must"),
+  categoryId: Yup.string().required("product category required"),
   sellerId: Yup.string().required("seller id required"),
   couponId: Yup.string(),
   stock: Yup.number().required("How many stocks are there"),

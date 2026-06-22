@@ -14,15 +14,17 @@ import {
 import CartLoading from "../../components/ui/CartLoading";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import SingleProductList from "../../components/SingleProductList";
+import ProductListTile from "../../components/ProductListTile";
 import Loading from "../../components/ui/Loading";
 
 function Products() {
   const dispatch = useDispatch();
 
-  const { products, isProductLoading, productError } = useSelector(
-    (state) => state.product,
-  );
+  const {
+    products = [],
+    isProductLoading,
+    productError,
+  } = useSelector((state) => state.product);
   const { seller, isSellerLoading, sellerError } = useSelector(
     (state) => state.seller,
   );
@@ -33,6 +35,7 @@ function Products() {
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
   const [hadError, setHadError] = useState(false);
+  const [addProduct, setAddProduct] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllProducts({ page: 1, limit: 15 }));
@@ -129,13 +132,20 @@ function Products() {
     <>
       <div className="flex items-center">
         <div
-          className={`${openProduct ? "scale-100" : "scale-0"} transition-all duration-300 fixed inset-0 z-50 flex items-center justify-center`}
+          className={`${openProduct || addProduct ? "scale-100" : "scale-0"} transition-all duration-500 fixed inset-0 z-50 flex items-center justify-center`}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setOpenProduct(false);
+              setAddProduct(false);
+            }
+          }}
         >
-          <SingleProductList
-            openProduct={openProduct}
+          <ProductListTile
             setOpenProduct={setOpenProduct}
             product={singleProduct}
-            setProduct={setSingleProduct}
+            addProduct={addProduct}
+            setAddProduct={setAddProduct}
+            openProduct={openProduct}
           />
         </div>
 
@@ -145,7 +155,13 @@ function Products() {
         </Button>
       </div>
       <div className="flex justify-start">
-        <Button className={"bg-[#5f0000] w-fit px-4"}>
+        <Button
+          className={"bg-[#5f0000] w-fit px-4"}
+          onClick={() => {
+            setAddProduct(true);
+            setOpenProduct(false);
+          }}
+        >
           <Plus /> Add Products
         </Button>
       </div>
@@ -186,6 +202,7 @@ function Products() {
                         } hover:bg-slate-200 cursor-pointer border-b`}
                         onClick={() => {
                           setOpenProduct(true);
+                          setAddProduct(false);
                           setSingleProduct({
                             ...item,
                             sellerData: sellerMap[item.sellerId] ?? null,

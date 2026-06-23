@@ -10,6 +10,9 @@ import { Field, Form, Formik } from "formik";
 import { productSchema } from "../validation/productSchema";
 import { Link } from "react-router-dom";
 import { handleImage } from "../utils/imageCompressor";
+import SelectionButton from "./ui/SelectionButton";
+
+const filter = ["seller", "seller", "seller", "seller"];
 
 function ProductListTile(props) {
   const { setOpenProduct, product, addProduct, openProduct, setAddProduct } =
@@ -42,10 +45,11 @@ function ProductListTile(props) {
         }
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openProduct, addProduct]);
   const handleDelete = async () => {
     if (!product._id) return toast.error("Product ID missing");
 
@@ -81,20 +85,40 @@ function ProductListTile(props) {
         <div
           className={`${openProduct ? "scale-100" : "scale-0"} absolute inset-0 duration-200 transition-all origin-center`}
         >
-          <div className="relative w-full h-fit">
-            <img
-              className="rounded-t-base object-cover rounded-lg h-60 w-full"
-              src={product.productImage?.[currentImage]}
-              alt={`${product.productName}-${currentImage}`}
-            />
+          <div className="relative w-full h-60 overflow-hidden rounded-lg">
+            {/* Sliding track */}
+            <div
+              className="flex h-full transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${currentImage * 100}%)` }}
+            >
+              {product.productImage?.length > 0 ? (
+                product.productImage?.map((img, index) => (
+                  <div
+                    key={index}
+                    className="min-w-full h-full relative flex-shrink-0"
+                  >
+                    <img
+                      className="w-full h-full object-cover"
+                      src={img?.url}
+                      alt={`${product.productName}-${index}`}
+                    />
+                    {/* gradient overlay per slide */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#5f0000] via-white/0 to-transparent rounded-lg" />
+                  </div>
+                ))
+              ) : (
+                <div className="min-w-full h-full relative flex-shrink-0 bg-gray-100 flex items-center justify-center flex-col">
+                  <TriangleAlert className="size-12" /> <p>There is no image</p>
+                </div>
+              )}
+            </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-[#5f0000] via-white/0 rounded-lg to-transparent" />
-
+            {/* Prev / Next buttons */}
             {product.productImage?.length > 1 && (
               <>
                 <button
                   type="button"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full z-10"
                   onClick={() =>
                     setCurrentImage((prev) =>
                       prev === 0 ? product.productImage.length - 1 : prev - 1,
@@ -103,10 +127,9 @@ function ProductListTile(props) {
                 >
                   ❮
                 </button>
-
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full z-10"
                   onClick={() =>
                     setCurrentImage((prev) =>
                       prev === product.productImage.length - 1 ? 0 : prev + 1,
@@ -117,19 +140,23 @@ function ProductListTile(props) {
                 </button>
               </>
             )}
-            <div className="flex justify-center gap-2 mt-3">
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10">
               {product.productImage?.map((_, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => setCurrentImage(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    currentImage === index ? "bg-[#5f0000]" : "bg-gray-300"
+                  className={`rounded-full transition-all duration-300 ${
+                    currentImage === index
+                      ? "bg-white w-4 h-3" // active dot stretches wider
+                      : "bg-white/50 w-3 h-3"
                   }`}
                 />
               ))}
             </div>
-          </div>
+          </div>{" "}
           <div className="p-6">
             <div>
               <div className="border-b py-2">
@@ -210,9 +237,11 @@ function ProductListTile(props) {
           <div className="relative mb-2">
             <div className="flex  items-center justify-center w-full">
               {[0, 1, 2, 3].map((i) => (
-                <div className="w-fit h-10 flex justify-center items-center">
+                <div
+                  key={i}
+                  className="w-fit h-10 flex justify-center items-center"
+                >
                   <div
-                    key={i}
                     className={` rounded-full flex items-center justify-center transition-all duration-500
           ${i < step ? "w-5 h-5 border-[#5f0000] bg-[#5f0000]" : i === step ? "w-5 h-5 border-4 animate-pulse border-[#5f0000]" : "w-0"}`}
                   >
@@ -259,33 +288,35 @@ function ProductListTile(props) {
               productImage: [],
             }}
             validationSchema={productSchema}
-            onSubmit={(values) => {
-              console.log("Formik onSubmit fired", values);
-              handleClose()
-              // build FormData for multer
+            onSubmit={async (values) => {
+              // Build FormData
               const formData = new FormData();
               formData.append("productName", values.productName);
               formData.append("brand", values.brand);
               formData.append("productDesc", values.productDesc);
               formData.append("categoryId", values.categoryId);
               formData.append("sellerId", values.sellerId);
-              formData.append("couponId", values.couponId);
+              if (values.couponId) {
+                formData.append("couponId", values.couponId);
+              }
               formData.append("stock", values.stock);
               formData.append("mrp", values.mrp);
               formData.append("offerPrice", values.offerPrice);
+
               const offerPercentage =
                 values.mrp > 0
                   ? Math.round(
                       ((values.mrp - values.offerPrice) / values.mrp) * 100,
                     )
                   : 0;
-
               formData.append("offerPercentage", offerPercentage);
               values.productImage.forEach((file) => {
                 formData.append("productImage", file);
               });
-
-              dispatch(addAProduct({ formData }));
+              const result = await dispatch(addAProduct({ formData }));
+              if (addAProduct.fulfilled.match(result)) {
+                handleClose();
+              }
             }}
           >
             {({ values, setFieldValue, validateForm, submitForm }) => {
@@ -303,7 +334,11 @@ function ProductListTile(props) {
                       style={{ transform: `translateX(-${step * 100}%)` }}
                     >
                       {/* first set */}
-                      <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+
+                      <div
+                        className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                        inert={step !== 0 ? true : undefined}
+                      >
                         <div className="sm:flex justify-between">
                           <div>
                             {/* product Name : */}
@@ -398,11 +433,14 @@ function ProductListTile(props) {
 
                       {/* second set */}
 
-                      <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
-                        <div className="sm:flex justify-between">
-                          <div>
+                      <div
+                        className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                        inert={step !== 1 ? true : undefined}
+                      >
+                        <div className="sm:flex justify-center gap-3">
+                          <div className="m-2 mt-4">
                             {/* categoryId*/}
-                            <label
+                            {/* <label
                               className="font-semibold block"
                               htmlFor="categoryId"
                             >
@@ -414,7 +452,13 @@ function ProductListTile(props) {
                               name="categoryId"
                               id="categoryId"
                               placeholder="Select the category"
-                            />
+                            /> */}
+                            <SelectionButton
+                              addSearch={true}
+                              defaultValue={"Select Category"}
+                            >
+                              {filter}
+                            </SelectionButton>
                             <div className="h-5">
                               {stepErrors.categoryId && (
                                 <p className="text-red-500 text-sm">
@@ -425,8 +469,8 @@ function ProductListTile(props) {
                             </div>
                           </div>
                           {/* sellerId */}
-                          <div>
-                            <label className="font-semibold block">
+                          <div className="m-2 mt-4">
+                            {/* <label className="font-semibold block">
                               Select Seller :
                             </label>
                             <Field
@@ -436,6 +480,15 @@ function ProductListTile(props) {
                               id="sellerId"
                               placeholder="Select the category"
                             />
+                            
+                          */}
+
+                            <SelectionButton
+                              addSearch={true}
+                              defaultValue={"Select Seller"}
+                            >
+                              {filter}
+                            </SelectionButton>
                             <div className="h-5">
                               {stepErrors.sellerId && (
                                 <p className="text-red-500 text-sm">
@@ -483,8 +536,13 @@ function ProductListTile(props) {
                           )}
                         </div>
                       </div>
+
                       {/* third set  */}
-                      <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+
+                      <div
+                        className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                        inert={step !== 2 ? true : undefined}
+                      >
                         <label className="font-semibold block">MRP :</label>
                         <Field
                           className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-500"
@@ -536,8 +594,12 @@ function ProductListTile(props) {
                         </div>
                       </div>
 
-                      {/* fifth set — product images */}
-                      <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                      {/* fourth set — product images */}
+
+                      <div
+                        className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                        inert={step !== 3 ? true : undefined}
+                      >
                         <label className="font-semibold block mb-2">
                           Product Images :
                         </label>
@@ -635,11 +697,11 @@ function ProductListTile(props) {
                   </div>
                   <Button
                     className={"bg-[#5f0000]"}
-                    type={step === 3 ? "submit" : "button"}
+                    type={"button"}
                     onClick={async () => {
                       const stepFields = [
                         ["productName", "brand", "productDesc"],
-                        ["categoryId", "sellerId", "couponId", "stock"],
+                        ["categoryId", "sellerId", "stock"],
                         ["mrp", "offerPrice"],
                         ["productImage"],
                       ][step];

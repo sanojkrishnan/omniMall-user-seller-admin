@@ -211,11 +211,11 @@ function Products() {
                         }}
                       >
                         <td className="p-3">
-                          {item.productImage ? (
+                          {item.productImage?.length > 0 ? (
                             <div className="w-12 h-12 overflow-hidden rounded-md">
                               <img
                                 className="w-full h-full object-cover"
-                                src={item.productImage}
+                                src={item.productImage?.[0]?.url}
                                 alt={item.productName}
                               />
                             </div>
@@ -314,18 +314,18 @@ function Products() {
                           setSingleProduct(item);
                         }}
                       >
-                        <td className="p-2">
-                          {item.productImage ? (
-                            <div className="w-12 h-12 overflow-hidden">
+                        <td className="p-3">
+                          {item.productImage?.length > 0 ? (
+                            <div className="w-12 h-12 overflow-hidden rounded-md">
                               <img
                                 className="w-full h-full object-cover"
-                                src={item.productImage}
+                                src={item.productImage?.[0]?.url}
                                 alt={item.productName}
                               />
                             </div>
                           ) : (
-                            <div className="w-full h-[100%] overflow-hidden flex items-center justify-center border rounded-full">
-                              <TriangleAlert className="size-10" />
+                            <div className="w-12 h-12 flex items-center justify-center border rounded-full">
+                              <TriangleAlert className="size-6" />
                             </div>
                           )}
                         </td>

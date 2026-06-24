@@ -15,8 +15,16 @@ export const fetchAllSellers = createAsyncThunk(
   "seller/fetchAllSellers",
   async ({ pagination, uniqueSellers }, { rejectWithValue }) => {
     try {
-      const data = await sellerAPI.fetchSeller({ pagination, uniqueSellers });
-      return { ...data };
+      if (uniqueSellers && uniqueSellers.length > 0) {
+        const data = await sellerAPI.fetchSeller({
+          pagination,
+          uniqueSellers,
+        });
+        return { ...data };
+      } else {
+        const data = await sellerAPI.fetchSeller({ pagination });
+        return { ...data };
+      }
     } catch (err) {
       return rejectWithValue(extractError(err, "Fetch sellers failed"));
     }

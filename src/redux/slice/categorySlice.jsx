@@ -15,11 +15,16 @@ export const fetchAllCategories = createAsyncThunk(
   "category/fetchAllCategories",
   async ({ pagination, uniqueCategories }, { rejectWithValue }) => {
     try {
-      const data = await categoryAPI.fetchCategory({
-        pagination,
-        uniqueCategories,
-      });
-      return { ...data };
+      if (uniqueCategories && uniqueCategories.length > 0) {
+        const data = await categoryAPI.fetchCategory({
+          pagination,
+          uniqueCategories,
+        });
+        return { ...data };
+      } else {
+        const data = await categoryAPI.fetchCategory({ pagination });
+        return { ...data };
+      }
     } catch (err) {
       return rejectWithValue(extractError(err, "Fetch categories failed"));
     }

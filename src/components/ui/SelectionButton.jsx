@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "../../utils/CN";
 import { ChevronDown, Search } from "lucide-react";
+import Loading from "./Loading";
 
 const variants = {
   primary:
@@ -15,17 +17,56 @@ function SelectionButton({
   variant = "primary",
   placeholder = "Select an option",
   defaultValue = null,
-  onChange, // callback to notify parent of selection
+  onChange,
+  onOpen,
+  loading,
+  zIndex = 30,
 }) {
   const [showOptions, setShowOptions] = useState(false);
   const [selected, setSelected] = useState(defaultValue);
   const [search, setSearch] = useState("");
-  const ref = useRef(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
+
+  const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
   const searchRef = useRef(null);
 
+  // Calculate dropdown position from button
+  const updatePosition = () => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    });
+  };
+
+  // Replace the old scroll-close useEffect with this
+  useEffect(() => {
+    if (!showOptions) return;
+
+    const updateOnScroll = () => {
+      updatePosition(); // ✅ recalculate position instead of closing
+    };
+
+    window.addEventListener("scroll", updateOnScroll, true);
+    window.addEventListener("resize", updateOnScroll);
+    return () => {
+      window.removeEventListener("scroll", updateOnScroll, true);
+      window.removeEventListener("resize", updateOnScroll);
+    };
+  }, [showOptions]);
+
+  // Close on outside click (covers both button and portal dropdown)
   useEffect(() => {
     function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target)) {
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
         setShowOptions(false);
         setSearch("");
       }
@@ -34,7 +75,7 @@ function SelectionButton({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // focus search input when dropdown opens
+  // Focus search when dropdown opens
   useEffect(() => {
     if (showOptions) {
       setTimeout(() => searchRef.current?.focus(), 50);
@@ -44,23 +85,91 @@ function SelectionButton({
   }, [showOptions]);
 
   const options = Array.isArray(children) ? children : [children];
-
   const filtered = options.filter((item) =>
     String(item).toLowerCase().includes(search.toLowerCase()),
   );
 
+  const dropdown = showOptions
+    ? createPortal(
+        <div
+          ref={dropdownRef}
+          style={{ ...dropdownStyle, position: "fixed", zIndex }}
+          className="bg-white border rounded-lg shadow-xl overflow-hidden"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center p-4">
+              <Loading className="size-6" />
+            </div>
+          ) : (
+            <>
+              {addSearch && (
+                <div className="flex items-center gap-2 px-3 py-2 border-b bg-white sticky top-0">
+                  <Search className="size-4 text-gray-400 shrink-0" />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search..."
+                    className="w-full text-sm outline-none bg-transparent placeholder:text-gray-400"
+                  />
+                </div>
+              )}
+              <div className="overflow-y-auto max-h-52 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
+                {filtered.length > 0 ? (
+                  filtered.map((item, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "px-4 py-2.5 text-sm cursor-pointer transition-colors duration-150",
+                        selected === item
+                          ? "bg-gray-100 font-medium"
+                          : "hover:bg-gray-50",
+                      )}
+                      onMouseDown={() => {
+                        setSelected(item);
+                        setShowOptions(false);
+                        onChange?.(item);
+                      }}
+                    >
+                      {item}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-4 text-sm text-gray-400 text-center">
+                    No results found
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>,
+        document.body,
+      )
+    : null;
+
   return (
-    <div ref={ref} className="relative w-fit">
-      {/* Trigger button */}
+    <div className="relative w-full">
       <button
+        ref={buttonRef}
+        type="button"
+        disabled={disabled}
         className={cn(
           variants[variant],
           disabled && "opacity-70 cursor-not-allowed hover:bg-white",
           className,
         )}
-        onClick={() => !disabled && setShowOptions((prev) => !prev)}
-        disabled={disabled}
-        type="button"
+        onClick={() => {
+          if (disabled) return;
+          if (!showOptions) {
+            updatePosition();
+            setShowOptions(true);
+            onOpen?.();
+          } else {
+            setShowOptions(false);
+          }
+        }}
       >
         <span className={cn("text-sm truncate", !selected && "text-gray-400")}>
           {selected ?? placeholder}
@@ -73,58 +182,7 @@ function SelectionButton({
         />
       </button>
 
-      {/* Dropdown */}
-      <div
-        className={cn(
-          "absolute top-full w-full left-0 z-10 bg-white border rounded-lg shadow-lg mt-1 overflow-hidden transition-all duration-300",
-          showOptions
-            ? "max-h-72 opacity-100"
-            : "max-h-0 opacity-0 pointer-events-none",
-        )}
-      >
-        {/* Search box inside dropdown */}
-        {addSearch && (
-          <div className="flex items-center gap-2 px-3 py-2 border-b sticky top-0 bg-white">
-            <Search className="size-4 text-gray-400 shrink-0" />
-            <input
-              ref={searchRef}
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search..."
-              className="w-full text-sm outline-none bg-transparent placeholder:text-gray-400"
-            />
-          </div>
-        )}
-
-        {/* Options list */}
-        <div className="overflow-y-auto max-h-52 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
-          {filtered.length > 0 ? (
-            filtered.map((item, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "px-4 py-2.5 text-sm cursor-pointer transition-colors duration-150",
-                  selected === item
-                    ? "bg-gray-100 font-medium"
-                    : "hover:bg-gray-50",
-                )}
-                onMouseDown={() => {
-                  setSelected(item);
-                  setShowOptions(false);
-                  onChange?.(item); // notify parent
-                }}
-              >
-                {item}
-              </div>
-            ))
-          ) : (
-            <div className="px-4 py-4 text-sm text-gray-400 text-center">
-              No results found
-            </div>
-          )}
-        </div>
-      </div>
+      {dropdown}
     </div>
   );
 }

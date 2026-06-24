@@ -228,7 +228,7 @@ function Dashboard() {
       </div>
       <div className="w-full h-[0.5px] border mb-6"></div>
       <div className="flex justify-end mr-10">
-        <SelectionButton defaultValue={filter[0]}>{filter}</SelectionButton>
+        <SelectionButton className={"w-fit"} defaultValue={filter[0]}>{filter}</SelectionButton>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 place-items-center ">

@@ -11,6 +11,9 @@ import { productSchema } from "../validation/productSchema";
 import { Link } from "react-router-dom";
 import { handleImage } from "../utils/imageCompressor";
 import SelectionButton from "./ui/SelectionButton";
+import { fetchAllCategories } from "../redux/slice/categorySlice";
+import { fetchAllSellers } from "../redux/slice/sellerSlice";
+import Loading from "./ui/Loading";
 
 const filter = ["seller", "seller", "seller", "seller"];
 
@@ -20,9 +23,31 @@ function ProductListTile(props) {
   const dispatch = useDispatch();
   const { isProductLoading } = useSelector((state) => state.product);
 
+  const { category, isCategoryLoading, categoryError } = useSelector(
+    (state) => state.category,
+  );
+
+  const { seller, isSellerLoading, sellerError } = useSelector(
+    (state) => state.seller,
+  );
+
+  // Add this useEffect in ProductListTile
+  useEffect(() => {
+    if (openProduct || addProduct) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [openProduct, addProduct]);
+
   const [step, setStep] = useState(0);
   const [stepErrors, setStepErrors] = useState({});
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectButtonLoading, setSelectButtonLoading] = useState(false);
 
   const divRef = useRef(null);
   const formikRef = useRef(null);
@@ -34,6 +59,21 @@ function ProductListTile(props) {
     setStepErrors({});
     formikRef.current?.resetForm();
   };
+
+  useEffect(() => {
+    if (isCategoryLoading || isSellerLoading) {
+      setSelectButtonLoading(true);
+    }
+    if (!isCategoryLoading || !isSellerLoading) {
+      setSelectButtonLoading(false);
+    }
+    if (categoryError) {
+      console.log(categoryError);
+    }
+    if (sellerError) {
+      console.log(sellerError);
+    }
+  }, [isCategoryLoading, isSellerLoading, categoryError, sellerError]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -314,6 +354,9 @@ function ProductListTile(props) {
                 formData.append("productImage", file);
               });
               const result = await dispatch(addAProduct({ formData }));
+
+              console.log("ADD PRODUCT RESULT:", result);
+
               if (addAProduct.fulfilled.match(result)) {
                 handleClose();
               }
@@ -328,7 +371,7 @@ function ProductListTile(props) {
                   : 0;
               return (
                 <Form>
-                  <div className="overflow-hidden">
+                  <div className="overflow-x-hidden">
                     <div
                       className="flex transition-transform duration-500"
                       style={{ transform: `translateX(-${step * 100}%)` }}
@@ -437,27 +480,30 @@ function ProductListTile(props) {
                         className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
                         inert={step !== 1 ? true : undefined}
                       >
-                        <div className="sm:flex justify-center gap-3">
+                        <div className="sm:flex justify-between ">
                           <div className="m-2 mt-4">
                             {/* categoryId*/}
-                            {/* <label
-                              className="font-semibold block"
-                              htmlFor="categoryId"
-                            >
-                              Add the category :
-                            </label>
-                            <Field
-                              className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-500"
-                              type="text"
-                              name="categoryId"
-                              id="categoryId"
-                              placeholder="Select the category"
-                            /> */}
                             <SelectionButton
                               addSearch={true}
+                              loading={selectButtonLoading}
                               defaultValue={"Select Category"}
+                              zIndex={100}
+                              onOpen={() => {
+                                dispatch(
+                                  fetchAllCategories({
+                                    pagination: { page: 1, limit: 15 },
+                                  }),
+                                );
+                              }}
+                              onChange={(selectedName) => {
+                                const found = category.find(
+                                  (cat) => cat.name === selectedName,
+                                );
+                                if (found)
+                                  setFieldValue("categoryId", found._id);
+                              }}
                             >
-                              {filter}
+                              {category.map((cat) => cat.name)}
                             </SelectionButton>
                             <div className="h-5">
                               {stepErrors.categoryId && (
@@ -469,25 +515,32 @@ function ProductListTile(props) {
                             </div>
                           </div>
                           {/* sellerId */}
-                          <div className="m-2 mt-4">
-                            {/* <label className="font-semibold block">
-                              Select Seller :
-                            </label>
-                            <Field
-                              className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-500"
-                              type="text"
-                              name="sellerId"
-                              id="sellerId"
-                              placeholder="Select the category"
-                            />
-                            
-                          */}
-
+                          <div className="m-2 mt-4 relative">
                             <SelectionButton
                               addSearch={true}
+                              loading={selectButtonLoading}
+                              zIndex={100}
                               defaultValue={"Select Seller"}
+                              onOpen={() => {
+                                dispatch(
+                                  fetchAllSellers({
+                                    pagination: { page: 1, limit: 15 },
+                                  }),
+                                );
+                              }}
+                              onChange={(selectedName) => {
+                                const found = seller.find((sell) => {
+                                  const name =
+                                    sell.firstName + " " + sell.lastName;
+                                  return name === selectedName;
+                                });
+                                if (found) setFieldValue("sellerId", found._id);
+                              }}
                             >
-                              {filter}
+                              {seller.map((sel) => {
+                                const name = sel.firstName + " " + sel.lastName;
+                                return name;
+                              })}
                             </SelectionButton>
                             <div className="h-5">
                               {stepErrors.sellerId && (
@@ -501,14 +554,21 @@ function ProductListTile(props) {
                         </div>
 
                         {/* coupon  */}
-                        <label className="font-semibold">Coupon :</label>
-                        <Field
-                          className="p-2 cursor-pointer rounded-lg bg-transparent border-[0.5px] border-black/50 w-full placeholder:text-gray-500"
-                          type="text"
-                          name="couponId"
-                          id="couponId"
-                          placeholder="Select the category"
-                        />
+                        <div className="m-2 mt-4">
+                          <SelectionButton
+                            addSearch={true}
+                            zIndex={100}
+                            defaultValue={"Select Coupon"}
+                            onChange={(selectedName) => {
+                              const found = seller.find(
+                                (sell) => sell.name === selectedName,
+                              );
+                              if (found) setFieldValue("categoryId", found._id);
+                            }}
+                          >
+                            {filter}
+                          </SelectionButton>
+                        </div>
                         <div className="h-5">
                           {stepErrors.couponId && (
                             <p className="text-red-500 text-sm">
@@ -698,6 +758,7 @@ function ProductListTile(props) {
                   <Button
                     className={"bg-[#5f0000]"}
                     type={"button"}
+                    disabled={step === 3 && isProductLoading}
                     onClick={async () => {
                       const stepFields = [
                         ["productName", "brand", "productDesc"],
@@ -728,7 +789,15 @@ function ProductListTile(props) {
                       setStep((prev) => prev + 1);
                     }}
                   >
-                    {step === 3 ? "Upload Product" : "Next"}
+                    {step === 3 ? (
+                      isProductLoading ? (
+                        <Loading className={"size-6"} />
+                      ) : (
+                        "Upload Product"
+                      )
+                    ) : (
+                      "Next"
+                    )}
                   </Button>
                   <Button
                     type="button"

@@ -68,7 +68,8 @@ const productSlice = createSlice({
       })
       .addCase(addAProduct.fulfilled, (state, action) => {
         state.isProductLoading = false;
-        state.products = action.payload.product;
+
+        state.products = [action.payload.data, ...state.products];
       })
       .addCase(addAProduct.rejected, (state, action) => {
         state.isProductLoading = false;
@@ -85,7 +86,17 @@ const productSlice = createSlice({
 
         console.log("FULFILLED PAYLOAD:", action.payload);
 
-        state.products = action.payload.data?.data ?? [];
+        console.log("FULFILLED PAGE:", action.meta.arg.page);
+
+        const newProducts = action.payload.data?.data ?? [];
+
+        console.log("PRODUCT COUNT:", newProducts.length);
+
+        if (action.meta.arg.page === 1) {
+          state.products = newProducts;
+        } else {
+          state.products = [...state.products, ...newProducts];
+        }
 
         state.hasNextPage = action.payload.data.pagination?.hasNextPage;
         state.totalPages = action.payload.data.pagination?.totalPages;

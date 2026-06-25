@@ -30,7 +30,7 @@ function PublicRoute({ children }) {
     if (user.role === "admin")
       return <Navigate to="/admin/dashboard" replace />;
     if (user.role === "seller") return <Navigate to="/seller/panel" replace />;
-    if (user.role === "user") return <Navigate to="/" replace />;
+    if (user.role === "user") return <Navigate to="/user" replace />;
   }
 
   return children;

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import Header from "../../components/Header";
 import ProductCard from "../../components/ui/ProductCard";
 import { Button } from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { Filter } from "lucide-react";
+import Footer from "../../components/Footer";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -157,12 +157,11 @@ function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="absolute inset-0">
       {/* Carousel */}
       <div className="relative w-full lg:h-[90vh] h-[40vh] md:h-[60vh] overflow-hidden">
         <div className="absolute z-10  flex justify-between items-center w-full">
           {/* header */}
-          <Header />
         </div>
         {carouselImages.map((item, index) => (
           <img
@@ -258,8 +257,11 @@ function Home() {
           </h1>
           <p>Save more with our exclusive deals</p>
         </div>
+      </div>
 
-        <div></div>
+      {/* footer */}
+      <div className="mt-4">
+        <Footer />
       </div>
     </div>
   );

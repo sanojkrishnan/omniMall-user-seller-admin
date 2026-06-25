@@ -36,6 +36,8 @@ function Products() {
     (state) => state.category,
   );
 
+  console.log("PRODUCT LIST :", productError);
+
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
   const [hadError, setHadError] = useState(false);
@@ -189,9 +191,9 @@ function Products() {
         </Button>
       </div>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
-        <div className="w-full flex-1 overflow-y-auto px-4 pb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="w-full flex-1 overflow-y-auto px-4 pb-4 custom-scrollBar">
           {isProductLoading && !productError && products.length === 0 && (
-            <div className="w-full h-[70vh] flex items-center justify-center">
+            <div className="w-full h-[65vh] flex items-center justify-center">
               <CartLoading />
             </div>
           )}
@@ -417,7 +419,7 @@ function Products() {
             </>
           )}
           {hadError && products.length === 0 && !isProductLoading && (
-            <div className="w-full h-[70vh] flex items-center justify-center text-center">
+            <div className="w-full h-[65vh] flex items-center justify-center text-center">
               Sorry, Something Went Wrong...
             </div>
           )}

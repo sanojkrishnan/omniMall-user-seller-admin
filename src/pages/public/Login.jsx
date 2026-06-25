@@ -30,7 +30,7 @@ function Login() {
     if (user && message) {
       toast.success(message);
       if (user.role === "user") {
-        navigate("/", { replace: true });
+        navigate("/user", { replace: true });
       }
       if (user.role === "admin") {
         navigate("/admin/dashboard", { replace: true });

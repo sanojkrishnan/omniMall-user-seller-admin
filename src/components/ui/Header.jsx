@@ -4,16 +4,19 @@ import {
   ShoppingCartIcon,
   UserCog,
 } from "lucide-react";
-import OmniMall from "./ui/OmniMall";
+import OmniMall from "./OmniMall";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-function Header({ hideMenu , borderLine }) {
+function Header({ hideMenu, borderLine }) {
   const { user } = useSelector((state) => state.auth);
   console.log("Header user:", user);
   const navigate = useNavigate();
+
   return (
-    <div className={`w-full h-16 flex items-center justify-between ${borderLine ? "border-b-1 shadow-xl" : ""}`}>
+    <div
+      className={`w-full fixed z-50 m-0 top-0 h-18 flex items-center justify-between ${borderLine ? "border-b-1 shadow-xl" : ""}`}
+    >
       <div className="m-2 ml-4 w-fit">
         <OmniMall />
       </div>
@@ -22,11 +25,21 @@ function Header({ hideMenu , borderLine }) {
       {!hideMenu && (
         <div className={`mr-5 hidden sm:block`}>
           <div className="w-fit p-1 text-center text-sm text-white rounded-b-3xl bg-black flex justify-evenly">
-            <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer">
+            <div
+              className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
+              onClick={() => {
+                user ? navigate("/user") : navigate("/");
+              }}
+            >
               <HomeIcon className="size-6" />
               <p>Home</p>
             </div>
-            <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer">
+            <div
+              className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
+              onClick={() => {
+                user ? navigate("/user/shop") : navigate("/shop");
+              }}
+            >
               <ShoppingBagIcon className="size-6" />
               <p>Shop</p>
             </div>
@@ -53,7 +66,7 @@ function Header({ hideMenu , borderLine }) {
                   user.provider === "local" &&
                   user.profileImage.url ? (
                   <img
-                    src={URL.createObjectURL(user.profileImage)}
+                    src={user.profileImage.url}
                     alt="Profile"
                     className="w-6 h-6 rounded-full object-cover"
                   />

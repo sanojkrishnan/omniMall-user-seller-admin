@@ -31,7 +31,7 @@ function ProfileComplete() {
     console.log("User from Redux:", user);
 
     if (user.status !== "incomplete" || user.provider === "local") {
-      navigate("/"); // if user already has dateOfBirth or is local provider, redirect to home
+      navigate("/user", { replace: true }); // if user already has dateOfBirth or is local provider, redirect to home
     }
     if (user.status === "active" && user.provider === "google") {
       toast.success(message || "Profile completed successfully");

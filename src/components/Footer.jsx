@@ -18,7 +18,7 @@ const Footer = () => {
               <OmniMall className={"size-2"} />
             </h2>
 
-            <p className="mt-8 text-lg leading-relaxed max-w-sm">
+            <p className="mt-8 sm:text-lg text-md leading-relaxed max-w-sm">
               Your all-in-one destination for curated products delivered to your
               door.
               <br />
@@ -41,12 +41,13 @@ const Footer = () => {
           </div>
 
           {/* Shop */}
+
           <div>
             <h3 className="uppercase text-sm tracking-[0.25em] text-gray-500 mb-8">
               Shop
             </h3>
 
-            <ul className="space-y-5 text-2xl">
+            <ul className="space-y-5 sm:text-2xl text-lg">
               <li>
                 <a href="#" className="hover:text-white transition">
                   New arrivals
@@ -81,7 +82,7 @@ const Footer = () => {
               Support
             </h3>
 
-            <ul className="space-y-5 text-2xl">
+            <ul className="space-y-5 sm:text-2xl text-lg">
               <li>
                 <a href="#" className="hover:text-white transition">
                   Help center
@@ -131,9 +132,7 @@ const Footer = () => {
         {/* Divider */}
         <div className="border-t border-gray-800 mt-16 pt-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-lg">
-              © 2026 OmniMall. All rights reserved.
-            </p>
+            <p className="text-lg">© 2026 OmniMall. All rights reserved.</p>
 
             <div className="flex gap-10 text-lg">
               <a href="#" className="hover:text-white transition">

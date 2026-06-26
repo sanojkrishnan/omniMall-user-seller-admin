@@ -157,7 +157,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="absolute inset-0">
+    <div className="">
       {/* Carousel */}
       <div className="relative w-full lg:h-[90vh] h-[40vh] md:h-[60vh] overflow-hidden">
         <div className="absolute z-10  flex justify-between items-center w-full">
@@ -257,11 +257,6 @@ function Home() {
           </h1>
           <p>Save more with our exclusive deals</p>
         </div>
-      </div>
-
-      {/* footer */}
-      <div className="mt-4">
-        <Footer />
       </div>
     </div>
   );

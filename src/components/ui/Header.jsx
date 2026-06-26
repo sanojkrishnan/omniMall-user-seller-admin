@@ -15,7 +15,7 @@ function Header({ hideMenu, borderLine }) {
 
   return (
     <div
-      className={`w-full fixed z-50 m-0 top-0 h-18 flex items-center justify-between ${borderLine ? "border-b-1 shadow-xl" : ""}`}
+      className={`w-full fixed z-50 m-0 top-0 h-18 flex items-center justify-between ${borderLine ? "border-b-1 shadow-lg bg-white" : ""}`}
     >
       <div className="m-2 ml-4 w-fit">
         <OmniMall />
@@ -86,11 +86,21 @@ function Header({ hideMenu, borderLine }) {
           className={`fixed top-3 right-0 flex sm:hidden ${hideMenu ? "hidden" : "block"}`}
         >
           <div className="w-fit p-1 text-center text-xs text-white rounded-l-3xl bg-black flex flex-col justify-evenly">
-            <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
+            <div
+              className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer"
+              onClick={() => {
+                user ? navigate("/user") : navigate("/");
+              }}
+            >
               <HomeIcon className="size-4" />
               <p>Home</p>
             </div>
-            <div className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer">
+            <div
+              className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer"
+              onClick={() => {
+                user ? navigate("/user/shop") : navigate("/shop");
+              }}
+            >
               <ShoppingBagIcon className="size-4" />
               <p>Shop</p>
             </div>

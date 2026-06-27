@@ -2,7 +2,10 @@ import { AlertTriangle, Filter, Plus, TriangleAlert } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
-import { clearError, fetchAllProducts } from "../../redux/slice/productSlice";
+import {
+  clearProductError,
+  fetchAllProducts,
+} from "../../redux/slice/productSlice";
 import {
   fetchAllSellers,
   clearError as clearSellerError,
@@ -57,6 +60,7 @@ function Products() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
+  //seller and category fetch using ids in products
   useEffect(() => {
     if (products.length > 0) {
       const uniqueSellerIds = [
@@ -140,7 +144,7 @@ function Products() {
     if (productError) {
       toast.error(productError);
       setHadError(true);
-      dispatch(clearError());
+      dispatch(clearProductError());
     }
     if (sellerError) {
       toast.error(sellerError);

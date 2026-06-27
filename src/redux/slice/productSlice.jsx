@@ -8,6 +8,7 @@ const initialState = {
   productError: null,
   page: 0,
   totalPages: 0,
+  hasNextPage: true,
 };
 
 export const addAProduct = createAsyncThunk(
@@ -23,17 +24,38 @@ export const addAProduct = createAsyncThunk(
 );
 
 export const fetchAllProducts = createAsyncThunk(
-  "product/fetchAllProduct",
-  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+  "product/fetchAll",
+  async (
+    {
+      page = 1,
+      limit = 15,
+      search = "",
+      category = "",
+      minPrice = "",
+      maxPrice = "",
+      sort = "newest",
+    } = {},
+    { rejectWithValue },
+  ) => {
     try {
-      const data = await productAPI.fetchAllProduct({ page, limit });
-      return data;
+      const params = Object.fromEntries(
+        Object.entries({
+          page,
+          limit,
+          search,
+          category,
+          minPrice,
+          maxPrice,
+          sort,
+        }).filter(([_, v]) => v !== ""),
+      );
+      const res = await productAPI.fetchAllProduct(params);
+      return res;
     } catch (err) {
-      return rejectWithValue(extractError(err, "fetch product failed"));
+      return rejectWithValue(extractError(err, "Failed to fetch products"));
     }
   },
 );
-
 export const deleteSingleProduct = createAsyncThunk(
   "product/deleteProduct",
   async ({ id }, { rejectWithValue }) => {
@@ -50,7 +72,7 @@ const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    clearError(state) {
+    clearProductError(state) {
       state.productError = null;
     },
     clearProductState(state) {
@@ -106,7 +128,10 @@ const productSlice = createSlice({
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.isProductLoading = false;
         state.productError = action.payload || "Failed to fetch products";
-        state.products = [];
+        //  keep existing products — only reset on page 1 failure
+        if (action.meta.arg.page === 1) {
+          state.products = [];
+        }
       });
     //delete products
     builder
@@ -127,5 +152,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearError, clearProductState } = productSlice.actions;
+export const { clearProductError, clearProductState } = productSlice.actions;
 export default productSlice.reducer;

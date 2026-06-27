@@ -6,7 +6,6 @@ import Shop from "./pages/user/Shop";
 import Home from "./pages/public/Home";
 
 const userRoutes = (
- 
   <>
     <Route
       path="/profile_complete"

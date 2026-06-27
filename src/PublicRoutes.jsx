@@ -46,13 +46,27 @@ const publicRoutes = (
     <Route
       path="/"
       element={
-        <RestrictRoles blockedRoles={["admin", "seller"]}>
+        <RestrictRoles blockedRoles={["admin", "seller", "user"]}>
           <PublicLayout />
         </RestrictRoles>
       }
     >
-      <Route path="" element={<Home selected={"home"} />} />
-      <Route path="shop" element={<Shop selected={"home"} />} />
+      <Route
+        path=""
+        element={
+          <PublicRoute>
+            <Home selected={"home"} />{" "}
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="shop"
+        element={
+          <PublicRoute>
+            <Shop selected={"home"} />{" "}
+          </PublicRoute>
+        }
+      />
     </Route>
   </>
 );

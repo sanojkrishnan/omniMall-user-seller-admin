@@ -18,7 +18,7 @@ function UserLayout() {
           borderLine={getSelection() !== "home"}
           selection={getSelection()}
         />
-        <main className="pt-[30px] p-6 flex-1">
+        <main className=" flex-1">
           <Outlet />
         </main>
       </div>

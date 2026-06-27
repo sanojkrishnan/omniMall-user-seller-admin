@@ -47,7 +47,7 @@ function SelectionButton({
     if (!showOptions) return;
 
     const updateOnScroll = () => {
-      updatePosition(); // ✅ recalculate position instead of closing
+      updatePosition(); //  recalculate position instead of closing
     };
 
     window.addEventListener("scroll", updateOnScroll, true);

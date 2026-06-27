@@ -5,9 +5,9 @@ import Footer from "../Footer";
 function UserLayout() {
   const { pathname } = useLocation();
   const getSelection = () => {
-    if (pathname.includes("/shop")) return "shop";
-    if (pathname.includes("/cart")) return "cart";
-    if (pathname.includes("/profile")) return "profile";
+    if (pathname.includes("user/shop")) return "shop";
+    if (pathname.includes("user/cart")) return "cart";
+    if (pathname.includes("user/profile")) return "profile";
     return "home";
   };
 

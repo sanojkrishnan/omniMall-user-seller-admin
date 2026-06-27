@@ -7,7 +7,7 @@ export const productAPI = {
   },
   //fetch all product
   fetchAllProduct: async (data) => {
-    return api.get("product/fetch", data);
+    return api.get("product/fetch", { params: data });
   },
   //delete product
   deleteProduct: async (id) => {

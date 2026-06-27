@@ -28,7 +28,9 @@ function Header({ hideMenu, borderLine }) {
             <div
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
               onClick={() => {
-                user ? navigate("/user") : navigate("/");
+                user
+                  ? navigate("/user", { replace: true })
+                  : navigate("/", { replace: true });
               }}
             >
               <HomeIcon className="size-6" />
@@ -37,7 +39,9 @@ function Header({ hideMenu, borderLine }) {
             <div
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
               onClick={() => {
-                user ? navigate("/user/shop") : navigate("/shop");
+                user
+                  ? navigate("/user/shop", { replace: true })
+                  : navigate("/shop", { replace: true });
               }}
             >
               <ShoppingBagIcon className="size-6" />
@@ -49,7 +53,7 @@ function Header({ hideMenu, borderLine }) {
             </div>
             <div
               onClick={() => {
-                user ? null : navigate("/login");
+                user ? null : navigate("/login", { replace: true });
               }}
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
             >
@@ -89,7 +93,9 @@ function Header({ hideMenu, borderLine }) {
             <div
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer"
               onClick={() => {
-                user ? navigate("/user") : navigate("/");
+                user
+                  ? navigate("/user", { replace: true })
+                  : navigate("/", { replace: true });
               }}
             >
               <HomeIcon className="size-4" />
@@ -98,7 +104,9 @@ function Header({ hideMenu, borderLine }) {
             <div
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black rounded-3xl cursor-pointer"
               onClick={() => {
-                user ? navigate("/user/shop") : navigate("/shop");
+                user
+                  ? navigate("/user/shop", { replace: true })
+                  : navigate("/shop", { replace: true });
               }}
             >
               <ShoppingBagIcon className="size-4" />
@@ -110,7 +118,7 @@ function Header({ hideMenu, borderLine }) {
             </div>
             <div
               onClick={() => {
-                user ? null : navigate("/login");
+                user ? null : navigate("/login", { replace: true });
               }}
               className="text-center flex flex-col items-center justify-center w-16 h-16 hover:bg-white hover:text-black transition-all duration-500 rounded-3xl cursor-pointer"
             >

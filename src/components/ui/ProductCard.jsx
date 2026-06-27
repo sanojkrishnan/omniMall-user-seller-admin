@@ -12,10 +12,10 @@ function ProductCard({ products }) {
         >
           {/* Image */}
           <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden">
-            {item.productImages?.length > 0 ? (
+            {item.productImage?.length > 0 ? (
               <img
                 className="w-full h-full object-cover"
-                src={item.productImages[0]?.url}
+                src={item.productImage[0]?.url}
                 alt={item.productName}
               />
             ) : (
@@ -69,10 +69,7 @@ function ProductCard({ products }) {
 
             <div className="flex gap-2 pt-1 mt-auto pb-2">
               <Button className="flex-1 text-sm py-2">Buy now</Button>
-              <Button
-                variant="secondary"
-                className="flex-1 text-sm py-2 flex items-center justify-center gap-1.5"
-              >
+              <Button variant="secondary" className="flex-1 text-sm ">
                 <ShoppingCart className="size-4" /> Add to cart
               </Button>
             </div>

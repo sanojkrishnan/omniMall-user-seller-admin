@@ -1,12 +1,10 @@
-import { Filter, Search } from "lucide-react";
-import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearProductError,
   fetchAllProducts,
 } from "../../redux/slice/productSlice";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import ProductCard from "../../components/ui/ProductCard";
 import CartLoading from "../../components/ui/CartLoading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
@@ -20,6 +18,7 @@ function Shop() {
   const [searchInput, setSearchInput] = useState(""); // raw input value
   const [isSearching, setIsSearching] = useState(false); //searching loading
 
+  //product fetch
   const {
     products = [],
     isProductLoading,
@@ -27,6 +26,11 @@ function Shop() {
     totalPages,
     hasNextPage,
   } = useSelector((state) => state.product);
+
+  // category fetch
+  const { category, isCategoryLoading, categoryError } = useSelector(
+    (state) => state.category,
+  );
 
   const triggerId = useInfiniteScroll({
     hasNextPage,

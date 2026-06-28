@@ -4,6 +4,7 @@ import ProfileComplete from "./pages/user/ProfileComplete";
 import UserLayout from "./components/ui/UserLayout";
 import Shop from "./pages/user/Shop";
 import Home from "./pages/public/Home";
+import SingleProduct from "./pages/user/SingleProduct";
 
 const userRoutes = (
   <>
@@ -26,6 +27,7 @@ const userRoutes = (
     >
       <Route path="" element={<Home />} />
       <Route path="shop" element={<Shop />} />
+      <Route path={`shop/product/:id`} element={<SingleProduct />} />
     </Route>
   </>
 );

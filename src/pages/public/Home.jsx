@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "../../components/ui/ProductCard";
 import { Button } from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
+import SortCategory from "../../components/ui/SortCategory";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -198,25 +199,7 @@ function Home() {
           <h1 className="text-3xl font-semibold">Shop By Category</h1>
           <p>Explore our wide range of products</p>
         </div>
-        <div className="flex px-20 overflow-x-auto justify-evenly loopScroll mt-10 ">
-          {categoryList.map((item, index) => {
-            return (
-              <div
-                className="relative min-w-28 h-40 mr-10 cursor-pointer overflow-hidden"
-                key={index}
-              >
-                <img
-                  className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                  src={item.image}
-                  alt={item.alt}
-                />
-                <div className="absolute w-full h-full hover:shadow-[inset_0_-70px_70px_rgba(0,0,0,100)] transition-all duration-500 rounded-lg shadow-[inset_0_-50px_50px_rgba(0,0,0,100)] flex items-end justify-center">
-                  <p className="text-center w-fit mb-2 px-4">{item.category}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <SortCategory categoryList={categoryList} />
       </div>
 
       {/* featured products  */}
@@ -231,7 +214,7 @@ function Home() {
             variant="secondary"
             className={"w-fit"}
             onClick={() => {
-              navigate("/user/shop", { replace: true });
+              navigate("/user/shop");
             }}
           >
             view more

@@ -1,12 +1,15 @@
 import { HeartIcon, ShoppingCart, TriangleAlert } from "lucide-react";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
+import { useNavigate } from "react-router-dom";
 
 function ProductCard({ products }) {
+  const navigate = useNavigate();
   return (
     <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8">
       {products.map((item, index) => (
         <div
+          onClick={() => navigate(`/user/shop/product/${item._id}`)}
           key={index}
           className="bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-500"
         >

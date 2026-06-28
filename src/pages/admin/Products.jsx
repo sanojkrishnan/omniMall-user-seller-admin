@@ -24,6 +24,7 @@ import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 function Products() {
   const dispatch = useDispatch();
 
+  //product fetch
   const {
     products = [],
     isProductLoading,

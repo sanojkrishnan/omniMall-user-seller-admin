@@ -4,6 +4,7 @@ import { sellerAPI } from "../../services/sellerService.js";
 
 const initialState = {
   seller: [],
+  singleSeller: {},
   sellersPage: 0,
   sellersTotalPages: 0,
   totalSellers: 0,
@@ -27,6 +28,17 @@ export const fetchAllSellers = createAsyncThunk(
       }
     } catch (err) {
       return rejectWithValue(extractError(err, "Fetch sellers failed"));
+    }
+  },
+);
+export const singleSellerFetch = createAsyncThunk(
+  "seller/fetchSingleSeller",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const data = await sellerAPI.fetchOneSeller(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch seller"));
     }
   },
 );
@@ -64,6 +76,21 @@ const sellerSlice = createSlice({
         state.isSellerLoading = false;
         state.sellerError = action.payload || "Failed to fetch sellers";
         state.seller = [];
+      });
+    //fetch single seller
+    builder
+      .addCase(singleSellerFetch.pending, (state) => {
+        state.isSellerLoading = true;
+        state.sellerError = null;
+      })
+      .addCase(singleSellerFetch.fulfilled, (state, action) => {
+        state.isSellerLoading = false;
+        state.singleSeller = action.payload.data;
+      })
+      .addCase(singleSellerFetch.rejected, (state, action) => {
+        state.isSellerLoading = false;
+        state.sellerError = action.payload?.error?.message;
+        state.singleSeller = {};
       });
   },
 });

@@ -10,6 +10,8 @@ import CartLoading from "../../components/ui/CartLoading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import Loading from "../../components/ui/Loading";
 import { toast } from "react-toastify";
+import ErrorFallback from "../../components/ui/ErrorFallback";
+import SearchNotFound from "../../components/ui/SearchNotFound";
 
 function Shop() {
   const dispatch = useDispatch();
@@ -110,27 +112,11 @@ function Shop() {
         )}
 
         {/* error */}
-        {!isBusy && productError && (
-          <div className="w-full h-[60vh] flex justify-center items-center">
-            <h1 className="text-md font-semibold text-gray-800">
-              Something went wrong...
-            </h1>
-          </div>
-        )}
+        {!isBusy && productError && <ErrorFallback />}
 
         {/* no results */}
         {!isBusy && !productError && products.length === 0 && (
-          <div className="w-full h-[60vh] flex flex-col justify-center items-center gap-3">
-            <h1 className="text-xl font-semibold text-gray-800">
-              No products found
-            </h1>
-            {search && (
-              <p className="text-sm text-gray-500">
-                No results for "<span className="font-medium">{search}</span>" —
-                try a different keyword
-              </p>
-            )}
-          </div>
+          <SearchNotFound search={search} />
         )}
 
         {/* infinite scroll loader — below products, not replacing them */}

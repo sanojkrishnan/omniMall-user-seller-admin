@@ -8,4 +8,8 @@ export const sellerAPI = {
       { uniqueSellers },
     );
   },
+  //fetch single seller
+  fetchOneSeller: async (id) => {
+    return api.get(`seller/fetch-single/${id}`);
+  },
 };

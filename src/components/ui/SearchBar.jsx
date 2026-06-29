@@ -46,6 +46,7 @@ export const SearchBar = ({
   className,
   disabled,
   variant = "primary",
+  colorVariants = "user",
   value,
   onChange,
   onFilterApply,
@@ -83,7 +84,7 @@ export const SearchBar = ({
         />
         <Button
           ref={buttonRef}
-          className={"w-fit px-6 m-0 ml-4"}
+          className={` ${colorVariants === "admin" && "bg-[#60001A]"} w-fit px-6 m-0 ml-4`}
           onClick={(e) => {
             e.stopPropagation();
             setFilterOpen((prev) => !prev);
@@ -106,11 +107,18 @@ export const SearchBar = ({
         >
           {/* Category sort */}
           <div
-            className="bg-black sm:p-8 text-white p-4 rounded-xl"
-            style={{
-              background:
-                "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
-            }}
+            className={`bg-black ${colorVariants === "user" ? "bg-black" : "bg-[#60001A]"} sm:p-8 text-white p-4 rounded-xl`}
+            style={
+              colorVariants === "user"
+                ? {
+                    background:
+                      "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
+                  }
+                : {
+                    background:
+                      "radial-gradient(ellipse at 50% 0%, #ad002e 0%, #60001A 50%, #510015 100%)",
+                  }
+            }
           >
             <div className="flex items-center justify-center">
               <h5 className="text-center">Category</h5>
@@ -120,6 +128,7 @@ export const SearchBar = ({
 
           {/* Price range filter */}
           <PriceRangeFilter
+          colorVariants={colorVariants}
             onApply={(payload) => {
               onFilterApply?.(payload);
               setFilterOpen(false);

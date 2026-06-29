@@ -4,6 +4,7 @@ import { productAPI } from "../../services/productService";
 
 const initialState = {
   products: [],
+  singleProduct: {},
   isProductLoading: false,
   productError: null,
   page: 0,
@@ -22,7 +23,7 @@ export const addAProduct = createAsyncThunk(
     }
   },
 );
-
+//fetch all products
 export const fetchAllProducts = createAsyncThunk(
   "product/fetchAll",
   async (
@@ -56,6 +57,19 @@ export const fetchAllProducts = createAsyncThunk(
     }
   },
 );
+//fetch single product
+export const singleProductFetch = createAsyncThunk(
+  "product/fetchSingleProduct",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const data = await productAPI.fetchOneProduct(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch products"));
+    }
+  },
+);
+//delete product
 export const deleteSingleProduct = createAsyncThunk(
   "product/deleteProduct",
   async ({ id }, { rejectWithValue }) => {
@@ -79,6 +93,7 @@ const productSlice = createSlice({
       state.message = null;
       state.productError = null;
       state.products = [];
+      state.singleProduct = {};
     },
   },
   extraReducers: (builder) => {
@@ -132,6 +147,21 @@ const productSlice = createSlice({
         if (action.meta.arg.page === 1) {
           state.products = [];
         }
+      });
+    //fetch single product
+    builder
+      .addCase(singleProductFetch.pending, (state) => {
+        state.isProductLoading = true;
+        state.productError = null;
+      })
+      .addCase(singleProductFetch.fulfilled, (state, action) => {
+        state.isProductLoading = false;
+        state.singleProduct = action.payload.data;
+      })
+      .addCase(singleProductFetch.rejected, (state, action) => {
+        state.isProductLoading = false;
+        state.productError = action.payload?.error?.message;
+        state.singleProduct = {};
       });
     //delete products
     builder

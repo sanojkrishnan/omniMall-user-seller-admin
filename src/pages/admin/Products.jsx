@@ -178,11 +178,9 @@ function Products() {
             openProduct={openProduct}
           />
         </div>
-
-        <SearchBar />
-        <Button className={"w-fit px-6 m-0 ml-4 bg-[#5f0000]"}>
-          <Filter className="size-4 " /> Filter
-        </Button>
+        <div className="w-full">
+          <SearchBar colorVariants="admin" />
+        </div>
       </div>
       <div className="flex justify-start">
         <Button

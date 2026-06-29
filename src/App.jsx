@@ -6,11 +6,13 @@ import CartLoading from "./components/ui/CartLoading";
 import adminRoutes from "./AdminRoutes";
 import publicRoutes from "./PublicRoutes";
 import userRoutes from "./UserRoutes";
+import ScrollToTop from "./components/ScrollTopComponent";
 
 function App() {
   return (
-   <>
+    <>
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={<CartLoading />}>
           <Routes>
             {adminRoutes}

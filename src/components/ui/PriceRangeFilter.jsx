@@ -8,7 +8,7 @@ const RANGE_STEP = 100;
 const DEFAULT_MIN = 0;
 const DEFAULT_MAX = 100000;
 
-function PriceRangeFilter({ onApply }) {
+function PriceRangeFilter({ onApply, colorVariants }) {
   const [minVal, setMinVal] = useState(DEFAULT_MIN);
   const [maxVal, setMaxVal] = useState(DEFAULT_MAX);
   const [sortOrder, setSortOrder] = useState("asc");
@@ -70,10 +70,17 @@ function PriceRangeFilter({ onApply }) {
   return (
     <div
       className="mt-6 rounded-xl p-4 sm:p-8 text-white"
-      style={{
-        background:
-          "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
-      }}
+      style={
+        colorVariants === "user"
+          ? {
+              background:
+                "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
+            }
+          : {
+              background:
+                "radial-gradient(ellipse at 50% 0%, #ad002e 0%, #60001A 50%, #510015 100%)",
+            }
+      }
     >
       {/* Header */}
       <div className="flex items-center justify-center mb-6">

@@ -4,6 +4,7 @@ import { categoryAPI } from "../../services/categoryService";
 
 const initialState = {
   category: [],
+  singleCategory: {},
   categoriesPage: 0,
   categoriesTotalPages: 0,
   totalCategories: 0,
@@ -31,11 +32,23 @@ export const fetchAllCategories = createAsyncThunk(
   },
 );
 
+export const singleCategoryFetch = createAsyncThunk(
+  "category/fetchSingleCategory",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const data = await categoryAPI.fetchOneCategory(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch category"));
+    }
+  },
+);
+
 const categorySlice = createSlice({
   name: "category",
   initialState,
   reducers: {
-    clearError(state) {
+    clearCategoryError(state) {
       state.categoryError = null;
     },
     clearCategoryState(state) {
@@ -64,6 +77,21 @@ const categorySlice = createSlice({
         state.isCategoryLoading = false;
         state.categoryError = action.payload || "Failed to fetch categories";
         state.category = [];
+      });
+    //fetch single category
+    builder
+      .addCase(singleCategoryFetch.pending, (state) => {
+        state.isCategoryLoading = true;
+        state.categoryError = null;
+      })
+      .addCase(singleCategoryFetch.fulfilled, (state, action) => {
+        state.isCategoryLoading = false;
+        state.singleCategory = action.payload.data;
+      })
+      .addCase(singleCategoryFetch.rejected, (state, action) => {
+        state.isCategoryLoading = false;
+        state.categoryError = action.payload?.error?.message;
+        state.singleCategory = {};
       });
   },
 });

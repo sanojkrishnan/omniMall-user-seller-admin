@@ -14,4 +14,8 @@ export const categoryAPI = {
       );
     }
   },
+  //fetch single category
+  fetchOneCategory: async (id) => {
+    return api.get(`category/fetch-single/${id}`);
+  },
 };

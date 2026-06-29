@@ -11,7 +11,7 @@ function ProductCard({ products }) {
         <div
           onClick={() => navigate(`/user/shop/product/${item._id}`)}
           key={index}
-          className="bg-white border border-gray-100 rounded-xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-500"
+          className="bg-white border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-500"
         >
           {/* Image */}
           <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden">

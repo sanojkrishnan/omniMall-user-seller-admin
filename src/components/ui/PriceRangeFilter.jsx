@@ -8,10 +8,11 @@ const RANGE_STEP = 100;
 const DEFAULT_MIN = 0;
 const DEFAULT_MAX = 100000;
 
-function PriceRangeFilter({ onApply, colorVariants }) {
+function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
   const [minVal, setMinVal] = useState(DEFAULT_MIN);
   const [maxVal, setMaxVal] = useState(DEFAULT_MAX);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("price_desc");
+  const [sort, setSort] = useState("newest");
   const fillRef = useRef();
 
   // Keep the slider fill track in sync
@@ -42,6 +43,20 @@ function PriceRangeFilter({ onApply, colorVariants }) {
     setMaxVal(val);
   }
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilterValues((prev) => {
+        return {
+          ...prev,
+          minPrice: minVal,
+          maxPrice: maxVal,
+          priceSort: sortOrder,
+        };
+      });
+    }, 500); // wait until the user stops dragging before triggering a fetch
+
+    return () => clearTimeout(timer);
+  }, [minVal, maxVal, sortOrder]);
   // Shared thumb styles (Tailwind arbitrary variants)
   const thumbCls = `
     absolute w-full top-1/2 -translate-y-1/2 appearance-none bg-transparent pointer-events-none
@@ -164,18 +179,34 @@ function PriceRangeFilter({ onApply, colorVariants }) {
         </p>
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => setSortOrder("asc")}
-            className={sortBtnCls(sortOrder === "asc")}
+            onClick={() => setSortOrder("price_asc")}
+            className={sortBtnCls(sortOrder === "price_asc")}
           >
             ↑ Low to high
           </button>
           <button
-            onClick={() => setSortOrder("desc")}
-            className={sortBtnCls(sortOrder === "desc")}
+            onClick={() => setSortOrder("price_desc")}
+            className={sortBtnCls(sortOrder === "price_desc")}
           >
             ↓ High to low
           </button>
         </div>
+        {colorVariants === "admin" && (
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <button
+              onClick={() => setSort("newest")}
+              className={sortBtnCls(sort === "newest")}
+            >
+              Newest on top
+            </button>
+            <button
+              onClick={() => setSort("oldest")}
+              className={sortBtnCls(sort === "oldest")}
+            >
+              Oldest on top
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Apply — sends clean payload to parent */}
@@ -191,6 +222,20 @@ function PriceRangeFilter({ onApply, colorVariants }) {
         }
       >
         Apply filter
+      </Button>
+      <Button
+        className={"border-white"}
+        variant="secondary"
+        onClick={() =>
+          setFilterValues({
+            category: "",
+            minPrice: "",
+            maxPrice: "",
+            priceSort: "",
+          })
+        }
+      >
+        Reset filter
       </Button>
     </div>
   );

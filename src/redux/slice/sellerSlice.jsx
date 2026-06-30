@@ -4,7 +4,7 @@ import { sellerAPI } from "../../services/sellerService.js";
 
 const initialState = {
   seller: [],
-  singleSeller: {},
+  singleSeller: null,
   sellersPage: 0,
   sellersTotalPages: 0,
   totalSellers: 0,
@@ -85,7 +85,7 @@ const sellerSlice = createSlice({
       })
       .addCase(singleSellerFetch.fulfilled, (state, action) => {
         state.isSellerLoading = false;
-        state.singleSeller = action.payload.data;
+        state.singleSeller = action.payload.data[0];
       })
       .addCase(singleSellerFetch.rejected, (state, action) => {
         state.isSellerLoading = false;

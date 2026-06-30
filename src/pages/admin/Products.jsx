@@ -20,9 +20,13 @@ import { toast } from "react-toastify";
 import ProductListTile from "../../components/ProductListTile";
 import Loading from "../../components/ui/Loading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import ErrorFallback from "../../components/ui/ErrorFallback";
+import SearchNotFound from "../../components/ui/SearchNotFound";
 
 function Products() {
   const dispatch = useDispatch();
+
+  const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
   //product fetch
   const {
@@ -40,19 +44,59 @@ function Products() {
     (state) => state.category,
   );
 
-  console.log("PRODUCT LIST :", productError);
-
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
   const [hadError, setHadError] = useState(false);
   const [addProduct, setAddProduct] = useState(false);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // raw input value
+  const [isSearching, setIsSearching] = useState(false); //searching loading
+  const [filterValues, setFilterValues] = useState({
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+    priceSort: "",
+    sort: "",
+  });
 
+  // Fetch all products
   useEffect(() => {
-    dispatch(fetchAllProducts({ page, limit: 15 }));
-  }, [dispatch, page]);
+    dispatch(
+      fetchAllProducts({
+        page,
+        limit: 15,
+        search,
+        category: filterValues.category,
+        minPrice: filterValues.minPrice,
+        maxPrice: filterValues.maxPrice,
+        priceSort: filterValues.priceSort,
+        sort: filterValues.sort,
+      }),
+    );
+  }, [
+    dispatch,
+    page,
+    search,
+    filterValues.category,
+    filterValues.minPrice,
+    filterValues.maxPrice,
+    filterValues.priceSort,
+    filterValues.sort,
+  ]);
 
-  const lastFetchedIdsRef = useRef("");
+  // error toast
+  useEffect(() => {
+    if (productError) {
+      toast.error(productError);
+      if (products.length !== 0) dispatch(clearProductError());
+      clearProductError();
+    }
+  }, [productError, dispatch]);
+
+  const lastFetchedSellerIdsRef = useRef("");
+  const lastFetchedCategoryIdsRef = useRef("");
+  const isFirstRender = useRef(true);
 
   // infinite scrolling
   const triggerId = useInfiniteScroll({
@@ -60,6 +104,27 @@ function Products() {
     isLoading: isProductLoading,
     onLoadMore: () => setPage((prev) => prev + 1),
   });
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+      // don't setIsSearching(false) here — wait for fetch to finish
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Clear isSearching only after fetch completes
+  useEffect(() => {
+    if (!isProductLoading) {
+      setIsSearching(false);
+    }
+  }, [isProductLoading]);
 
   //seller and category fetch using ids in products
   useEffect(() => {
@@ -91,8 +156,11 @@ function Products() {
 
       const idcKey = uniqueCategoryIds.sort().join(",");
 
-      if (uniqueSellerIds.length > 0 && idsKey !== lastFetchedIdsRef.current) {
-        lastFetchedIdsRef.current = idsKey;
+      if (
+        uniqueSellerIds.length > 0 &&
+        idsKey !== lastFetchedSellerIdsRef.current
+      ) {
+        lastFetchedSellerIdsRef.current = idsKey;
         dispatch(
           fetchAllSellers({
             pagination: { page: 1, limit: uniqueSellerIds.length },
@@ -102,9 +170,9 @@ function Products() {
       }
       if (
         uniqueCategoryIds.length > 0 &&
-        idcKey !== lastFetchedIdsRef.current
+        idcKey !== lastFetchedCategoryIdsRef.current
       ) {
-        lastFetchedIdsRef.current = idcKey;
+        lastFetchedCategoryIdsRef.current = idcKey;
         dispatch(
           fetchAllCategories({
             pagination: { page: 1, limit: uniqueCategoryIds.length },
@@ -154,9 +222,14 @@ function Products() {
   }, [productError, sellerError, dispatch]);
 
   const getSellerName = (sellerId) => {
-    const s = sellerMap[sellerId];
+    const s = sellerMap[getId(sellerId)];
     return s ? `${s.firstName} ${s.lastName}` : "Unknown Seller";
   };
+
+  const isFirstLoad = isProductLoading && products.length === 0;
+  const isLoadingMore =
+    isProductLoading && products.length !== 0 && !isSearching;
+  const isBusy = isSearching || isFirstLoad;
 
   return (
     <>
@@ -179,7 +252,13 @@ function Products() {
           />
         </div>
         <div className="w-full">
-          <SearchBar colorVariants="admin" />
+          <SearchBar
+            colorVariants="admin"
+            filterValues={filterValues}
+            setFilterValues={setFilterValues}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
         </div>
       </div>
       <div className="flex justify-start">
@@ -195,13 +274,13 @@ function Products() {
       </div>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 custom-scrollBar">
-          {isProductLoading && !productError && products.length === 0 && (
+          {isBusy && !productError && (
             <div className="w-full h-[65vh] flex items-center justify-center">
               <CartLoading />
             </div>
           )}
 
-          {!isProductLoading && products.length !== 0 && (
+          {!isBusy && !productError && products.length !== 0 && (
             <>
               <table className="w-full border-collapse">
                 <thead>
@@ -232,8 +311,9 @@ function Products() {
                         setAddProduct(false);
                         setSingleProduct({
                           ...item,
-                          sellerData: sellerMap[item.sellerId] ?? null,
-                          categoryData: categoryMap[item.categoryId] ?? null,
+                          sellerData: sellerMap[getId(item.sellerId)] ?? null,
+                          categoryData:
+                            categoryMap[getId(item.categoryId)] ?? null,
                         });
                       }}
                     >
@@ -268,7 +348,7 @@ function Products() {
                           ) : categoryError ? (
                             ""
                           ) : (
-                            (categoryMap[item.categoryId]?.name ??
+                            (categoryMap[getId(item.categoryId)]?.name ??
                             "Unknown Category")
                           )}
                         </div>
@@ -281,7 +361,7 @@ function Products() {
                           "Failed to fetch seller"
                         ) : (
                           (() => {
-                            const sellerObj = sellerMap[item.sellerId];
+                            const sellerObj = sellerMap[getId(item.sellerId)];
                             return (
                               <div className="flex w-fit gap-2 border p-1 pr-2 rounded-full justify-center items-center">
                                 <div className="w-8 h-8 rounded-full border flex justify-center items-center text-center">
@@ -335,7 +415,13 @@ function Products() {
                       } hover:bg-slate-200 cursor-pointer border-y`}
                       onClick={() => {
                         setOpenProduct(true);
-                        setSingleProduct(item);
+                        setAddProduct(false);
+                        setSingleProduct({
+                          ...item,
+                          sellerData: sellerMap[getId(item.sellerId)] ?? null,
+                          categoryData:
+                            categoryMap[getId(item.categoryId)] ?? null,
+                        });
                       }}
                     >
                       <td className="p-3">
@@ -369,7 +455,7 @@ function Products() {
                           ) : categoryError ? (
                             ""
                           ) : (
-                            (categoryMap[item.categoryId]?.name ??
+                            (categoryMap[getId(item.categoryId)]?.name ??
                             "Unknown Category")
                           )}
                         </div>
@@ -421,11 +507,21 @@ function Products() {
               <div id={triggerId} className="h-10" />
             </>
           )}
-          {hadError && products.length === 0 && !isProductLoading && (
-            <div className="w-full h-[65vh] flex items-center justify-center text-center">
-              Sorry, Something Went Wrong...
+          {!isBusy && productError && <ErrorFallback />}
+
+          {/* no results */}
+          {!isBusy && !productError && products.length === 0 && (
+            <SearchNotFound search={search} />
+          )}
+
+          {/* infinite scroll loader — below products, not replacing them */}
+          {isLoadingMore && (
+            <div className="flex justify-center py-6">
+              <Loading className={"size-6"} />
             </div>
           )}
+
+          <div id={triggerId} className="h-10" />
         </div>
       </div>
     </>

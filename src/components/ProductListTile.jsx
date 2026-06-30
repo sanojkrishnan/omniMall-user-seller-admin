@@ -142,8 +142,6 @@ function ProductListTile(props) {
                       src={img?.url}
                       alt={`${product.productName}-${index}`}
                     />
-                    {/* gradient overlay per slide */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#5f0000] via-white/0 to-transparent rounded-lg" />
                   </div>
                 ))
               ) : (

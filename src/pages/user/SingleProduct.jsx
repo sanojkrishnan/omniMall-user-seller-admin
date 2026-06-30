@@ -100,13 +100,14 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
     (state) => state.product,
   );
   //seller selector
-  const { seller, isSellerLoading, sellerError } = useSelector(
+  const { singleSeller, isSellerLoading } = useSelector(
     (state) => state.seller,
   );
   //category selector
-  const { category, isCategoryLoading, categoryError } = useSelector(
-    (state) => state.category,
-  );
+  const { singleCategory } = useSelector((state) => state.category);
+
+  console.log("SINGLE SELLER :", singleSeller);
+  console.log("SINGLE CATEGORY :", singleCategory);
   //product fetch
   useEffect(() => {
     dispatch(singleProductFetch({ id }));
@@ -145,9 +146,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
           <div className="mx-auto max-w-6xl px-6 pt-6">
             <nav className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-neutral-500">
               <ChevronRight className="size-3" />
-              <span>{product.category}</span>
+              <span>{singleCategory.name}</span>
               <ChevronRight className="size-3" />
-              <span className="text-black">{product.subcategory}</span>
+              <span className="text-black">{singleCategory.subcategory}</span>
             </nav>
           </div>
 
@@ -274,7 +275,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-neutral-400">Category</p>
-                    <p className="mt-0.5">{product.category}</p>
+                    <p className="mt-0.5">{singleCategory.name}</p>
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-neutral-400">In Stock</p>
@@ -284,30 +285,41 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               </div>
 
               {/* Seller card */}
-              <div className="mt-6 flex items-center justify-between border-y border-neutral-200 py-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold">
-                    {product.seller.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium">
-                        {product.seller.name}
-                      </span>
-                      {product.seller.verified && (
-                        <BadgeCheck className="size-4 fill-black text-white" />
+              {singleSeller && !isSellerLoading && (
+                <div className="mt-6 flex items-center justify-between border-y border-neutral-200 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold overflow-hidden">
+                      {singleSeller.profileImage.url ? (
+                        <img
+                          src={singleSeller.profileImage.url}
+                          alt={singleSeller.firstName}
+                          className="size-full rounded-full object-cover"
+                        />
+                      ) : (
+                        singleSeller.firstName.charAt(0)
                       )}
                     </div>
-                    <p className="text-xs text-neutral-500">
-                      {product.seller.rating} rating · {product.seller.sales}{" "}
-                      sales
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">
+                          {singleSeller.firstName + " " + singleSeller.lastName}
+                        </span>
+                        {singleSeller.isVerified && (
+                          <BadgeCheck className="size-4 fill-green-500 text-white" />
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-500">
+                        {singleSeller?.rating ? singleSeller.rating : "0"}{" "}
+                        rating ·{" "}
+                        {singleSeller?.sales ? singleSeller.sales : "0"} sales
+                      </p>
+                    </div>
                   </div>
+                  <button className="text-xs font-medium underline underline-offset-2">
+                    View store
+                  </button>
                 </div>
-                <button className="text-xs font-medium underline underline-offset-2">
-                  View store
-                </button>
-              </div>
+              )}
 
               {/* Size selector */}
               <div className="mt-6">

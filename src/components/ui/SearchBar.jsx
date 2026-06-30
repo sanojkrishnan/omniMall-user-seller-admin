@@ -1,4 +1,4 @@
-import { Filter } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { Button } from "./Button";
 import { useEffect, useRef, useState } from "react";
 import SortCategory from "./SortCategory";
@@ -43,6 +43,7 @@ const categoryList = [
 ];
 
 export const SearchBar = ({
+  setFilterValues,
   className,
   disabled,
   variant = "primary",
@@ -50,6 +51,7 @@ export const SearchBar = ({
   value,
   onChange,
   onFilterApply,
+  filterValues,
 }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef();
@@ -67,7 +69,7 @@ export const SearchBar = ({
   }, []);
 
   return (
-    <div className="flex flex-col m-4 mb-8 mt-6 border-b-[0.5px] pb-8">
+    <div className="flex flex-col m-4 mb-8 mt-6 border-b-[0.5px] pb-1">
       <div className="flex items-center justify-center relative">
         <input
           disabled={disabled}
@@ -97,7 +99,7 @@ export const SearchBar = ({
         <div
           ref={filterRef}
           className={cn(
-            "absolute top-[160%] left-0 p-8 w-full rounded-b-xl z-30 overflow-y-auto custom-scrollbar",
+            "absolute top-[180%] left-0 p-8 w-full rounded-b-xl z-30 overflow-y-auto custom-scrollbar",
             "transition-all duration-500 origin-top border-[0.5px] border-t-0 bg-white shadow-lg",
             filterOpen
               ? "opacity-100 scale-y-100 pointer-events-auto"
@@ -123,18 +125,55 @@ export const SearchBar = ({
             <div className="flex items-center justify-center">
               <h5 className="text-center">Category</h5>
             </div>
-            <SortCategory categoryList={categoryList} />
+            <SortCategory
+              setFilterValues={setFilterValues}
+              categoryList={categoryList}
+            />
           </div>
 
           {/* Price range filter */}
           <PriceRangeFilter
-          colorVariants={colorVariants}
+            setFilterValues={setFilterValues}
+            colorVariants={colorVariants}
             onApply={(payload) => {
               onFilterApply?.(payload);
               setFilterOpen(false);
             }}
           />
         </div>
+      </div>
+      <div className="px-4 flex gap-2 mt-1">
+        {filterValues.category !== "" && (
+          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>{filterValues.category}</span> <X className="size-4 ml-4" />
+          </div>
+        )}
+
+        {filterValues.minPrice !== 0 ||
+          (filterValues.minPrice !== "" && (
+            <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
+              <span>{filterValues.minPrice}</span> <X className="size-4 ml-4" />
+            </div>
+          ))}
+
+        {filterValues.maxPrice !== "" && (
+          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>{filterValues.maxPrice}</span> <X className="size-4 ml-4" />
+          </div>
+        )}
+
+        {filterValues.priceSort !== "" && (
+          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>{filterValues.priceSort}</span> <X className="size-4 ml-4" />
+          </div>
+        )}
+
+        {filterValues.sort !== "" ||
+          (filterValues?.sort && (
+            <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
+              <span>{filterValues.sort}</span> <X className="size-4 ml-4" />
+            </div>
+          ))}
       </div>
     </div>
   );

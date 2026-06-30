@@ -34,6 +34,7 @@ export const fetchAllProducts = createAsyncThunk(
       category = "",
       minPrice = "",
       maxPrice = "",
+      priceSort= "price_desc",
       sort = "newest",
     } = {},
     { rejectWithValue },
@@ -47,6 +48,7 @@ export const fetchAllProducts = createAsyncThunk(
           category,
           minPrice,
           maxPrice,
+          priceSort,
           sort,
         }).filter(([_, v]) => v !== ""),
       );

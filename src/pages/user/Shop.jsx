@@ -19,6 +19,12 @@ function Shop() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState(""); // raw input value
   const [isSearching, setIsSearching] = useState(false); //searching loading
+  const [filterValues, setFilterValues] = useState({
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+    priceSort: "",
+  });
 
   //product fetch
   const {
@@ -29,11 +35,6 @@ function Shop() {
     hasNextPage,
   } = useSelector((state) => state.product);
 
-  // category fetch
-  const { category, isCategoryLoading, categoryError } = useSelector(
-    (state) => state.category,
-  );
-
   const triggerId = useInfiniteScroll({
     hasNextPage,
     isLoading: isProductLoading,
@@ -41,7 +42,6 @@ function Shop() {
   });
 
   const isFirstRender = useRef(true);
-  const searchRef = useRef(""); // track latest search to detect when fetch matches
 
   // Debounce — only sets isSearching false AFTER fetch completes
   useEffect(() => {
@@ -67,8 +67,26 @@ function Shop() {
 
   // Fetch
   useEffect(() => {
-    dispatch(fetchAllProducts({ page, limit: 15, search }));
-  }, [dispatch, page, search]);
+    dispatch(
+      fetchAllProducts({
+        page,
+        limit: 15,
+        search,
+        category: filterValues.category,
+        minPrice: filterValues.minPrice,
+        maxPrice: filterValues.maxPrice,
+        priceSort: filterValues.priceSort,
+      }),
+    );
+  }, [
+    dispatch,
+    page,
+    search,
+    filterValues.category,
+    filterValues.minPrice,
+    filterValues.maxPrice,
+    filterValues.priceSort,
+  ]);
 
   // error toast
   useEffect(() => {
@@ -91,6 +109,8 @@ function Shop() {
         Shop In Your Choice
       </h1>
       <SearchBar
+        filterValues={filterValues}
+        setFilterValues={setFilterValues}
         className={"border-black"}
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}

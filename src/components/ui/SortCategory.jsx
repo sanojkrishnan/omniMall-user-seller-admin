@@ -1,12 +1,18 @@
+import { useState } from "react";
 
-function SortCategory({ categoryList }) {
+function SortCategory({ categoryList, setFilterValues }) {
+  const [select, setSelect] = useState("");
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-6 lg:gap-6 px-5 mt-5">
       {categoryList.map((item, index) => {
         return (
           <div
-            className="relative text-sm h-40 hover:scale-105 transition-all duration-500 cursor-pointer overflow-hidden"
+            className={`${select === item.category ? "border-2" : ""} rounded-xl relative text-sm h-40 hover:scale-105 transition-all duration-500 cursor-pointer overflow-hidden`}
             key={index}
+            onClick={() => {
+              setFilterValues((prev) => ({ ...prev, category: item.category }));
+              setSelect(item.category);
+            }}
           >
             <img
               className="absolute inset-0 w-full h-full object-cover rounded-xl"

@@ -3,10 +3,10 @@ import { cn } from "../../utils/CN";
 import { Button } from "./Button";
 
 const RANGE_MIN = 0;
-const RANGE_MAX = 100000; // ₹1,00,000
+const RANGE_MAX = 1000000; // ₹10,00,000
 const RANGE_STEP = 100;
 const DEFAULT_MIN = 0;
-const DEFAULT_MAX = 100000;
+const DEFAULT_MAX = 1000000;
 
 function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
   const [minVal, setMinVal] = useState(DEFAULT_MIN);
@@ -42,19 +42,20 @@ function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
     const val = Math.min(RANGE_MAX, Math.max(raw, minVal + RANGE_STEP));
     setMaxVal(val);
   }
-
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const timer = setTimeout(() => {
-      setFilterValues((prev) => {
-        return {
-          ...prev,
-          minPrice: minVal,
-          maxPrice: maxVal,
-          priceSort: sortOrder,
-        };
-      });
-    }, 500); // wait until the user stops dragging before triggering a fetch
-
+      setFilterValues((prev) => ({
+        ...prev,
+        minPrice: minVal,
+        maxPrice: maxVal,
+        priceSort: sortOrder,
+      }));
+    }, 500);
     return () => clearTimeout(timer);
   }, [minVal, maxVal, sortOrder]);
   // Shared thumb styles (Tailwind arbitrary variants)
@@ -226,14 +227,18 @@ function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
       <Button
         className={"border-white"}
         variant="secondary"
-        onClick={() =>
-          setFilterValues({
+        onClick={() => {
+          setMinVal(DEFAULT_MIN);
+          setMaxVal(DEFAULT_MAX);
+          setSortOrder("price_desc");
+          setFilterValues((prev) => ({
+            ...prev,
             category: "",
             minPrice: "",
             maxPrice: "",
             priceSort: "",
-          })
-        }
+          }));
+        }}
       >
         Reset filter
       </Button>

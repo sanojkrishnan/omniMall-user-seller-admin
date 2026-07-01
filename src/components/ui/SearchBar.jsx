@@ -68,6 +68,9 @@ export const SearchBar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const clearFilter = (key) => {
+    setFilterValues((prev) => ({ ...prev, [key]: "" }));
+  };
   return (
     <div className="flex flex-col m-4 mb-8 mt-6 border-b-[0.5px] pb-1">
       <div className="flex items-center justify-center relative">
@@ -142,38 +145,62 @@ export const SearchBar = ({
           />
         </div>
       </div>
+      {/* filter chips */}
       <div className="px-4 flex gap-2 mt-1">
         {filterValues.category !== "" && (
-          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
-            <span>{filterValues.category}</span> <X className="size-4 ml-4" />
+          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>{filterValues.category}</span>{" "}
+            <button
+              type="button"
+              onClick={() => clearFilter("category")}
+              aria-label="Remove category filter"
+            >
+              <X className="size-4 ml-4" />
+            </button>
           </div>
         )}
 
         {filterValues.minPrice !== 0 ||
-          (filterValues.minPrice !== "" && (
-            <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
-              <span>{filterValues.minPrice}</span> <X className="size-4 ml-4" />
+          (filterValues.maxPrice !== 1000000 && (
+            <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+              <span>
+                ₹{filterValues.minPrice} - ₹{filterValues.maxPrice}
+              </span>{" "}
+              <button
+                type="button"
+                onClick={() => clearFilter("minPrice")}
+                aria-label="Remove min price filter"
+              >
+                <X className="size-4 ml-4" />
+              </button>
             </div>
           ))}
-
-        {filterValues.maxPrice !== "" && (
-          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
-            <span>{filterValues.maxPrice}</span> <X className="size-4 ml-4" />
-          </div>
-        )}
 
         {filterValues.priceSort !== "" && (
-          <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
-            <span>{filterValues.priceSort}</span> <X className="size-4 ml-4" />
+          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>price: Ascending</span>{" "}
+            <button
+              type="button"
+              onClick={() => clearFilter("priceSort")}
+              aria-label="Remove price sort filter"
+            >
+              <X className="size-4 ml-4" />
+            </button>
           </div>
         )}
 
-        {filterValues.sort !== "" ||
-          (filterValues?.sort && (
-            <div className="bg-black px-4 text-white rounded-full text-center flex items-center justify-between p-1">
-              <span>{filterValues.sort}</span> <X className="size-4 ml-4" />
-            </div>
-          ))}
+        {filterValues.sort && (
+          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+            <span>{filterValues.sort}</span>{" "}
+            <button
+              type="button"
+              onClick={() => clearFilter("sort")}
+              aria-label="Remove sort filter"
+            >
+              <X className="size-4 ml-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

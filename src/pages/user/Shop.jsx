@@ -58,6 +58,15 @@ function Shop() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [
+    filterValues.category,
+    filterValues.minPrice,
+    filterValues.maxPrice,
+    filterValues.priceSort,
+  ]);
+
   // Clear isSearching only after fetch completes
   useEffect(() => {
     if (!isProductLoading) {

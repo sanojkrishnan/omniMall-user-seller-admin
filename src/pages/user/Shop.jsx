@@ -4,14 +4,15 @@ import {
   clearProductError,
   fetchAllProducts,
 } from "../../redux/slice/productSlice";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "../../components/ui/ProductCard";
 import CartLoading from "../../components/ui/CartLoading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import Loading from "../../components/ui/Loading";
-import { toast } from "react-toastify";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
+import { useToastError } from "../../hooks/useToastError";
+import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 
 function Shop() {
   const dispatch = useDispatch();
@@ -31,7 +32,6 @@ function Shop() {
     products = [],
     isProductLoading,
     productError,
-    totalPages,
     hasNextPage,
   } = useSelector((state) => state.product);
 
@@ -41,22 +41,14 @@ function Shop() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
-  const isFirstRender = useRef(true);
-
-  // Debounce — only sets isSearching false AFTER fetch completes
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    setIsSearching(true);
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-      // don't setIsSearching(false) here — wait for fetch to finish
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  // search debounce
+  useSearchDebounce({
+    setSearch,
+    setPage,
+    searchInput,
+    setIsSearching,
+    isLoading: isProductLoading,
+  });
 
   useEffect(() => {
     setPage(1);
@@ -66,13 +58,6 @@ function Shop() {
     filterValues.maxPrice,
     filterValues.priceSort,
   ]);
-
-  // Clear isSearching only after fetch completes
-  useEffect(() => {
-    if (!isProductLoading) {
-      setIsSearching(false);
-    }
-  }, [isProductLoading]);
 
   // Fetch
   useEffect(() => {
@@ -98,13 +83,16 @@ function Shop() {
   ]);
 
   // error toast
+  //toastify error
+  useToastError({
+    errorMessage: productError,
+    fallbackErrorMessage: "Failed to load products",
+  });
   useEffect(() => {
-    if (productError) {
-      toast.error(productError);
-      if (products.length !== 0) dispatch(clearProductError());
-      clearProductError();
-    }
-  }, [productError, dispatch]);
+    return () => {
+      dispatch(clearProductError());
+    };
+  }, []);
 
   const isFirstLoad = isProductLoading && products.length === 0;
   const isLoadingMore =
@@ -141,7 +129,9 @@ function Shop() {
         )}
 
         {/* error */}
-        {!isBusy && productError && <ErrorFallback />}
+        {!isBusy && productError && (
+          <ErrorFallback loading={isBusy} error={productError} />
+        )}
 
         {/* no results */}
         {!isBusy && !productError && products.length === 0 && (

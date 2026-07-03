@@ -5,9 +5,15 @@ import { Button } from "../../components/ui/Button";
 import { TriangleAlert } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { resetPassword } from "../../redux/slice/authSlice";
+import {
+  clearAuthState,
+  resetPassword,
+  clearAuthError,
+} from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
 import Loading from "../../components/ui/Loading";
+import { useToastError } from "../../hooks/useToastError";
+import { useEffect } from "react";
 
 function ResetPass() {
   const dispatch = useDispatch();
@@ -16,15 +22,21 @@ function ResetPass() {
 
   const { message, isLoading } = useSelector((state) => state.auth);
 
+  // error toast
+  useToastError({
+    errorMessage: message,
+    fallbackErrorMessage: "Failed to log in",
+  });
+  useEffect(() => {
+    dispatch(clearAuthState());
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
+
   // If no token in URL, show error early
   if (!token) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-red-500 font-semibold">
-          Invalid or missing reset link. Please request a new one.
-        </p>
-      </div>
-    );
+    toast.error("Invalid or missing reset link. Please request a new one.");
   }
 
   const formik = useFormik({
@@ -67,8 +79,6 @@ function ResetPass() {
 
       if (resetPassword.fulfilled.match(result)) {
         toast.success(message || "Password reset successful!");
-      } else {
-        toast.error(message || "Reset failed. Link may have expired.");
       }
     },
   });

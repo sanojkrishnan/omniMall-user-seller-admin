@@ -7,8 +7,12 @@ import { Button } from "../../components/ui/Button";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-import { googleProfileCompletion } from "../../redux/slice/authSlice";
+import {
+  googleProfileCompletion,
+  clearAuthError,
+} from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
+import { useToastError } from "../../hooks/useToastError";
 
 //google profile completion schema
 const googleProfileSchema = Yup.object({
@@ -24,7 +28,7 @@ const googleProfileSchema = Yup.object({
 
 function ProfileComplete() {
   const dispatch = useDispatch();
-  const { user, message } = useSelector((state) => state.auth);
+  const { user, message, authError } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +41,19 @@ function ProfileComplete() {
       toast.success(message || "Profile completed successfully");
     }
   }, [user, navigate, message]);
+
+  // error toast
+  useToastError({
+    errorMessage: authError,
+    fallbackErrorMessage: "Failed to complete profile",
+  });
+
+  // clear error only on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
 
   return (
     <div className="bg-[url('/logo%20and%20other%20utilities/lipstick_profile.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
@@ -152,7 +169,6 @@ function ProfileComplete() {
                 ) : null}
               </div>
               <Button variant="primary" type="submit">
-                {/* {isLoading ? <Loading variant="secondary" /> : "Submit"} */}{" "}
                 Submit
               </Button>
             </Form>

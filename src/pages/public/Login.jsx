@@ -9,11 +9,13 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "../../components/ui/Loading";
 import {
-  clearError,
+  clearAuthError,
+  clearAuthState,
   forgotPassword,
   loginUser,
 } from "../../redux/slice/authSlice";
 import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
+import { useToastError } from "../../hooks/useToastError";
 
 function Login() {
   const navigate = useNavigate();
@@ -39,12 +41,19 @@ function Login() {
         navigate("/seller/panel", { replace: true });
       }
     }
+  }, [user, message, navigate]);
 
-    if (error) {
-      toast.error(error);
-      dispatch(clearError()); // clear after showing toast
-    }
-  }, [user, error, message, dispatch, navigate]);
+  // error toast
+  useToastError({
+    errorMessage: error,
+    fallbackErrorMessage: "Failed to log in",
+  });
+  useEffect(() => {
+    dispatch(clearAuthState());
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
 
   const formik = useFormik({
     initialValues: {

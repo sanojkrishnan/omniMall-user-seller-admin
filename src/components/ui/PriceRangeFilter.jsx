@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../../utils/CN";
-import { Button } from "./Button";
 
 const RANGE_MIN = 0;
 const RANGE_MAX = 1000000; // ₹10,00,000
 const RANGE_STEP = 100;
-const DEFAULT_MIN = 0;
-const DEFAULT_MAX = 1000000;
 
-function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
-  const [minVal, setMinVal] = useState(DEFAULT_MIN);
-  const [maxVal, setMaxVal] = useState(DEFAULT_MAX);
-  const [sortOrder, setSortOrder] = useState("price_desc");
+
+function PriceRangeFilter({
+  colorVariants,
+  setFilterValues,
+  minVal,
+  maxVal,
+  setMinVal,
+  setMaxVal,
+  setSortOrder,
+  sortOrder,
+}) {
   const [sort, setSort] = useState("newest");
   const fillRef = useRef();
 
@@ -209,39 +213,6 @@ function PriceRangeFilter({ onApply, colorVariants, setFilterValues }) {
           </div>
         )}
       </div>
-
-      {/* Apply — sends clean payload to parent */}
-      <Button
-        className={"bg-white text-black"}
-        variant="secondary"
-        onClick={() =>
-          onApply?.({
-            minPrice: minVal, // number  — use as query param ?minPrice=
-            maxPrice: maxVal, // number  — use as query param ?maxPrice=
-            sortOrder, // "asc" | "desc" — use as ?sortOrder=
-          })
-        }
-      >
-        Apply filter
-      </Button>
-      <Button
-        className={"border-white"}
-        variant="secondary"
-        onClick={() => {
-          setMinVal(DEFAULT_MIN);
-          setMaxVal(DEFAULT_MAX);
-          setSortOrder("price_desc");
-          setFilterValues((prev) => ({
-            ...prev,
-            category: "",
-            minPrice: "",
-            maxPrice: "",
-            priceSort: "",
-          }));
-        }}
-      >
-        Reset filter
-      </Button>
     </div>
   );
 }

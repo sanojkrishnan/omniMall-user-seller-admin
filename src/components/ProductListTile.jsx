@@ -207,7 +207,7 @@ function ProductListTile(props) {
                 <h5>
                   MRP: <span>{product.mrp}$</span>
                 </h5>
-                <p>13% off</p>
+                <p>{product.offerPercentage}% Off</p>
                 <h5 className="text-xl">Seller Price: {product.offerPrice}$</h5>
               </div>
               <div>

@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/Button";
 import RelatedSuggestion from "../../components/ui/RelatedSuggestion";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  clearProductError,
   clearProductState,
   singleProductFetch,
 } from "../../redux/slice/productSlice";
@@ -23,7 +24,13 @@ import {
   clearCategoryState,
   singleCategoryFetch,
 } from "../../redux/slice/categorySlice";
-import { singleSellerFetch } from "../../redux/slice/sellerSlice";
+import {
+  clearSellerState,
+  singleSellerFetch,
+} from "../../redux/slice/sellerSlice";
+import { toast } from "react-toastify";
+import { extractError } from "../../utils/ErrorExtractor";
+import { useToastError } from "../../hooks/useToastError";
 
 const defaultProduct = {
   name: "Cosmos Wool Overcoat",
@@ -108,12 +115,16 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
   console.log("SINGLE SELLER :", singleSeller);
   console.log("SINGLE CATEGORY :", singleCategory);
+  console.log("SINGLE PRODUCT error :", productError);
+
   //product fetch
   useEffect(() => {
     dispatch(singleProductFetch({ id }));
 
     return () => {
-      dispatch(clearProductState()); // clear on unmount
+      dispatch(clearProductState());
+      dispatch(clearSellerState());
+      dispatch(clearCategoryState());
     };
   }, [id]);
   useEffect(() => {
@@ -127,6 +138,17 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
       dispatch(singleCategoryFetch({ id: singleProduct.categoryId }));
     }
   }, [singleProduct?.categoryId]);
+
+  //toastify error
+  useToastError({
+    errorMessage: productError,
+    fallbackErrorMessage: "Failed to load products",
+  });
+  useEffect(() => {
+    return () => {
+      dispatch(clearProductError());
+    };
+  }, []);
 
   const toggleSection = (key) =>
     setOpenSection((prev) => (prev === key ? null : key));
@@ -427,9 +449,8 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
           <RelatedSuggestion product={product} related={related} />
         </div>
       )}
-      {!isProductLoading && !singleProduct?._id && productError && (
-        <ErrorFallback />
-      )}
+
+      <ErrorFallback loading={isProductLoading} error={productError} />
     </>
   );
 }

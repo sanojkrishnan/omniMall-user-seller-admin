@@ -5,13 +5,18 @@ import { Eye, EyeOff, Trash, TriangleAlert, UserPen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { handleImage } from "../../utils/imageCompressor";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../redux/slice/authSlice";
+import {
+  clearAuthState,
+  registerUser,
+  clearAuthError,
+} from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import Loading from "../../components/ui/Loading";
 import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
 import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
+import { useToastError } from "../../hooks/useToastError";
 
 function Register() {
   const navigate = useNavigate();
@@ -26,16 +31,26 @@ function Register() {
   );
 
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-    } else if (otpSent?.status) {
+    if (otpSent?.status) {
       navigate(`/otp`);
       toast.success(message);
       console.log(message);
     }
-  }, [error, otpSent, navigate, message]);
+  }, [otpSent, navigate, message]);
 
   const dispatch = useDispatch();
+
+  // error toast
+  useToastError({
+    errorMessage: error,
+    fallbackErrorMessage: "Failed to log in",
+  });
+  useEffect(() => {
+    dispatch(clearAuthState());
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
   return (
     <>
       <div className="bg-[url('/logo%20and%20other%20utilities/register.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">

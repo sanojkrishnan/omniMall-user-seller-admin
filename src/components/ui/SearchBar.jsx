@@ -42,6 +42,9 @@ const categoryList = [
   },
 ];
 
+const DEFAULT_MIN = 0;
+const DEFAULT_MAX = 1000000;
+
 export const SearchBar = ({
   setFilterValues,
   className,
@@ -52,10 +55,19 @@ export const SearchBar = ({
   onChange,
   onFilterApply,
   filterValues,
+  filterOn = "products",
 }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef();
   const buttonRef = useRef();
+  const [minVal, setMinVal] = useState(DEFAULT_MIN);
+  const [maxVal, setMaxVal] = useState(DEFAULT_MAX);
+  const [sortOrder, setSortOrder] = useState("price_desc");
+
+  const onApply = (payload) => {
+    onFilterApply?.(payload);
+    setFilterOpen(false);
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -108,7 +120,6 @@ export const SearchBar = ({
               ? "opacity-100 scale-y-100 pointer-events-auto"
               : "opacity-0 scale-y-0 pointer-events-none",
           )}
-          style={{ height: "700px" }}
         >
           {/* Category sort */}
           <div
@@ -135,20 +146,58 @@ export const SearchBar = ({
           </div>
 
           {/* Price range filter */}
-          <PriceRangeFilter
-            setFilterValues={setFilterValues}
-            colorVariants={colorVariants}
-            onApply={(payload) => {
-              onFilterApply?.(payload);
-              setFilterOpen(false);
-            }}
-          />
+          {filterOn === "products" && (
+            <PriceRangeFilter
+              setFilterValues={setFilterValues}
+              colorVariants={colorVariants}
+              minVal={minVal}
+              maxVal={maxVal}
+              setMinVal={setMinVal}
+              setMaxVal={setMaxVal}
+            />
+          )}
+
+          <div>
+            {/* Apply — sends clean payload to parent */}
+            <Button
+              className={"bg-[#60001A] text-white"}
+              variant="secondary"
+              onClick={() =>
+                onApply?.({
+                  minPrice: minVal, // number  — use as query param ?minPrice=
+                  maxPrice: maxVal, // number  — use as query param ?maxPrice=
+                  sortOrder, // "asc" | "desc" — use as ?sortOrder=
+                })
+              }
+            >
+              Apply filter
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setMinVal(DEFAULT_MIN);
+                setMaxVal(DEFAULT_MAX);
+                setSortOrder("price_desc");
+                setFilterValues((prev) => ({
+                  ...prev,
+                  category: "",
+                  minPrice: "",
+                  maxPrice: "",
+                  priceSort: "",
+                }));
+              }}
+            >
+              Reset filter
+            </Button>
+          </div>
         </div>
       </div>
       {/* filter chips */}
       <div className="px-4 flex gap-2 mt-1">
         {filterValues.category !== "" && (
-          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+          <div
+            className={` ${colorVariants === "admin" ? "bg-[#60001A]" : "bg-black"} pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1`}
+          >
             <span>{filterValues.category}</span>{" "}
             <button
               type="button"
@@ -162,7 +211,9 @@ export const SearchBar = ({
 
         {filterValues.minPrice !== 0 ||
           (filterValues.maxPrice !== 1000000 && (
-            <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+            <div
+              className={` ${colorVariants === "admin" ? "bg-[#60001A]" : "bg-black"} pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1`}
+            >
               <span>
                 ₹{filterValues.minPrice} - ₹{filterValues.maxPrice}
               </span>{" "}
@@ -177,7 +228,9 @@ export const SearchBar = ({
           ))}
 
         {filterValues.priceSort !== "" && (
-          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+          <div
+            className={` ${colorVariants === "admin" ? "bg-[#60001A]" : "bg-black"} pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1`}
+          >
             <span>price: Ascending</span>{" "}
             <button
               type="button"
@@ -190,7 +243,9 @@ export const SearchBar = ({
         )}
 
         {filterValues.sort && (
-          <div className="bg-black pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1">
+          <div
+            className={` ${colorVariants === "admin" ? "bg-[#60001A]" : "bg-black"} pl-4 pr-2 text-white rounded-full text-center flex items-center justify-between p-1`}
+          >
             <span>{filterValues.sort}</span>{" "}
             <button
               type="button"

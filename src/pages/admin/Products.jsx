@@ -1,4 +1,4 @@
-import { AlertTriangle, Filter, Plus, TriangleAlert } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +22,10 @@ import Loading from "../../components/ui/Loading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
+import { clearAuthError } from "../../redux/slice/authSlice";
+import { useToastError } from "../../hooks/useToastError";
+import DataTable from "../../components/ui/DataTable";
+import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 
 function Products() {
   const dispatch = useDispatch();
@@ -33,16 +37,11 @@ function Products() {
     products = [],
     isProductLoading,
     productError,
-    totalPages,
     hasNextPage,
   } = useSelector((state) => state.product);
 
-  const { seller, isSellerLoading, sellerError } = useSelector(
-    (state) => state.seller,
-  );
-  const { category, isCategoryLoading, categoryError } = useSelector(
-    (state) => state.category,
-  );
+  const { seller } = useSelector((state) => state.seller);
+  const { category } = useSelector((state) => state.category);
 
   const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
@@ -105,26 +104,14 @@ function Products() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    setIsSearching(true);
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-      // don't setIsSearching(false) here — wait for fetch to finish
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  // Clear isSearching only after fetch completes
-  useEffect(() => {
-    if (!isProductLoading) {
-      setIsSearching(false);
-    }
-  }, [isProductLoading]);
+  // search debounce
+  useSearchDebounce({
+    setSearch,
+    setPage,
+    searchInput,
+    setIsSearching,
+    isLoading: isProductLoading,
+  });
 
   //seller and category fetch using ids in products
   useEffect(() => {
@@ -209,17 +196,16 @@ function Products() {
   }
   const topSellingProducts = topSellingRef.current ?? products.slice(0, 7);
 
+  useToastError({
+    errorMessage: productError,
+    fallbackErrorMessage: "Failed to log in",
+  });
   useEffect(() => {
-    if (productError) {
-      toast.error(productError);
-      setHadError(true);
-      dispatch(clearProductError());
-    }
-    if (sellerError) {
-      toast.error(sellerError);
-      dispatch(clearSellerError());
-    }
-  }, [productError, sellerError, dispatch]);
+    setHadError(true);
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
 
   const getSellerName = (sellerId) => {
     const s = sellerMap[getId(sellerId)];
@@ -230,6 +216,50 @@ function Products() {
   const isLoadingMore =
     isProductLoading && products.length !== 0 && !isSearching;
   const isBusy = isSearching || isFirstLoad;
+
+  //table columns
+  const columns = [
+    {
+      header: "Image",
+      render: (item) =>
+        item.productImage?.length ? (
+          <img
+            src={item.productImage[0].url}
+            alt={item.productName}
+            className="w-12 h-12 rounded-md object-cover"
+          />
+        ) : (
+          <TriangleAlert />
+        ),
+    },
+    {
+      header: "Product Name",
+      render: (item) => (
+        <>
+          <p className="font-semibold">{item.productName}</p>
+          <p className="text-xs text-gray-500">
+            {categoryMap[getId(item.categoryId)]?.name}
+          </p>
+        </>
+      ),
+    },
+    {
+      header: "Seller",
+      render: (item) => <div>{getSellerName(item.sellerId)}</div>,
+    },
+    {
+      header: "Stock",
+      accessor: "stock",
+    },
+    {
+      header: "MRP",
+      render: (item) => `₹ ${item.mrp}`,
+    },
+    {
+      header: "Seller Price",
+      render: (item) => `₹ ${item.offerPrice}`,
+    },
+  ];
 
   return (
     <>
@@ -282,232 +312,25 @@ function Products() {
 
           {!isBusy && !productError && products.length !== 0 && (
             <>
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th colSpan={6} className="text-lg p-6 border-b">
-                      Top Selling Products
-                    </th>
-                  </tr>
-                  <tr className="bg-slate-100 border-b">
-                    <th className="p-3 text-left">Image</th>
-                    <th className="p-3 text-left">Product Name</th>
-                    <th className="p-3 text-left">Seller</th>
-                    <th className="p-3 text-left">Stock</th>
-                    <th className="p-3 text-left">MRP</th>
-                    <th className="p-3 text-left">Seller Price</th>
-                  </tr>
-                </thead>
+              <DataTable
+                title="All Products"
+                columns={columns}
+                data={products}
+                onRowClick={(item) => {
+                  setOpenProduct(true);
+                  setAddProduct(false);
 
-                <tbody>
-                  {topSellingProducts.map((item, index) => (
-                    <tr
-                      key={item._id ?? index}
-                      className={`${
-                        index % 2 === 0 ? "bg-white" : "bg-slate-50"
-                      } hover:bg-slate-200 cursor-pointer border-b`}
-                      onClick={() => {
-                        setOpenProduct(true);
-                        setAddProduct(false);
-                        setSingleProduct({
-                          ...item,
-                          sellerData: sellerMap[getId(item.sellerId)] ?? null,
-                          categoryData:
-                            categoryMap[getId(item.categoryId)] ?? null,
-                        });
-                      }}
-                    >
-                      <td className="p-3">
-                        {item.productImage?.length > 0 ? (
-                          <div className="w-12 h-12 overflow-hidden rounded-md">
-                            <img
-                              className="w-full h-full object-cover"
-                              src={item.productImage?.[0]?.url}
-                              alt={item.productName}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 flex items-center justify-center border rounded-full">
-                            <TriangleAlert className="size-6" />
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="p-2">
-                        <p className="font-semibold text-sm">
-                          {item.productName}
-                        </p>
-                        <div className="text-xs text-gray-500">
-                          {isCategoryLoading ? (
-                            <div className="w-6 h-6">
-                              <Loading
-                                variant="secondary"
-                                className="size-3 border-2 border-gray-500"
-                              />
-                            </div>
-                          ) : categoryError ? (
-                            ""
-                          ) : (
-                            (categoryMap[getId(item.categoryId)]?.name ??
-                            "Unknown Category")
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="p-3 text-sm">
-                        {isSellerLoading ? (
-                          <Loading className="size-6 border" />
-                        ) : sellerError ? (
-                          "Failed to fetch seller"
-                        ) : (
-                          (() => {
-                            const sellerObj = sellerMap[getId(item.sellerId)];
-                            return (
-                              <div className="flex w-fit gap-2 border p-1 pr-2 rounded-full justify-center items-center">
-                                <div className="w-8 h-8 rounded-full border flex justify-center items-center text-center">
-                                  {sellerObj?.profileImage?.url ? (
-                                    <img
-                                      className="w-8 h-8 rounded-full object-cover"
-                                      src={sellerObj.profileImage.url}
-                                      alt={getSellerName(item.sellerId)}
-                                    />
-                                  ) : (
-                                    <AlertTriangle className="size-4" />
-                                  )}
-                                </div>
-                                {getSellerName(item.sellerId)}
-                              </div>
-                            );
-                          })()
-                        )}
-                      </td>
-
-                      <td className="p-3 text-sm">{item.stock}</td>
-
-                      <td className="p-3">
-                        <span className="text-xs border p-1 px-2 rounded-lg">
-                          ₹ {item.mrp}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span className="text-xs border p-1 px-2 rounded-lg">
-                          ₹ {item.offerPrice}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-
-                <thead>
-                  <tr>
-                    <th colSpan={6} className="text-lg p-6 border-b">
-                      All Products
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {products.map((item, index) => (
-                    <tr
-                      key={`all-${item._id ?? index}`}
-                      className={`${
-                        index % 2 === 0 ? "bg-slate-50" : "bg-white"
-                      } hover:bg-slate-200 cursor-pointer border-y`}
-                      onClick={() => {
-                        setOpenProduct(true);
-                        setAddProduct(false);
-                        setSingleProduct({
-                          ...item,
-                          sellerData: sellerMap[getId(item.sellerId)] ?? null,
-                          categoryData:
-                            categoryMap[getId(item.categoryId)] ?? null,
-                        });
-                      }}
-                    >
-                      <td className="p-3">
-                        {item.productImage?.length > 0 ? (
-                          <div className="w-12 h-12 overflow-hidden rounded-md">
-                            <img
-                              className="w-full h-full object-cover"
-                              src={item.productImage?.[0]?.url}
-                              alt={item.productName}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 flex items-center justify-center border rounded-full">
-                            <TriangleAlert className="size-6" />
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="p-2">
-                        <p className="font-semibold text-sm">
-                          {item.productName}
-                        </p>
-                        <div className="text-xs text-gray-500">
-                          {isCategoryLoading ? (
-                            <div className="w-6 h-6">
-                              <Loading
-                                variant="secondary"
-                                className="size-3 border-2 border-gray-500"
-                              />
-                            </div>
-                          ) : categoryError ? (
-                            ""
-                          ) : (
-                            (categoryMap[getId(item.categoryId)]?.name ??
-                            "Unknown Category")
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="p-3 text-sm">
-                        {isSellerLoading ? (
-                          <Loading className="size-6 border" />
-                        ) : sellerError ? (
-                          "Failed to fetch seller"
-                        ) : (
-                          (() => {
-                            const sellerObj = sellerMap[item.sellerId];
-                            return (
-                              <div className="flex w-fit gap-2 border p-1 pr-2 rounded-full justify-center items-center">
-                                <div className="w-8 h-8 rounded-full border flex justify-center items-center text-center">
-                                  {sellerObj?.profileImage?.url ? (
-                                    <img
-                                      className="w-8 h-8 rounded-full object-cover"
-                                      src={sellerObj.profileImage.url}
-                                      alt={getSellerName(item.sellerId)}
-                                    />
-                                  ) : (
-                                    <AlertTriangle className="size-4" />
-                                  )}
-                                </div>
-                                {getSellerName(item.sellerId)}
-                              </div>
-                            );
-                          })()
-                        )}
-                      </td>
-                      <td className="p-2 text-sm">{item.stock}</td>
-
-                      <td className="p-2">
-                        <span className="text-xs border p-1 px-2 rounded-lg">
-                          ₹ {item.mrp}
-                        </span>
-                      </td>
-                      <td className="p-2">
-                        <span className="text-xs border p-1 px-2 rounded-lg">
-                          ₹ {item.offerPrice}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div id={triggerId} className="h-10" />
+                  setSingleProduct({
+                    ...item,
+                    sellerData: sellerMap[getId(item.sellerId)] ?? null,
+                    categoryData: categoryMap[getId(item.categoryId)] ?? null,
+                  });
+                }}
+                footer={<div id={triggerId} className="h-10" />}
+              />
             </>
           )}
-          {!isBusy && productError && <ErrorFallback />}
+          <ErrorFallback loading={isBusy} error={productError} />
 
           {/* no results */}
           {!isBusy && !productError && products.length === 0 && (

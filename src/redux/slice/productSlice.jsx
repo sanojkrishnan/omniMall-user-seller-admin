@@ -34,7 +34,7 @@ export const fetchAllProducts = createAsyncThunk(
       category = "",
       minPrice = "",
       maxPrice = "",
-      priceSort= "price_desc",
+      priceSort = "price_desc",
       sort = "newest",
     } = {},
     { rejectWithValue },
@@ -102,8 +102,8 @@ const productSlice = createSlice({
     //register product
     builder
       .addCase(addAProduct.pending, (state) => {
-        state.isProductLoading = true;
         state.productError = null;
+        state.isProductLoading = true;
       })
       .addCase(addAProduct.fulfilled, (state, action) => {
         state.isProductLoading = false;
@@ -143,9 +143,9 @@ const productSlice = createSlice({
         state.limit = action.payload.data.pagination?.itemsPerPage;
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
+        if (action.meta.aborted) return; // <-- add this line
         state.isProductLoading = false;
         state.productError = action.payload || "Failed to fetch products";
-        //  keep existing products — only reset on page 1 failure
         if (action.meta.arg.page === 1) {
           state.products = [];
         }
@@ -153,8 +153,8 @@ const productSlice = createSlice({
     //fetch single product
     builder
       .addCase(singleProductFetch.pending, (state) => {
-        state.isProductLoading = true;
         state.productError = null;
+        state.isProductLoading = true;
       })
       .addCase(singleProductFetch.fulfilled, (state, action) => {
         state.isProductLoading = false;
@@ -162,7 +162,8 @@ const productSlice = createSlice({
       })
       .addCase(singleProductFetch.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload?.error?.message;
+        console.log("REJECTED PAYLOAD:", action.payload);
+        state.productError = action.payload;
         state.singleProduct = {};
       });
     //delete products
@@ -179,7 +180,7 @@ const productSlice = createSlice({
       })
       .addCase(deleteSingleProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload || "Deletion failed";
+        state.productError = action.payload;
       });
   },
 });

@@ -7,8 +7,14 @@ import { FormCard } from "../../components/ui/FormCard";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { verifyOTP, resendOTP } from "../../redux/slice/authSlice";
+import {
+  verifyOTP,
+  resendOTP,
+  clearAuthState,
+  clearAuthError,
+} from "../../redux/slice/authSlice";
 import Loading from "../../components/ui/Loading";
+import { useToastError } from "../../hooks/useToastError";
 
 function OTP() {
   const navigate = useNavigate();
@@ -67,6 +73,18 @@ function OTP() {
       }),
     );
   };
+
+  // error toast
+  useToastError({
+    errorMessage: error,
+    fallbackErrorMessage: "Failed to log in",
+  });
+  useEffect(() => {
+    dispatch(clearAuthState());
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, []);
 
   const formik = useFormik({
     initialValues: {

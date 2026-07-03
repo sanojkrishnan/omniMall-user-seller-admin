@@ -10,6 +10,7 @@ socketURL: import.meta.env.VITE_SOCKET_URL,
 export const AUTH_CONFIG = {
   tokenKey: "authToken",
   adminTokenKey: "adminToken",
+  sellerTokenKey: "sellerToken",
   userKey: "user",
   adminKey: "admin",
   refreshThreshold: 5 * 60 * 1000, // 5 minutes before expiry

@@ -25,6 +25,9 @@ export default {
 
           "100%": { transform: "translateX(0) translateY(0) rotate(0deg)" },
         },
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
         width: {
           "0%": { transform: "scaleX(0.3)" },
           "10%": { transform: "scaleX(1)" },
@@ -59,6 +62,7 @@ export default {
         width: "width 3s ease-in-out infinite",
         loopScroll: "loopScroll 2s linear infinite",
         bellRing: "bellRing 0.8s ease-in-out",
+        shimmer: "shimmer 1.5s infinite",
       },
     },
   },

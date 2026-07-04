@@ -37,6 +37,10 @@ function CartLoading() {
         <div className=" w-[5px] h-[2px] ml-2 bg-black"></div>
         <div className=" w-[5px] h-[2px] ml-2 bg-black"></div>
       </div>
+
+      <div className="flex items-center justify-center mt-2 w-full overflow-visible">
+        <p className="text-xs font-thin">Loading...</p>
+      </div>
     </div>
   );
 }

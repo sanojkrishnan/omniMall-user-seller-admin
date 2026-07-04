@@ -3,6 +3,10 @@ import ProductCard from "../../components/ui/ProductCard";
 import { Button } from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 import SortCategory from "../../components/ui/SortCategory";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllProducts } from "../../redux/slice/productSlice";
+import CartLoading from "../../components/ui/CartLoading";
+import ErrorFallback from "../../components/ui/ErrorFallback";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -10,141 +14,27 @@ const carouselImages = [
   { image: "/src/assets/carausal/home Pikbest.jfif", alt: "Home" },
 ];
 
-const featuredProducts = [
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 5,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 5,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 2,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 1,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 4,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-  {
-    productName: "Lenovo laptop",
-    productDesc:
-      "32gb/1tb intel 13th gen i5 | 16inch 100% srgb ips display | gray | dedicated intel graphics",
-    rating: 3,
-    productImages: [
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-      { image: "/src/assets/homeSort/product-laptop.jpg" },
-    ],
-    mrp: 150000,
-    offerPercentage: 20,
-    offerPrice: 120000,
-    quantity: 14,
-  },
-];
-
-const categoryList = [
-  {
-    category: "Electronics",
-    image: "/src/assets/homeSort/electronics.jpeg",
-    alt: "electronics",
-  },
-  {
-    category: "Home Appliances",
-    image: "/src/assets/homeSort/Kitchen Appliances Setup.jpeg",
-    alt: "home appliances",
-  },
-  {
-    category: "Beauty",
-    image: "/src/assets/homeSort/beauty.jpeg",
-    alt: "beauty",
-  },
-  {
-    category: "Fashion",
-    image: "/src/assets/homeSort/fashion.jpeg",
-    alt: "fashion",
-  },
-  {
-    category: "Accessories",
-    image: "/src/assets/homeSort/accessories.jpeg",
-    alt: "accessories",
-  },
-  {
-    category: "Beverages",
-    image: "/src/assets/homeSort/beverages.jpeg",
-    alt: "beverages",
-  },
-];
-
 function Home() {
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  //product fetch
+  const {
+    products = [],
+    isProductLoading,
+    productError,
+  } = useSelector((state) => state.product);
+
+  // Fetch
+  useEffect(() => {
+    dispatch(
+      fetchAllProducts({
+        page: 1,
+        limit: 15,
+      }),
+    );
+  }, [dispatch]);
 
   // Auto change every 3 seconds
   useEffect(() => {
@@ -199,7 +89,7 @@ function Home() {
           <h1 className="text-3xl font-semibold">Shop By Category</h1>
           <p>Explore our wide range of products</p>
         </div>
-        <SortCategory categoryList={categoryList} />
+        <SortCategory />
       </div>
 
       {/* featured products  */}
@@ -208,18 +98,28 @@ function Home() {
           <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
           <p>Handpicked favorites just for you</p>
         </div>
-        <ProductCard products={featuredProducts} />
-        <div className="flex justify-center items-center mt-10">
-          <Button
-            variant="secondary"
-            className={"w-fit"}
-            onClick={() => {
-              navigate("/user/shop");
-            }}
-          >
-            view more
-          </Button>
-        </div>
+        {isProductLoading && !productError && (
+          <div className="w-full h-[60vh] flex justify-center items-center">
+            <CartLoading />
+          </div>
+        )}
+        {products.length !== 0 && !isProductLoading && !productError && (
+          <>
+            <ProductCard products={products} />
+            <div className="flex justify-center items-center mt-10">
+              <Button
+                variant="secondary"
+                className={"w-fit"}
+                onClick={() => {
+                  navigate("/user/shop");
+                }}
+              >
+                view more
+              </Button>
+            </div>
+          </>
+        )}
+        <ErrorFallback loading={isProductLoading} error={productError} />
       </div>
 
       {/* coupons  */}

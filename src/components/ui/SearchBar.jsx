@@ -9,39 +9,6 @@ const variants = {
   primary: "backdrop-blur-lg border rounded-2xl border-black",
 };
 
-const categoryList = [
-  {
-    category: "Electronics",
-    image: "/src/assets/homeSort/electronics.jpeg",
-    alt: "electronics",
-  },
-  {
-    category: "Home Appliances",
-    image: "/src/assets/homeSort/Kitchen Appliances Setup.jpeg",
-    alt: "home appliances",
-  },
-  {
-    category: "Beauty",
-    image: "/src/assets/homeSort/beauty.jpeg",
-    alt: "beauty",
-  },
-  {
-    category: "Fashion",
-    image: "/src/assets/homeSort/fashion.jpeg",
-    alt: "fashion",
-  },
-  {
-    category: "Accessories",
-    image: "/src/assets/homeSort/accessories.jpeg",
-    alt: "accessories",
-  },
-  {
-    category: "Beverages",
-    image: "/src/assets/homeSort/beverages.jpeg",
-    alt: "beverages",
-  },
-];
-
 const DEFAULT_MIN = 0;
 const DEFAULT_MAX = 1000000;
 
@@ -139,10 +106,7 @@ export const SearchBar = ({
             <div className="flex items-center justify-center">
               <h5 className="text-center">Category</h5>
             </div>
-            <SortCategory
-              setFilterValues={setFilterValues}
-              categoryList={categoryList}
-            />
+            <SortCategory setFilterValues={setFilterValues} />
           </div>
 
           {/* Price range filter */}
@@ -160,7 +124,7 @@ export const SearchBar = ({
           <div>
             {/* Apply — sends clean payload to parent */}
             <Button
-              className={"bg-[#60001A] text-white"}
+              className={`${colorVariants === "admin" ? "bg-[#60001A]" : "bg-black"} text-white`}
               variant="secondary"
               onClick={() =>
                 onApply?.({

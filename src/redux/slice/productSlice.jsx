@@ -50,6 +50,7 @@ export const fetchAllProducts = createAsyncThunk(
           maxPrice,
           priceSort,
           sort,
+          isFeatured: false,
         }).filter(([_, v]) => v !== ""),
       );
       const res = await productAPI.fetchAllProduct(params);

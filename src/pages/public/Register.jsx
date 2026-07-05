@@ -17,6 +17,9 @@ import { Button } from "../../components/ui/Button";
 import { FormCard } from "../../components/ui/FormCard";
 import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 import { useToastError } from "../../hooks/useToastError";
+import H2 from "../../components/ui/H2";
+import H3 from "../../components/ui/H3";
+import P2 from "../../components/ui/P2";
 
 function Register() {
   const navigate = useNavigate();
@@ -58,9 +61,7 @@ function Register() {
           <div className=" w-full flex justify-center items-center mb-2 mt-2">
             <div className="text-center">
               <OmniMall />
-              <h3 className="text-center pt-2 font-bold text-blue-800">
-                Sign Up
-              </h3>
+              <H3 className="font-bold text-blue-800">Sign Up</H3>
             </div>
           </div>
           {/* Step indicator */}
@@ -162,10 +163,10 @@ function Register() {
 
                           <div className="h-5">
                             {stepErrors.firstName && (
-                              <p className="text-red-500 text-sm">
+                              <P2 className="text-red-500 text-left">
                                 <TriangleAlert className="size-3 inline-block" />{" "}
                                 {stepErrors.firstName}
-                              </p>
+                              </P2>
                             )}
                           </div>
                         </div>
@@ -186,10 +187,10 @@ function Register() {
                           />
                           <div className="h-5">
                             {stepErrors.lastName && (
-                              <p className="text-red-500 text-sm">
+                              <P2 className="text-red-500 text-left">
                                 <TriangleAlert className="size-3 inline-block" />{" "}
                                 {stepErrors.lastName}
-                              </p>
+                              </P2>
                             )}
                           </div>
                         </div>
@@ -208,10 +209,10 @@ function Register() {
                       />
                       <div className="h-5">
                         {stepErrors.email && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.email}
-                          </p>
+                          </P2>
                         )}
                       </div>
                     </div>
@@ -232,10 +233,10 @@ function Register() {
                       />
                       <div className="h-5">
                         {stepErrors.dateOfBirth && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.dateOfBirth}
-                          </p>
+                          </P2>
                         )}
                       </div>
                       {/* gender */}
@@ -271,10 +272,10 @@ function Register() {
                       </div>
                       <div className="h-5">
                         {stepErrors.gender && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.gender}
-                          </p>
+                          </P2>
                         )}
                       </div>
                     </div>
@@ -334,11 +335,11 @@ function Register() {
                         </div>
                       </div>
                       <div className="text-center">
-                        <h2 className="font-semibold mb-6">Profile picture</h2>
-                        <p>
+                        <H2 className="font-semibold mb-6">Profile picture</H2>
+                        <P2>
                           Add your profile picture here. The profile picture is
                           not mandatory, click next to skip
-                        </p>
+                        </P2>
                       </div>
                     </div>
                     {/* fourth set */}
@@ -369,10 +370,10 @@ function Register() {
                       </div>
                       <div className="h-5">
                         {stepErrors.password && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.password}
-                          </p>
+                          </P2>
                         )}
                       </div>
                       {/* confirm password */}
@@ -406,10 +407,10 @@ function Register() {
                       </div>
                       <div className="h-5">
                         {stepErrors.confirmPassword && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.confirmPassword}
-                          </p>
+                          </P2>
                         )}
                       </div>
                       {/* terms and conditions */}
@@ -427,10 +428,10 @@ function Register() {
                       </label>
                       <div className="h-5">
                         {stepErrors.conditionCheck && (
-                          <p className="text-red-500 text-sm">
+                          <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.conditionCheck}
-                          </p>
+                          </P2>
                         )}
                       </div>
                     </div>

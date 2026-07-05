@@ -13,6 +13,7 @@ import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import { useToastError } from "../../hooks/useToastError";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
+import H1 from "../../components/ui/H1";
 
 function Shop() {
   const dispatch = useDispatch();
@@ -33,8 +34,8 @@ function Shop() {
     isProductLoading,
     productError,
     hasNextPage,
+    totalProducts,
   } = useSelector((state) => state.product);
-
   const triggerId = useInfiniteScroll({
     hasNextPage,
     isLoading: isProductLoading,
@@ -102,18 +103,22 @@ function Shop() {
   return (
     <div>
       <div className="w-full h-24"></div>
-      <h1 className="text-center text-3xl font-semibold mt-8">
-        Shop In Your Choice
-      </h1>
-      <SearchBar
-        filterValues={filterValues}
-        setFilterValues={setFilterValues}
-        className={"border-black"}
-        value={searchInput}
-        onChange={(e) => setSearchInput(e.target.value)}
-      />
+      <H1>Shop In Your Choice</H1>
+      <div className="max-w-2xl lg:max-w-5xl mx-auto px-6 mt-8">
+        <SearchBar
+          filterValues={filterValues}
+          setFilterValues={setFilterValues}
+          className={"border-black"}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </div>
+      {/* count of items and sellers */}
+      <p className="text-center text-sm text-neutral-500">
+        {totalProducts} {totalProducts === 1 ? "product" : "total products"}
+      </p>
 
-      <div>
+      <div className="max-w-7xl mx-auto px-6 mt-8 pb-24">
         {/* initial load or searching */}
         {isBusy && !productError && (
           <div className="w-full h-[60vh] flex justify-center items-center">

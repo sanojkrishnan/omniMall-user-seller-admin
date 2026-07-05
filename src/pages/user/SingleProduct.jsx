@@ -28,36 +28,16 @@ import {
   clearSellerState,
   singleSellerFetch,
 } from "../../redux/slice/sellerSlice";
-import { toast } from "react-toastify";
-import { extractError } from "../../utils/ErrorExtractor";
 import { useToastError } from "../../hooks/useToastError";
+import H1 from "../../components/ui/H1";
+import P2 from "../../components/ui/P2";
+import P from "../../components/ui/P";
 
 const defaultProduct = {
-  name: "Cosmos Wool Overcoat",
-  category: "Outerwear",
   subcategory: "Coats",
   sku: "OM-7741-BLK",
-  price: 4499,
-  mrp: 5999,
-  rating: 4.6,
   reviewCount: 128,
-  stock: 12,
-  description:
-    "Tailored from a heavyweight wool blend, cut for a relaxed silhouette that layers easily over knitwear. Finished with horn buttons and a half-belt back.",
-  images: [
-    "https://placehold.co/640x800/0a0a0a/ffffff?text=01",
-    "https://placehold.co/640x800/1a1a1a/ffffff?text=02",
-    "https://placehold.co/640x800/2a2a2a/ffffff?text=03",
-    "https://placehold.co/640x800/3a3a3a/ffffff?text=04",
-    "https://placehold.co/640x800/3a3a3a/ffffff?text=05",
-  ],
   sizes: ["XS", "S", "M", "L", "XL"],
-  seller: {
-    name: "Norden & Co.",
-    verified: true,
-    rating: 4.8,
-    sales: "12.4k",
-  },
   specs: [
     { label: "Material", value: "80% Wool, 20% Nylon" },
     { label: "Fit", value: "Relaxed" },
@@ -259,9 +239,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
             {/* Info panel */}
             <div className="order-3 lg:order-3">
-              <h1 className="font-serif text-3xl leading-tight tracking-tight">
+              <H1 className="font-serif text-left leading-tight tracking-tight">
                 {singleProduct.productName}
-              </h1>
+              </H1>
 
               <div className="mt-2 flex items-center gap-3">
                 <div className="flex items-center gap-1">
@@ -330,11 +310,11 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                           <BadgeCheck className="size-4 fill-green-500 text-white" />
                         )}
                       </div>
-                      <p className="text-xs text-neutral-500">
+                      <P2 className="text-xs text-left text-neutral-500">
                         {singleSeller?.rating ? singleSeller.rating : "0"}{" "}
                         rating ·{" "}
                         {singleSeller?.sales ? singleSeller.sales : "0"} sales
-                      </p>
+                      </P2>
                     </div>
                   </div>
                   <button className="text-xs font-medium underline underline-offset-2">
@@ -345,9 +325,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
               {/* Size selector */}
               <div className="mt-6">
-                <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+                <P2 className="text-xs text-left font-medium uppercase tracking-wide text-neutral-500">
                   Select size
-                </p>
+                </P2>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {product.sizes.map((size) => (
                     <button
@@ -414,9 +394,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               isOpen={openSection === "description"}
               onToggle={() => toggleSection("description")}
             >
-              <p className="text-sm leading-relaxed text-neutral-600">
+              <P className="text-sm text-left leading-relaxed text-neutral-600">
                 {singleProduct.productDesc}
-              </p>
+              </P>
             </AccordionRow>
 
             <AccordionRow
@@ -439,10 +419,10 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               isOpen={openSection === "shipping"}
               onToggle={() => toggleSection("shipping")}
             >
-              <p className="text-sm leading-relaxed text-neutral-600">
+              <P2 className="text-sm text-left leading-relaxed text-neutral-600">
                 Delivered in 3–5 business days. Free returns within 30 days of
                 delivery, unworn and with original tags.
-              </p>
+              </P2>
             </AccordionRow>
           </div>
 

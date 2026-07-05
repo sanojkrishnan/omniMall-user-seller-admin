@@ -7,6 +7,7 @@ import {
 import OmniMall from "./OmniMall";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import P2 from "./P2";
 
 const headerContent = ["Home", "Shop", "Cart", "Profile"];
 
@@ -81,9 +82,9 @@ function Header({ hideMenu, borderLine, selection }) {
                     <Icon className="size-6" />
                   )}
 
-                  <p>
+                  <P2>
                     {item === "Profile" ? (user ? "Profile" : "Login") : item}
-                  </p>
+                  </P2>
 
                   {/* selection indicator */}
                   <div
@@ -132,9 +133,9 @@ function Header({ hideMenu, borderLine, selection }) {
                     <Icon className="size-4" />
                   )}
 
-                  <p>
+                  <P2>
                     {item === "Profile" ? (user ? "Profile" : "Login") : item}
-                  </p>
+                  </P2>
 
                   {/* selection indicator */}
                   <div

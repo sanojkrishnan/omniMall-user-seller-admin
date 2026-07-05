@@ -9,6 +9,8 @@ import {
   Users,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import P2 from "./P2";
+import H3 from "./H3";
 
 function LineChart({ children, index }) {
   const isDown =
@@ -53,16 +55,18 @@ function LineChart({ children, index }) {
             )}
           </div>
           <div className="ml-4">
-            <h1 className="text-xs">{children.cardName}</h1>
-            <h3 className="text-lg font-semibold">{index === 0 || index === 7 ? "₹" : ""} {children.rate}</h3>
-            <p>
+            <P2 className="md:text-xs">{children.cardName}</P2>
+            <H3 className="">
+              {index === 0 || index === 7 ? "₹" : ""} {children.rate}
+            </H3>
+            <P2>
               <span
                 className={`${Number(children.percentage) > 0 ? "text-green-500" : "text-red-500"} font-semibold text-sm`}
               >
                 {children.percentage} %
               </span>{" "}
               <span className="text-xs">{children.from}</span>
-            </p>
+            </P2>
           </div>
           <div className="w-12 h-12 ml-2 mt-6">
             <ResponsiveContainer width="100%" height="100%">

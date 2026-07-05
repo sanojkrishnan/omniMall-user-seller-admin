@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import { fetchAllCategories } from "../../redux/slice/categorySlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
+import P from "../../components/ui/P";
 
 function Categories() {
   const [openCategory, setOpenCategory] = useState(false);
@@ -43,7 +44,7 @@ function Categories() {
       header: "Category Name",
       render: (item) => (
         <>
-          <p className="font-semibold">{item.name}</p>
+          <P className="text-left">{item.name}</P>
         </>
       ),
     },

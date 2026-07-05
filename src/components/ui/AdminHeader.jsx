@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
 import { BellIcon } from "lucide-react";
+import P2 from "./P2";
+import H1 from "./H1";
 
 function AdminHeader({ selection }) {
   const [showNotification, setShowNotification] = useState(false);
@@ -53,13 +55,13 @@ function AdminHeader({ selection }) {
           {/* notification bar */}
 
           <div
-            className={`border absolute top-16 right-[-130px] rounded-b-lg p-2 text-center shadow-lg w-80 min-h-4 ${showNotification ? "scale-y-100 " : "scale-y-0 "} origin-top transition-all duration-500 bg-white`}
+            className={`border absolute top-16 right-[-130px] rounded-b-lg p-2 shadow-lg w-80 min-h-4 ${showNotification ? "scale-y-100 " : "scale-y-0 "} origin-top transition-all duration-500 bg-white`}
           >
-            <p
+            <P2
               className={`${showNotification ? "opacity-100" : "opacity-0"} transition-all duration-200 text-gray-500`}
             >
               No notifications
-            </p>
+            </P2>
           </div>
         </div>
 
@@ -74,8 +76,8 @@ function AdminHeader({ selection }) {
           />
         </div>
         <div>
-          <h1 className="font-semibold text-lg">Admin</h1>
-          <p className="text-gray-700">admin123@omnimall.com</p>
+          <H1 className="font-semibold lg:text-lg mt-0 text-left">Admin</H1>
+          <P2 className="text-gray-700 text-left">admin123@omnimall.com</P2>
         </div>
       </div>
     </div>

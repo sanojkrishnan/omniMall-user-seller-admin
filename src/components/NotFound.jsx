@@ -1,6 +1,8 @@
-import React from "react";
 import { Button } from "./ui/Button";
 import { useNavigate } from "react-router-dom";
+import H2 from "./ui/H2";
+import P2 from "./ui/P2";
+import H1 from "./ui/H1";
 
 function NotFound() {
   const navigate = useNavigate();
@@ -12,11 +14,11 @@ function NotFound() {
           src="/src/assets/404.png"
           alt="404 not found"
         />
-        <h2 className="font-bold text-xl text-center">Oops..!</h2>
-        <p className="font-normal text-center mt-4">
+        <H2 className="font-bold">Oops..!</H2>
+        <P2 className="mt-4">
           Something Went <br /> Wrong
-        </p>
-        <h1 className="font-extrabold text-6xl mt-4">404</h1>
+        </P2>
+        <H1 className="font-extrabold text-6xl mt-4">404</H1>
         <Button onClick={() => navigate(-1)}>Go Back</Button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import SortCategory from "./SortCategory";
 import PriceRangeFilter from "./PriceRangeFilter";
 import { cn } from "../../utils/CN";
+import H5 from "./H5";
 
 const variants = {
   primary: "backdrop-blur-lg border rounded-2xl border-black",
@@ -104,7 +105,7 @@ export const SearchBar = ({
             }
           >
             <div className="flex items-center justify-center">
-              <h5 className="text-center">Category</h5>
+              <H5>Category</H5>
             </div>
             <SortCategory setFilterValues={setFilterValues} />
           </div>

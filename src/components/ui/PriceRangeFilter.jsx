@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../../utils/CN";
+import H5 from "./H5";
+import P2 from "./P2";
 
 const RANGE_MIN = 0;
 const RANGE_MAX = 1000000; // ₹10,00,000
 const RANGE_STEP = 100;
-
 
 function PriceRangeFilter({
   colorVariants,
@@ -104,7 +105,7 @@ function PriceRangeFilter({
     >
       {/* Header */}
       <div className="flex items-center justify-center mb-6">
-        <h5 className="text-center tracking-wide">Price Range</h5>
+        <H5 className="tracking-wide">Price Range</H5>
       </div>
 
       {/* Min / Max number inputs */}
@@ -179,9 +180,9 @@ function PriceRangeFilter({
 
       {/* Sort order toggle */}
       <div className="mb-5">
-        <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">
+        <P2 className="md:text-xs text-gray-400 uppercase tracking-wider mb-3">
           Sort order
-        </p>
+        </P2>
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setSortOrder("price_asc")}

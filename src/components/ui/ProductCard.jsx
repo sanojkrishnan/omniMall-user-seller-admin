@@ -2,6 +2,8 @@ import { HeartIcon, ShoppingCart, TriangleAlert } from "lucide-react";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
 import { useNavigate } from "react-router-dom";
+import P from "./P";
+import H2 from "./H2";
 
 function ProductCard({ products }) {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ function ProductCard({ products }) {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-300">
                 <TriangleAlert className="size-10" />
-                <p className="text-sm">No image available</p>
+                <P className="text-sm">No image available</P>
               </div>
             )}
 
@@ -45,9 +47,9 @@ function ProductCard({ products }) {
 
           {/* Body */}
           <div className="flex flex-col gap-2 text-center p-4 flex-1">
-            <h2 className="text-[15px] font-medium text-gray-800 leading-snug">
+            <H2 className="lg:text-[15px] md:text-[15px] text-[15px] font-medium text-gray-800 leading-snug">
               {item.productName}
-            </h2>
+            </H2>
             <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">
               {item.productDesc}
             </p>

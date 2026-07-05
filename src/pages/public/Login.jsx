@@ -16,6 +16,9 @@ import {
 } from "../../redux/slice/authSlice";
 import GoogleSignInButton from "../../components/ui/GoogleSiginButton";
 import { useToastError } from "../../hooks/useToastError";
+import H3 from "../../components/ui/H3";
+import P from "../../components/ui/P";
+import P2 from "../../components/ui/P2";
 
 function Login() {
   const navigate = useNavigate();
@@ -119,9 +122,9 @@ function Login() {
         <div className=" w-full flex justify-center items-center my-4">
           <div className="text-center">
             <OmniMall />
-            <h3 className="text-center pt-2 font-bold text-blue-800">
+            <H3 className="font-bold text-blue-800">
               {!forgotPassClick ? "Log In" : "Forgot Password"}
-            </h3>
+            </H3>
           </div>
         </div>
         <form
@@ -146,10 +149,10 @@ function Login() {
               />
               <div className="w-full h-5 text-sm">
                 {forgotFormik.submitCount !== 0 && forgotFormik.errors.email ? (
-                  <p className="text-red-500">
+                  <P className="text-red-500">
                     <TriangleAlert className="size-3 inline-block" />
                     {forgotFormik.errors.email}
-                  </p>
+                  </P>
                 ) : null}
               </div>
               <Button variant="primary" disabled={isLoading} type="submit">
@@ -187,10 +190,10 @@ function Login() {
               />
               <div className="w-full h-5 text-sm">
                 {formik.submitCount !== 0 && formik.errors.email ? (
-                  <p className="text-red-500">
+                  <P2 className="text-red-500 text-left">
                     <TriangleAlert className="size-3 inline-block" />
                     {formik.errors.email}
-                  </p>
+                  </P2>
                 ) : null}
               </div>
               <label className="font-semibold" htmlFor="password">
@@ -210,26 +213,26 @@ function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-12 top-1/2 -translate-y-1/2"
+                  className="absolute right-12 top-1/2 "
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <div className="w-full h-5 text-sm ">
+              <div className="w-full h-5 text-sm">
                 {formik.submitCount !== 0 && formik.errors.password && (
-                  <p className="text-red-500 w-full">
+                  <P2 className="text-red-500 w-full text-left">
                     <TriangleAlert className="size-3 inline-block" />{" "}
                     {formik.errors.password}
-                  </p>
+                  </P2>
                 )}
               </div>
               <div className="w-full cursor-pointer flex justify-end">
-                <p
-                  className="text-blue-600"
+                <P2
+                  className="text-blue-600 text-right"
                   onClick={() => setForgotPassClick(true)}
                 >
                   Forgot Password
-                </p>
+                </P2>
               </div>
 
               <Button variant="primary" disabled={isLoading} type="submit">

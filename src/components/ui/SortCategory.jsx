@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllCategories } from "../../redux/slice/categorySlice";
-import ErrorFallback from "./ErrorFallback";
 import { Frown } from "lucide-react";
+import P from "./P";
 
 function SortCategory({ setFilterValues }) {
   const [select, setSelect] = useState("");
@@ -50,9 +50,7 @@ function SortCategory({ setFilterValues }) {
                 alt={item.name}
               />
               <div className="absolute w-full h-full hover:shadow-[inset_0_-70px_70px_rgba(0,0,0,100)] transition-all duration-500 rounded-lg shadow-[inset_0_-50px_50px_rgba(0,0,0,100)] flex items-end justify-center">
-                <p className="text-center w-fit mb-2 px-4 text-white">
-                  {item.name}
-                </p>
+                <P className="w-fit mb-2 px-4 text-white">{item.name}</P>
               </div>
             </div>
           );

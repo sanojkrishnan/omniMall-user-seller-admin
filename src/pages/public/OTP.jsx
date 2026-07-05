@@ -15,6 +15,7 @@ import {
 } from "../../redux/slice/authSlice";
 import Loading from "../../components/ui/Loading";
 import { useToastError } from "../../hooks/useToastError";
+import H3 from "../../components/ui/H3";
 
 function OTP() {
   const navigate = useNavigate();
@@ -115,9 +116,9 @@ function OTP() {
         <div className=" w-full flex justify-center items-center my-4">
           <div className="text-center">
             <OmniMall />
-            <h3 className="text-center pt-2 font-bold text-blue-800">
+            <H3 className=" font-bold text-blue-800">
               Confirm OTP
-            </h3>
+            </H3>
           </div>
         </div>
         <form onSubmit={formik.handleSubmit}>

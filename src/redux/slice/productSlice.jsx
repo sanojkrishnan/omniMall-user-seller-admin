@@ -9,6 +9,7 @@ const initialState = {
   productError: null,
   page: 0,
   totalPages: 0,
+  totalProducts:0,
   hasNextPage: true,
 };
 
@@ -36,6 +37,7 @@ export const fetchAllProducts = createAsyncThunk(
       maxPrice = "",
       priceSort = "price_desc",
       sort = "newest",
+      isFeatured = false,
     } = {},
     { rejectWithValue },
   ) => {
@@ -50,7 +52,7 @@ export const fetchAllProducts = createAsyncThunk(
           maxPrice,
           priceSort,
           sort,
-          isFeatured: false,
+          isFeatured,
         }).filter(([_, v]) => v !== ""),
       );
       const res = await productAPI.fetchAllProduct(params);

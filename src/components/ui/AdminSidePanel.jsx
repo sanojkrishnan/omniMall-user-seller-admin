@@ -14,6 +14,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { clearTokens } from "../../utils/apiClient";
 import { logout } from "../../redux/slice/authSlice";
 import { useDispatch } from "react-redux";
+import H2 from "./H2";
+import P from "./P";
+import P2 from "./P2";
 
 const dashMenu = [
   "Dashboard",
@@ -60,7 +63,7 @@ function AdminSidePanel({ setSelection, selection }) {
   return (
     <div className={` sticky h-screen  top-0 left-0 z-50 w-24 xl:w-[340px]`}>
       <div
-        className={` ${menuClick ? "w-24" : "w-[350px] "} fixed transition-all p-6 duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
+        className={` ${menuClick ? "w-24" : "w-[350px] "} fixed transition-all p-6 duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto custom-scrollbar bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
       >
         <div
           onClick={() => setMenuClick((prev) => !prev)}
@@ -77,18 +80,18 @@ function AdminSidePanel({ setSelection, selection }) {
           ></div>
         </div>
         <div className="grid grid-cols-1 place-items-center">
-          <h2
-            className={`${menuClick ? "text-sm font-semibold mt-16" : "text-2xl font-bold"} transition-all duration-500 text font-hurricane`}
+          <H2
+            className={`${menuClick ? "text-sm font-semibold" : "font-bold"} mt-0 transition-all duration-500 text font-hurricane`}
           >
             OmniMall
-          </h2>
-          <p
+          </H2>
+          <P
             className={`overflow-hidden whitespace-nowrap transition-all duration-500 ${
               menuClick ? "w-0 opacity-0" : "w-auto opacity-100"
             }`}
           >
             Admin Panel
-          </p>
+          </P>
 
           {/* logout button */}
           <button
@@ -98,13 +101,13 @@ function AdminSidePanel({ setSelection, selection }) {
               navigate("/login", { replace: true });
             }}
           >
-            <p
-              className={`overflow-hidden whitespace-nowrap text-sm ${
+            <P2
+              className={`overflow-hidden whitespace-nowrap mt-0 ${
                 menuClick ? "opacity-0 w-0" : "opacity-100"
               } transition-all duration-500 `}
             >
               LogOut &nbsp;&nbsp;&nbsp;&nbsp;
-            </p>
+            </P2>
             <LogOut className="size-5" />
           </button>
 
@@ -137,13 +140,13 @@ function AdminSidePanel({ setSelection, selection }) {
                 <Settings
                   className={item === "Settings" ? "block" : "hidden"}
                 />
-                <p
+                <P
                   className={`overflow-hidden whitespace-nowrap ${
                     menuClick ? "w-0 opacity-0" : "opacity-100"
                   } transition-all duration-500 `}
                 >
                   &nbsp;&nbsp;&nbsp;&nbsp;{item}
-                </p>
+                </P>
               </li>
             ))}
           </ul>

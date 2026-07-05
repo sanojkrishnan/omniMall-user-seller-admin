@@ -13,6 +13,7 @@ import {
 } from "../../redux/slice/authSlice";
 import { toast } from "react-toastify";
 import { useToastError } from "../../hooks/useToastError";
+import H3 from "../../components/ui/H3";
 
 //google profile completion schema
 const googleProfileSchema = Yup.object({
@@ -61,9 +62,9 @@ function ProfileComplete() {
         <div className=" w-full flex justify-center items-center mb-2 mt-2">
           <div className="text-center">
             <OmniMall />
-            <h3 className="text-center pt-2 font-bold text-blue-800">
+            <H3 className="font-bold text-blue-800">
               Complete Your Profile
-            </h3>
+            </H3>
           </div>
         </div>
         <Formik

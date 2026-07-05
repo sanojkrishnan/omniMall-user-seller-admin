@@ -1,4 +1,5 @@
 import { ShoppingCart } from "lucide-react";
+import P2 from "./P2";
 
 function CartLoading() {
   return (
@@ -39,7 +40,7 @@ function CartLoading() {
       </div>
 
       <div className="flex items-center justify-center mt-2 w-full overflow-visible">
-        <p className="text-xs font-thin">Loading...</p>
+        <P2 className="lg:text-xs md:text-xs font-thin">Loading...</P2>
       </div>
     </div>
   );

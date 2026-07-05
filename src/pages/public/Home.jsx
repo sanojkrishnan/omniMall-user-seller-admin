@@ -32,6 +32,7 @@ function Home() {
       fetchAllProducts({
         page: 1,
         limit: 15,
+        isFeatured: true,
       }),
     );
   }, [dispatch]);
@@ -78,6 +79,7 @@ function Home() {
       </div>
 
       {/* shop by category */}
+
       <div
         className="w-full h-fit bg-gradient-to-br text-white text-center sm:p-8 p-2 py-12 sm:py-24"
         style={{
@@ -85,51 +87,54 @@ function Home() {
             "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
         }}
       >
-        <div className="pb-10">
-          <h1 className="text-3xl font-semibold">Shop By Category</h1>
-          <p>Explore our wide range of products</p>
-        </div>
-        <SortCategory />
-      </div>
-
-      {/* featured products  */}
-      <div className="w-full text-center sm:p-8 p-4 py-12 sm:py-16">
-        <div className="pb-10">
-          <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
-          <p>Handpicked favorites just for you</p>
-        </div>
-        {isProductLoading && !productError && (
-          <div className="w-full h-[60vh] flex justify-center items-center">
-            <CartLoading />
+        <div className="max-w-7xl mx-auto">
+          <div className=" pb-10">
+            <h1 className="text-3xl font-semibold">Shop By Category</h1>
+            <p>Explore our wide range of products</p>
           </div>
-        )}
-        {products.length !== 0 && !isProductLoading && !productError && (
-          <>
-            <ProductCard products={products} />
-            <div className="flex justify-center items-center mt-10">
-              <Button
-                variant="secondary"
-                className={"w-fit"}
-                onClick={() => {
-                  navigate("/user/shop");
-                }}
-              >
-                view more
-              </Button>
-            </div>
-          </>
-        )}
-        <ErrorFallback loading={isProductLoading} error={productError} />
+          <SortCategory />
+        </div>
       </div>
+      <div className="max-w-7xl mx-auto px-6 mt-8">
+        {/* featured products  */}
+        <div className="w-full text-center sm:p-8 p-4 py-12 sm:py-16">
+          <div className="pb-10">
+            <h1 className="text-3xl font-semibold mb-2">Featured Products</h1>
+            <p>Handpicked favorites just for you</p>
+          </div>
+          {isProductLoading && !productError && (
+            <div className="w-full h-[60vh] flex justify-center items-center">
+              <CartLoading />
+            </div>
+          )}
+          {products.length !== 0 && !isProductLoading && !productError && (
+            <>
+              <ProductCard products={products} />
+              <div className="flex justify-center items-center mt-10">
+                <Button
+                  variant="secondary"
+                  className={"w-fit"}
+                  onClick={() => {
+                    navigate("/user/shop");
+                  }}
+                >
+                  view more
+                </Button>
+              </div>
+            </>
+          )}
+          <ErrorFallback loading={isProductLoading} error={productError} />
+        </div>
 
-      {/* coupons  */}
+        {/* coupons  */}
 
-      <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-16">
-        <div className="pb-10">
-          <h1 className="text-3xl font-semibold mb-2">
-            Special Offers And Coupons
-          </h1>
-          <p>Save more with our exclusive deals</p>
+        <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-16">
+          <div className="pb-10">
+            <h1 className="text-3xl font-semibold mb-2">
+              Special Offers And Coupons
+            </h1>
+            <p>Save more with our exclusive deals</p>
+          </div>
         </div>
       </div>
     </div>

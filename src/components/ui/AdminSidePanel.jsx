@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { clearTokens } from "../../utils/apiClient";
 import { logout } from "../../redux/slice/authSlice";
 import { useDispatch } from "react-redux";
 import H2 from "./H2";

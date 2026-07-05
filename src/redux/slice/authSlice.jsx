@@ -163,6 +163,7 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.token = null;
+      clearTokens();
       state.otpSent = {
         sentToMail: null,
         status: false,

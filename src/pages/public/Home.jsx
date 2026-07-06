@@ -125,10 +125,10 @@ function Home() {
           )}
           <ErrorFallback loading={isProductLoading} error={productError} />
         </div>
-
-        {/* coupons  */}
-
-        <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-16">
+      </div>
+      {/* coupons  */}
+      <div className="w-full text-center bg-gray-200 sm:p-10 p-4 py-16">
+        <div className="max-w-7xl mx-auto">
           <div className="pb-10">
             <h1 className="text-3xl font-semibold mb-2">
               Special Offers And Coupons

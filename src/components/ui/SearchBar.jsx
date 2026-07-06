@@ -52,7 +52,7 @@ export const SearchBar = ({
     setFilterValues((prev) => ({ ...prev, [key]: "" }));
   };
   return (
-    <div className="flex flex-col m-4 mb-8 mt-6 border-b-[0.5px] pb-1">
+    <div className="flex flex-col m-4 mb-8 mt-6 border-b-[0.5px] pb-8">
       <div className="flex items-center justify-center relative">
         <input
           disabled={disabled}
@@ -61,7 +61,7 @@ export const SearchBar = ({
           value={value}
           onChange={onChange}
           className={cn(
-            "p-4 w-full",
+            "p-2 sm:p-4 w-full",
             variants[variant],
             disabled && "opacity-70 cursor-not-allowed",
             className,

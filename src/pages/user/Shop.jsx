@@ -118,7 +118,7 @@ function Shop() {
         {totalProducts} {totalProducts === 1 ? "product" : "total products"}
       </p>
 
-      <div className="max-w-7xl mx-auto px-6 mt-8 pb-24">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 mt-8 pb-24">
         {/* initial load or searching */}
         {isBusy && !productError && (
           <div className="w-full h-[60vh] flex justify-center items-center">
@@ -128,7 +128,7 @@ function Shop() {
 
         {/* products — also shows while loading more pages */}
         {!isBusy && !productError && products.length !== 0 && (
-          <div className="px-8 pb-10">
+          <div className="px-2 xs:px-8 pb-10">
             <ProductCard products={products} />
           </div>
         )}

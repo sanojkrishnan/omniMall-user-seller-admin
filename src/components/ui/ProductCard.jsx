@@ -4,9 +4,11 @@ import { Rating } from "./Rating";
 import { useNavigate } from "react-router-dom";
 import P from "./P";
 import H2 from "./H2";
+import { useHandleCartClick } from "../../hooks/useHandleCartClick";
 
 function ProductCard({ products }) {
   const navigate = useNavigate();
+  const handleCartClick = useHandleCartClick();
   return (
     <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8">
       {products.map((item, index) => (
@@ -39,7 +41,9 @@ function ProductCard({ products }) {
             <button
               className="absolute top-2.5 right-2.5 bg-white border border-gray-100 rounded-full w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-400 transition-colors"
               aria-label="Add to wishlist"
-              onClick={() => {}}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
               <HeartIcon className="size-4" />
             </button>
@@ -73,8 +77,22 @@ function ProductCard({ products }) {
             </div>
 
             <div className="flex gap-2 pt-1 mt-auto pb-2">
-              <Button className="flex-1 text-sm py-2">Buy now</Button>
-              <Button variant="secondary" className="flex-1 text-sm ">
+              <Button
+                className="flex-1 text-sm py-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                Buy now
+              </Button>
+              <Button
+                variant="secondary"
+                className="flex-1 text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCartClick(item);
+                }}
+              >
                 <ShoppingCart className="size-4" /> Add to cart
               </Button>
             </div>

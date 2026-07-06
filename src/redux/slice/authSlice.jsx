@@ -4,12 +4,14 @@ import {
   saveUser,
   clearTokens,
   setAdminToken,
+  getStoredUser,
 } from "../../utils/apiClient";
 import { AuthAPI } from "../../services/authService";
 import { extractError } from "../../utils/errorExtractor";
 
 const initialState = {
   user: [],
+  loggedUser: {},
   token: null,
   isLoading: false,
   error: null,
@@ -169,7 +171,15 @@ const authSlice = createSlice({
         lastSentAt: null,
       };
       state.isVerified = false;
-      clearTokens(); // uses existing apiClient helper
+      clearTokens();
+    },
+    fetchLoggedUser(state) {
+      if (
+        !state.user ||
+        (Array.isArray(state.user) && state.user.length === 0)
+      ) {
+        state.user = getStoredUser();
+      }
     },
   },
   extraReducers: (builder) => {
@@ -375,5 +385,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, clearAuthState, logout } = authSlice.actions;
+export const { clearAuthError, clearAuthState, logout, fetchLoggedUser } =
+  authSlice.actions;
 export default authSlice.reducer;

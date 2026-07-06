@@ -10,7 +10,7 @@ import { API_CONFIG } from "../config/app";
 const apiClient = axios.create({
   baseURL: API_CONFIG.baseURL,
   headers: { "Content-Type": "application/json" },
-  timeout: 10000,
+  timeout: 20000,
 });
 
 // Token Management

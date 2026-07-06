@@ -15,7 +15,7 @@ const icons = {
   Home: HomeIcon,
   Shop: ShoppingBagIcon,
   Cart: ShoppingCartIcon,
-  Profile: null, // handled separately
+  Profile: null,
 };
 
 const getNavPath = (item, user) => {

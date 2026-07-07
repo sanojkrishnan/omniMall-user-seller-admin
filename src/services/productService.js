@@ -5,13 +5,17 @@ export const productAPI = {
   addProduct: async (data) => {
     return api.upload("product/register", data);
   },
+
   //fetch all product
-  fetchAllProduct: async (data) => {
-    return api.get("product/fetch", { params: data });
+  fetchAllProduct: async ({ queryParams, uniqueProducts }) => {
+    const query = new URLSearchParams(queryParams).toString();
+    return api.post(`product/fetch?${query}`, { uniqueProducts });
   },
+
   fetchOneProduct: async (id) => {
     return api.get(`product/fetch-single/${id}`);
   },
+
   //delete product
   deleteProduct: async (id) => {
     return api.delete(`product/delete/${id}`);

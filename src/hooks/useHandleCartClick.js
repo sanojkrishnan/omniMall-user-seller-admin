@@ -9,15 +9,19 @@ export const useHandleCartClick = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Load the cart from localStorage into Redux once, on mount
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  const handleCartClick = (item) => {
-    dispatch(fetchLoggedUser());
+  const handleCartClick = async (item) => {
+    let currentUserId = userId;
 
-    if (!userId) {
+    if (!currentUserId) {
+      const result = await dispatch(fetchLoggedUser());
+      currentUserId = result.payload?._id;
+    }
+
+    if (!currentUserId) {
       navigate("/login", { replace: true });
       return;
     }
@@ -25,7 +29,7 @@ export const useHandleCartClick = () => {
     dispatch(
       addCart({
         productId: item._id,
-        userId,
+        userId: currentUserId,
         sellerId: item.sellerId,
       }),
     );

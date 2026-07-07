@@ -46,6 +46,18 @@ export const fetchCart = createAsyncThunk(
   },
 );
 
+export const removeCart = createAsyncThunk(
+  "cart/delete-cart",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const cart = localStorage.removeItem("Cart", id);
+      return cart ? JSON.parse(cart) : [];
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to delete cart item"));
+    }
+  },
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,

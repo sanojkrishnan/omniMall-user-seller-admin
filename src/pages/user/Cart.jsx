@@ -22,7 +22,13 @@ function Cart() {
 
   // raw cart entries: [{ productId, userId, sellerId, qnty }]
   const { cart, isCartLoading, cartError } = useSelector((state) => state.cart);
-  const { products = [] } = useSelector((state) => state.product);
+
+  console.log(cart, "CART VALUES");
+  const {
+    products = [],
+    productError,
+    isProductLoading,
+  } = useSelector((state) => state.product);
   const { seller } = useSelector((state) => state.seller);
 
   // load the raw cart (from localStorage, via your existing thunk)
@@ -30,8 +36,6 @@ function Cart() {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  // once cart is loaded, fetch full product + seller details
-  // for the productIds/sellerIds it references — same dedupe pattern as Products.jsx
   const lastFetchedProductIdsRef = useRef("");
   const lastFetchedSellerIdsRef = useRef("");
 
@@ -69,6 +73,11 @@ function Cart() {
           fetchAllSellers({
             pagination: { page: 1, limit: uniqueSellerIds.length },
             uniqueSellers: uniqueSellerIds,
+            search: "",
+            category: "",
+            minPrice: null,
+            maxPrice: null,
+            priceSort: "",
           }),
         );
       }

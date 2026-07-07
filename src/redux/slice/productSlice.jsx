@@ -9,7 +9,7 @@ const initialState = {
   productError: null,
   page: 0,
   totalPages: 0,
-  totalProducts:0,
+  totalProducts: 0,
   hasNextPage: true,
 };
 
@@ -24,25 +24,25 @@ export const addAProduct = createAsyncThunk(
     }
   },
 );
+
 //fetch all products
 export const fetchAllProducts = createAsyncThunk(
   "product/fetchAll",
-  async (
-    {
-      page = 1,
-      limit = 15,
-      search = "",
-      category = "",
-      minPrice = "",
-      maxPrice = "",
-      priceSort = "price_desc",
-      sort = "newest",
-      isFeatured = false,
-    } = {},
-    { rejectWithValue },
-  ) => {
+  async ({ pagination = {}, uniqueProducts } = {}, { rejectWithValue }) => {
     try {
-      const params = Object.fromEntries(
+      const {
+        page = 1,
+        limit = 15,
+        search = "",
+        category = "",
+        minPrice = "",
+        maxPrice = "",
+        priceSort = "",
+        sort = "newest",
+        isFeatured = false,
+      } = pagination;
+
+      const queryParams = Object.fromEntries(
         Object.entries({
           page,
           limit,
@@ -53,10 +53,14 @@ export const fetchAllProducts = createAsyncThunk(
           priceSort,
           sort,
           isFeatured,
-        }).filter(([_, v]) => v !== ""),
+        }).filter(([_, v]) => v !== "" && v !== undefined && v !== null),
       );
-      const res = await productAPI.fetchAllProduct(params);
-      return res;
+
+      const data = await productAPI.fetchAllProduct({
+        queryParams,
+        uniqueProducts,
+      });
+      return { ...data };
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to fetch products"));
     }
@@ -74,6 +78,7 @@ export const singleProductFetch = createAsyncThunk(
     }
   },
 );
+
 //delete product
 export const deleteSingleProduct = createAsyncThunk(
   "product/deleteProduct",
@@ -110,13 +115,13 @@ const productSlice = createSlice({
       })
       .addCase(addAProduct.fulfilled, (state, action) => {
         state.isProductLoading = false;
-
         state.products = [action.payload.data, ...state.products];
       })
       .addCase(addAProduct.rejected, (state, action) => {
         state.isProductLoading = false;
         state.productError = action.payload;
       });
+
     //fetching all products
     builder
       .addCase(fetchAllProducts.pending, (state) => {
@@ -126,15 +131,10 @@ const productSlice = createSlice({
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.isProductLoading = false;
 
-        console.log("FULFILLED PAYLOAD:", action.payload);
-
-        console.log("FULFILLED PAGE:", action.meta.arg.page);
-
         const newProducts = action.payload.data?.data ?? [];
+        const page = action.meta.arg.pagination?.page ?? 1;
 
-        console.log("PRODUCT COUNT:", newProducts.length);
-
-        if (action.meta.arg.page === 1) {
+        if (page === 1) {
           state.products = newProducts;
         } else {
           state.products = [...state.products, ...newProducts];
@@ -146,13 +146,15 @@ const productSlice = createSlice({
         state.limit = action.payload.data.pagination?.itemsPerPage;
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
-        if (action.meta.aborted) return; // <-- add this line
+        if (action.meta.aborted) return;
         state.isProductLoading = false;
         state.productError = action.payload || "Failed to fetch products";
-        if (action.meta.arg.page === 1) {
+        const page = action.meta.arg.pagination?.page ?? 1;
+        if (page === 1) {
           state.products = [];
         }
       });
+
     //fetch single product
     builder
       .addCase(singleProductFetch.pending, (state) => {
@@ -165,10 +167,10 @@ const productSlice = createSlice({
       })
       .addCase(singleProductFetch.rejected, (state, action) => {
         state.isProductLoading = false;
-        console.log("REJECTED PAYLOAD:", action.payload);
         state.productError = action.payload;
         state.singleProduct = {};
       });
+
     //delete products
     builder
       .addCase(deleteSingleProduct.pending, (state) => {

@@ -168,7 +168,7 @@ function Register() {
                                 {stepErrors.firstName}
                               </P2>
                             )}
-                          </div>
+                          </div>z
                         </div>
                         <div>
                           {/* last Name  */}

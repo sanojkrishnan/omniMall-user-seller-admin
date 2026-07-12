@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import P from "./P";
 import H2 from "./H2";
 import { useHandleCartClick } from "../../hooks/useHandleCartClick";
-import { toast } from "react-toastify";
 
 function ProductCard({ products }) {
   const navigate = useNavigate();
@@ -14,7 +13,6 @@ function ProductCard({ products }) {
   const [addedIds, setAddedIds] = useState({});
 
   const handleAddToCart = (e, item) => {
-    toast.success("Product Added To Cart");
     e.stopPropagation();
     handleCartClick(item);
 

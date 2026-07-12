@@ -32,7 +32,7 @@ function AdminHeader({ selection }) {
         <div ref={divRef} className="relative">
           <Button
             variant="secondary"
-            className="rounded-full w-fit"
+            className="rounded-full w-fit px-2 py-2 sm:py-2 sm:px-2"
             onMouseDown={(e) => {
               e.stopPropagation();
               setShowNotification((prev) => !prev);

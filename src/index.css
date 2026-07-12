@@ -30,6 +30,101 @@
   }
 }
 
+@keyframes pop-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes cart-bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 .animate-shimmer {
   animation: shimmer 1.5s infinite;
+}
+
+/* --- Custom Toastify theme --- */
+.custom-toast-container {
+  width: auto;
+  max-width: 380px;
+}
+
+.custom-toast {
+  background: #16171b !important;
+  color: #f1f1f1 !important;
+  border-radius: 12px !important;
+  border: 1px solid #2a2b30;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+  padding: 14px 16px !important;
+  font-family: inherit;
+  min-height: unset !important;
+}
+
+.custom-toast-body {
+  font-size: 13.5px;
+  line-height: 1.4;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+
+.custom-toast-body > div:last-child {
+  font-weight: 500;
+}
+
+.custom-progress {
+  height: 3px !important;
+  border-radius: 0 0 12px 12px;
+  opacity: 1 !important;
+}
+
+/* type-specific accents */
+.Toastify__toast--success.custom-toast {
+  border-left: 3px solid #22c55e;
+}
+.Toastify__toast--error.custom-toast {
+  border-left: 3px solid #ef4444;
+}
+.Toastify__toast--warning.custom-toast {
+  border-left: 3px solid #f59e0b;
+}
+.Toastify__toast--info.custom-toast {
+  border-left: 3px solid #3b82f6;
+}
+
+.Toastify__progress-bar--success { background: #22c55e !important; }
+.Toastify__progress-bar--error   { background: #ef4444 !important; }
+.Toastify__progress-bar--warning { background: #f59e0b !important; }
+.Toastify__progress-bar--info    { background: #3b82f6 !important; }
+
+/* close button */
+.Toastify__close-button {
+  color: #9ca3af !important;
+  opacity: 0.7;
+  align-self: center;
+}
+.Toastify__close-button:hover {
+  opacity: 1;
+  color: #fff !important;
+}
+
+/* subtle slide/fade instead of default bounce */
+.Toastify__slide-enter--top-right {
+  animation-duration: 0.35s !important;
 }

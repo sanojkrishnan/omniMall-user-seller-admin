@@ -63,14 +63,15 @@ function Products() {
   useEffect(() => {
     dispatch(
       fetchAllProducts({
-        page,
-        limit: 15,
-        search,
-        category: filterValues.category,
-        minPrice: filterValues.minPrice,
-        maxPrice: filterValues.maxPrice,
-        priceSort: filterValues.priceSort,
-        sort: filterValues.sort,
+        pagination: {
+          page,
+          limit: 15,
+          search,
+          category: filterValues.category,
+          minPrice: filterValues.minPrice,
+          maxPrice: filterValues.maxPrice,
+          priceSort: filterValues.priceSort,
+        },
       }),
     );
   }, [

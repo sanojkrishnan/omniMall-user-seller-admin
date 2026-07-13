@@ -4,9 +4,15 @@ import { SearchBar } from "../../components/ui/SearchBar";
 import P2 from "../../components/ui/P2";
 import H1 from "../../components/ui/H1";
 import CartSellerSeparation from "../../components/CartSellerSeparation";
-import { fetchCart } from "../../redux/slice/cartSlice";
+import {
+  fetchCart,
+  updateCartQty,
+  removeCart,
+} from "../../redux/slice/cartSlice";
 import { fetchAllProducts } from "../../redux/slice/productSlice";
 import { fetchAllSellers } from "../../redux/slice/sellerSlice";
+import CartLoading from "../../components/ui/CartLoading";
+import ErrorFallback from "../../components/ui/ErrorFallback";
 
 const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
@@ -21,9 +27,10 @@ function Cart() {
   });
 
   // raw cart entries: [{ productId, userId, sellerId, qnty }]
-  const { cart, isCartLoading, cartError } = useSelector((state) => state.cart);
+  const { cart, isCartLoading, cartError, cartStatus } = useSelector(
+    (state) => state.cart,
+  );
 
-  console.log(cart, "CART VALUES");
   const {
     products = [],
     productError,
@@ -31,10 +38,15 @@ function Cart() {
   } = useSelector((state) => state.product);
   const { seller } = useSelector((state) => state.seller);
 
+  // TODO: adjust this path to match your real auth slice
+  const userId = useSelector((state) => state.auth?.user?._id);
+
   // load the raw cart (from localStorage, via your existing thunk)
   useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
+    if (userId) {
+      dispatch(fetchCart({ userId }));
+    }
+  }, [dispatch, userId]);
 
   const lastFetchedProductIdsRef = useRef("");
   const lastFetchedSellerIdsRef = useRef("");
@@ -59,7 +71,7 @@ function Cart() {
         dispatch(
           fetchAllProducts({
             pagination: { page: 1, limit: uniqueProductIds.length },
-            uniqueProducts: uniqueProductIds, // mirrors uniqueSellers/uniqueCategories pattern
+            uniqueProducts: uniqueProductIds,
           }),
         );
       }
@@ -84,7 +96,6 @@ function Cart() {
     }
   }, [cart, dispatch]);
 
-  // O(1) lookup maps — same pattern as Products.jsx
   const productMap = useMemo(() => {
     const map = {};
     (products || []).forEach((p) => {
@@ -101,7 +112,6 @@ function Cart() {
     return map;
   }, [seller]);
 
-  // Step 3: merge cart entries with product + seller data, grouped by seller
   const groups = useMemo(() => {
     if (!cart || cart.length === 0) return [];
 
@@ -111,7 +121,7 @@ function Cart() {
       const product = productMap[getId(cartItem.productId)];
       const sellerData = sellerMap[getId(cartItem.sellerId)];
 
-      if (!product) return; // product details not loaded yet, skip for now
+      if (!product) return;
 
       const sellerId = getId(cartItem.sellerId);
       const storeName = sellerData
@@ -136,13 +146,27 @@ function Cart() {
     return Object.values(bySeller);
   }, [cart, productMap, sellerMap]);
 
+  // itemId here is the productId (see `id: product._id` above)
   const updateQty = (storeIdx, itemId, delta) => {
-    // TODO: dispatch an update-quantity thunk (persist to localStorage/backend)
-    // Local-only version for now, mirrors your existing pattern:
+    if (!userId) return;
+
+    const currentItem = cart.find((c) => getId(c.productId) === itemId);
+    if (!currentItem) return;
+
+    const nextQty = currentItem.qnty + delta;
+
+    if (nextQty < 1) {
+      // dropping to 0 (or below) removes the item instead of writing qnty: 0
+      dispatch(removeCart({ userId, productId: itemId }));
+      return;
+    }
+
+    dispatch(updateCartQty({ userId, productId: itemId, qnty: nextQty }));
   };
 
   const removeItem = (storeIdx, itemId) => {
-    // TODO: dispatch a remove-from-cart thunk (persist to localStorage/backend)
+    if (!userId) return;
+    dispatch(removeCart({ userId, productId: itemId }));
   };
 
   const filteredGroups = useMemo(() => {
@@ -205,23 +229,36 @@ function Cart() {
         />
       </div>
 
-      <P2 className="text-neutral-500">
-        {itemCount} {itemCount === 1 ? "item" : "items"} · {groups.length}{" "}
-        {groups.length === 1 ? "store" : "stores"}
-      </P2>
+      {cartStatus === "idle" || isCartLoading || isProductLoading ? (
+        <div className="h-[70vh] w-full flex items-center justify-center">
+          <CartLoading />
+        </div>
+      ) : cartError || productError ? (
+        <ErrorFallback
+          loading={isProductLoading}
+          error={productError || cartError}
+        />
+      ) : (
+        <>
+          <P2 className="text-neutral-500">
+            {itemCount} {itemCount === 1 ? "item" : "items"} · {groups.length}{" "}
+            {groups.length === 1 ? "store" : "stores"}
+          </P2>
 
-      <CartSellerSeparation
-        allItems={allItems}
-        visibleItems={visibleItems}
-        isFiltering={isFiltering}
-        filteredGroups={filteredGroups}
-        groups={groups}
-        removeItem={removeItem}
-        updateQty={updateQty}
-        subtotal={subtotal}
-        shipping={shipping}
-        total={total}
-      />
+          <CartSellerSeparation
+            allItems={allItems}
+            visibleItems={visibleItems}
+            isFiltering={isFiltering}
+            filteredGroups={filteredGroups}
+            groups={groups}
+            removeItem={removeItem}
+            updateQty={updateQty}
+            subtotal={subtotal}
+            shipping={shipping}
+            total={total}
+          />
+        </>
+      )}
     </div>
   );
 }

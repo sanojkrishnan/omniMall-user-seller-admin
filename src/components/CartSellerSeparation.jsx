@@ -18,9 +18,9 @@ function CartSellerSeparation({
   return (
     <div className="max-w-7xl mx-auto px-6 mt-2 pb-24 lg:grid lg:grid-cols-[1fr_360px] lg:gap-10 lg:items-start">
       {allItems.length === 0 ? (
-        <ErrorFallback item={"cart_empty"} />
+        <ErrorFallback item="cart_empty" />
       ) : visibleItems.length === 0 ? (
-        <ErrorFallback item={"cart_notMatch"} />
+        <ErrorFallback item="cart_notMatch" />
       ) : (
         <div className={`space-y-7 ${isFiltering ? "lg:col-span-2" : ""}`}>
           {filteredGroups.map((group) => {
@@ -41,6 +41,7 @@ function CartSellerSeparation({
                 <div className="space-y-4">
                   {group.items.map((item) => (
                     <CartProductCard
+                      key={item.id}
                       item={item}
                       storeIdx={storeIdx}
                       removeItem={removeItem}

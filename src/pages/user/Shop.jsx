@@ -14,6 +14,8 @@ import SearchNotFound from "../../components/ui/SearchNotFound";
 import { useToastError } from "../../hooks/useToastError";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import H1 from "../../components/ui/H1";
+import P from "../../components/ui/P";
+import P2 from "../../components/ui/P2";
 
 function Shop() {
   const dispatch = useDispatch();
@@ -115,10 +117,6 @@ function Shop() {
           onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
-      {/* count of items and sellers */}
-      <p className="text-center text-sm text-neutral-500">
-        {totalProducts} {totalProducts === 1 ? "product" : "total products"}
-      </p>
 
       <div className="max-w-7xl mx-auto px-2 sm:px-6 mt-8 pb-24">
         {/* initial load or searching */}
@@ -130,9 +128,17 @@ function Shop() {
 
         {/* products — also shows while loading more pages */}
         {!isBusy && !productError && products.length !== 0 && (
-          <div className="px-2 xs:px-8 pb-10">
-            <ProductCard products={products} />
-          </div>
+          <>
+            {/* count of items */}
+            <P2 className="text-neutral-500 mb-4">
+              {totalProducts}{" "}
+              {totalProducts === 1 ? "product" : "total products"}
+            </P2>
+
+            <div className="px-2 xs:px-8 pb-10">
+              <ProductCard products={products} />
+            </div>
+          </>
         )}
 
         {/* error */}

@@ -4,15 +4,17 @@ import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearProductError,
+  clearProductState,
   fetchAllProducts,
 } from "../../redux/slice/productSlice";
 import {
   fetchAllSellers,
-  clearError as clearSellerError,
+  clearSellerError,
+  clearSellerState,
 } from "../../redux/slice/sellerSlice";
 import {
   fetchAllCategories,
-  clearError as clearCategoryError,
+  clearCategoryError,
 } from "../../redux/slice/categorySlice";
 import CartLoading from "../../components/ui/CartLoading";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -261,6 +263,15 @@ function Products() {
       render: (item) => `₹ ${item.offerPrice}`,
     },
   ];
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearProductError);
+      dispatch(clearSellerError);
+      dispatch(clearProductState);
+      dispatch(clearSellerState);
+    };
+  }, []);
 
   return (
     <>

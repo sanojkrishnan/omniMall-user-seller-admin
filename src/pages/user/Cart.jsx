@@ -9,8 +9,16 @@ import {
   updateCartQty,
   removeCart,
 } from "../../redux/slice/cartSlice";
-import { fetchAllProducts } from "../../redux/slice/productSlice";
-import { fetchAllSellers } from "../../redux/slice/sellerSlice";
+import {
+  fetchAllProducts,
+  clearProductError,
+  clearProductState,
+} from "../../redux/slice/productSlice";
+import {
+  fetchAllSellers,
+  clearSellerError,
+  clearSellerState,
+} from "../../redux/slice/sellerSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 
@@ -95,6 +103,15 @@ function Cart() {
       }
     }
   }, [cart, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearProductError);
+      dispatch(clearSellerError);
+      dispatch(clearProductState);
+      dispatch(clearSellerState);
+    };
+  }, []);
 
   const productMap = useMemo(() => {
     const map = {};

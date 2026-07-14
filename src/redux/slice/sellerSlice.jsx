@@ -47,7 +47,7 @@ const sellerSlice = createSlice({
   name: "seller",
   initialState,
   reducers: {
-    clearError(state) {
+    clearSellerError(state) {
       state.sellerError = null;
     },
     clearSellerState(state) {
@@ -95,5 +95,5 @@ const sellerSlice = createSlice({
   },
 });
 
-export const { clearError, clearSellerState } = sellerSlice.actions;
+export const { clearSellerError, clearSellerState } = sellerSlice.actions;
 export default sellerSlice.reducer;

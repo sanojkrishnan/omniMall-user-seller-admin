@@ -1,17 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { fetchLoggedUser } from "../redux/slice/authSlice";
-import { addCart, fetchCart } from "../redux/slice/cartSlice";
+import { addCart } from "../redux/slice/cartSlice";
 
 export const useHandleCartClick = () => {
   const userId = useSelector((state) => state.auth.user?._id);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
 
   const handleCartClick = async (item) => {
     let currentUserId = userId;
@@ -23,14 +18,21 @@ export const useHandleCartClick = () => {
 
     if (!currentUserId) {
       navigate("/login", { replace: true });
-      return;
+      return; // no cart action happened — ProductCard should treat this as non-success, which it already does since result stays undefined
     }
 
-    dispatch(
+    return dispatch(
       addCart({
-        productId: item._id,
-        userId: currentUserId,
-        sellerId: item.sellerId,
+        data: {
+          userId: currentUserId,
+          cart: [
+            {
+              productId: item._id,
+              sellerId: item.sellerId,
+              qnty: 1,
+            },
+          ],
+        },
       }),
     );
   };

@@ -4,7 +4,6 @@ import { cartAPI } from "../../services/cartService";
 
 const initialState = {
   cart: [],
-  singleCart: null,
   cartPage: 0,
   cartTotalPages: 0,
   totalCarts: 0,
@@ -26,7 +25,7 @@ export const addCart = createAsyncThunk(
   },
 );
 
-// Fetch the cart for a specific user from localStorage
+// Fetch the cart for a specific user from backend
 export const fetchCart = createAsyncThunk(
   "cart/fetch",
   async ({ userId }, { rejectWithValue }) => {
@@ -39,11 +38,24 @@ export const fetchCart = createAsyncThunk(
   },
 );
 
+//remove cart from the backend
+export const removeCart = createAsyncThunk(
+  "cart/remove",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const cartData = await cartAPI.removeCart(data);
+      return cartData;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to remove item"));
+    }
+  },
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    clearError(state) {
+    clearCartError(state) {
       state.cartError = null;
     },
     clearCartState(state) {
@@ -84,8 +96,22 @@ const cartSlice = createSlice({
         state.cartStatus = "failed";
         state.cartError = action.payload;
       });
+    builder
+      // remove from cart
+      .addCase(removeCart.pending, (state) => {
+        state.isCartLoading = true;
+        state.cartError = null;
+      })
+      .addCase(removeCart.fulfilled, (state, action) => {
+        state.isCartLoading = false;
+        state.cart = action.payload;
+      })
+      .addCase(removeCart.rejected, (state, action) => {
+        state.isCartLoading = false;
+        state.cartError = action.payload;
+      });
   },
 });
 
-export const { clearError, clearCartState } = cartSlice.actions;
+export const { clearCartError, clearCartState } = cartSlice.actions;
 export default cartSlice.reducer;

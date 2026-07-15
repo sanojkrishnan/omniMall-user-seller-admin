@@ -5,9 +5,6 @@ import P2 from "../../components/ui/P2";
 import H1 from "../../components/ui/H1";
 import CartSellerSeparation from "../../components/CartSellerSeparation";
 import {
-  fetchCart,
-} from "../../redux/slice/cartSlice";
-import {
   fetchAllProducts,
   clearProductError,
   clearProductState,
@@ -19,6 +16,7 @@ import {
 } from "../../redux/slice/sellerSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
+import { fetchCart, addCart, removeCart } from "../../redux/slice/cartSlice";
 
 const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
@@ -37,6 +35,8 @@ function Cart() {
     (state) => state.cart,
   );
 
+  console.log("CART FROM CART PAGE :", cart)
+
   const {
     products = [],
     productError,
@@ -47,7 +47,7 @@ function Cart() {
   // TODO: adjust this path to match your real auth slice
   const userId = useSelector((state) => state.auth?.user?._id);
 
-  // load the raw cart (from localStorage, via your existing thunk)
+  // load the cart from the backend once we know who the user is
   useEffect(() => {
     if (userId) {
       dispatch(fetchCart({ userId }));
@@ -58,7 +58,7 @@ function Cart() {
   const lastFetchedSellerIdsRef = useRef("");
 
   useEffect(() => {
-    if (cart && cart.length > 0) {
+    if (Array.isArray(cart) && cart.length > 0) {
       const uniqueProductIds = [
         ...new Set(cart.map((item) => getId(item.productId)).filter(Boolean)),
       ];
@@ -104,10 +104,10 @@ function Cart() {
 
   useEffect(() => {
     return () => {
-      dispatch(clearProductError);
-      dispatch(clearSellerError);
-      dispatch(clearProductState);
-      dispatch(clearSellerState);
+      dispatch(clearProductError());
+      dispatch(clearSellerError());
+      dispatch(clearProductState());
+      dispatch(clearSellerState());
     };
   }, []);
 
@@ -128,7 +128,7 @@ function Cart() {
   }, [seller]);
 
   const groups = useMemo(() => {
-    if (!cart || cart.length === 0) return [];
+    if (!Array.isArray(cart) || cart.length === 0) return [];
 
     const bySeller = {};
 
@@ -162,6 +162,15 @@ function Cart() {
   }, [cart, productMap, sellerMap]);
 
   // itemId here is the productId (see `id: product._id` above)
+
+  const handleQtyChange = (productId, sellerId, newQty) => {
+    if (newQty < 1) return;
+    dispatch(addCart({ data: { userId, productId, sellerId, qnty: newQty } }));
+  };
+
+  const handleRemove = (productId, sellerId) => {
+    dispatch(removeCart({ data: { userId, productId, sellerId } }));
+  };
 
   const filteredGroups = useMemo(() => {
     return groups
@@ -248,6 +257,8 @@ function Cart() {
             subtotal={subtotal}
             shipping={shipping}
             total={total}
+            onQtyChange={handleQtyChange}
+            onRemove={handleRemove}
           />
         </>
       )}

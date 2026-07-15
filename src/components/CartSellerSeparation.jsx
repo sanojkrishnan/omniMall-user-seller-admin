@@ -12,6 +12,8 @@ function CartSellerSeparation({
   subtotal,
   shipping,
   total,
+  onQtyChange,
+  onRemove,
 }) {
   return (
     <div className="max-w-7xl mx-auto px-6 mt-2 pb-24 lg:grid lg:grid-cols-[1fr_360px] lg:gap-10 lg:items-start">
@@ -42,6 +44,9 @@ function CartSellerSeparation({
                       key={item.id}
                       item={item}
                       storeIdx={storeIdx}
+                      sellerId={group.sellerId}
+                      onQtyChange={onQtyChange}
+                      onRemove={onRemove}
                     />
                   ))}
                 </div>

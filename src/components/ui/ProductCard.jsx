@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HeartIcon, ShoppingCart, Check, TriangleAlert } from "lucide-react";
 import { Button } from "./Button";
 import { Rating } from "./Rating";
@@ -7,32 +7,62 @@ import P from "./P";
 import H2 from "./H2";
 import { useHandleCartClick } from "../../hooks/useHandleCartClick";
 import { toast } from "react-toastify";
+import Loading from "../ui/Loading";
 
 function ProductCard({ products }) {
   const navigate = useNavigate();
   const handleCartClick = useHandleCartClick();
-  const [addedIds, setAddedIds] = useState({});
+  const [status, setStatus] = useState({});
+  const timeoutsRef = useRef({});
 
-  const handleAddToCart = (e, item) => {
-    toast.success("Product Added To Cart");
+  const setItemStatus = (id, value) => {
+    setStatus((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleAddToCart = async (e, item) => {
     e.stopPropagation();
-    handleCartClick(item);
 
-    setAddedIds((prev) => ({ ...prev, [item._id]: true }));
-    setTimeout(() => {
-      setAddedIds((prev) => ({ ...prev, [item._id]: false }));
-    }, 1200);
+    if (status[item._id] === "loading") return;
+
+    if (timeoutsRef.current[item._id]) {
+      clearTimeout(timeoutsRef.current[item._id]);
+      delete timeoutsRef.current[item._id];
+    }
+
+    setItemStatus(item._id, "loading");
+
+    const result = await handleCartClick(item);
+    const succeeded = result?.meta?.requestStatus === "fulfilled";
+
+    if (succeeded) {
+      toast.success("Product added to cart");
+      setItemStatus(item._id, "added");
+      timeoutsRef.current[item._id] = setTimeout(() => {
+        setItemStatus(item._id, "idle");
+        delete timeoutsRef.current[item._id];
+      }, 1200);
+    } else {
+      toast.error(result?.payload || "Failed to add to cart");
+      setItemStatus(item._id, "error");
+      timeoutsRef.current[item._id] = setTimeout(() => {
+        setItemStatus(item._id, "idle");
+        delete timeoutsRef.current[item._id];
+      }, 1800);
+    }
   };
 
   return (
     <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8">
-      {products.map((item, index) => {
-        const isAdded = !!addedIds[item._id];
+      {products.map((item) => {
+        const itemStatus = status[item._id] || "idle";
+        const isAdded = itemStatus === "added";
+        const isLoading = itemStatus === "loading";
+        const isError = itemStatus === "error";
 
         return (
           <div
             onClick={() => navigate(`/user/shop/product/${item._id}`)}
-            key={index}
+            key={item._id}
             className="bg-white border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-500"
           >
             {/* Image */}
@@ -105,13 +135,15 @@ function ProductCard({ products }) {
                   className={`flex-1 text-sm transition-all duration-300 ease-out ${
                     isAdded
                       ? "bg-green-500 border-green-500 text-white scale-[1.03]"
-                      : ""
+                      : isError
+                        ? "bg-yellow-500 border-yellow-500 text-white scale-[1.03]"
+                        : ""
                   }`}
                   onClick={(e) => handleAddToCart(e, item)}
-                  disabled={isAdded}
+                  disabled={isAdded || isLoading}
                 >
                   <span
-                    key={isAdded ? "added" : "idle"}
+                    key={itemStatus}
                     className="flex items-center gap-1.5"
                     style={{
                       animation: "pop-in 0.35s ease",
@@ -119,10 +151,20 @@ function ProductCard({ products }) {
                   >
                     {isAdded ? (
                       <Check className="size-4" />
+                    ) : isLoading ? (
+                      <Loading className="size-4" />
+                    ) : isError ? (
+                      <TriangleAlert className="size-4" />
                     ) : (
                       <ShoppingCart className="size-4" />
                     )}
-                    {isAdded ? "Added!" : "Add to cart"}
+                    {isAdded
+                      ? "Added!"
+                      : isLoading
+                        ? "Adding..."
+                        : isError
+                          ? "Try again"
+                          : "Add to cart"}
                   </span>
                 </Button>
               </div>

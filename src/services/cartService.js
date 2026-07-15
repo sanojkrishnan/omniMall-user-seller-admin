@@ -4,7 +4,10 @@ export const cartAPI = {
   addCart: async (data) => {
     return api.post("cart/add", data);
   },
-  fetchCart: async (id) => {
-    return api.get("cart/fetch", id);
+  fetchCart: async (userId) => {
+    return api.get("cart/fetch", { params: { userId } });
+  },
+  removeCart: async (data) => {
+    return api.delete("cart/delete", data);
   },
 };

@@ -1,7 +1,7 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import P2 from "./ui/P2";
 
-function CartProductCard({ item, storeIdx }) {
+function CartProductCard({ item, sellerId, onQtyChange, onRemove }) {
   return (
     <div
       key={item.id}
@@ -23,6 +23,7 @@ function CartProductCard({ item, storeIdx }) {
           </div>
           <button
             aria-label={`Remove ${item.name}`}
+            onClick={() => onRemove(item.id, sellerId)}
             className="text-neutral-400 hover:text-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg p-1"
           >
             <Trash2 size={14} strokeWidth={2} />
@@ -33,7 +34,9 @@ function CartProductCard({ item, storeIdx }) {
           <div className="flex items-center rounded-lg border border-neutral-200">
             <button
               aria-label="Decrease quantity"
-              className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-l-lg"
+              disabled={item.qty <= 1}
+              onClick={() => onQtyChange(item.id, sellerId, item.qty - 1)}
+              className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-l-lg disabled:opacity-30 disabled:hover:text-neutral-600"
             >
               <Minus size={12} strokeWidth={2} />
             </button>
@@ -42,6 +45,7 @@ function CartProductCard({ item, storeIdx }) {
             </span>
             <button
               aria-label="Increase quantity"
+              onClick={() => onQtyChange(item.id, sellerId, item.qty + 1)}
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-r-lg"
             >
               <Plus size={12} strokeWidth={2} />

@@ -6,8 +6,6 @@ import H1 from "../../components/ui/H1";
 import CartSellerSeparation from "../../components/CartSellerSeparation";
 import {
   fetchCart,
-  updateCartQty,
-  removeCart,
 } from "../../redux/slice/cartSlice";
 import {
   fetchAllProducts,
@@ -164,27 +162,6 @@ function Cart() {
   }, [cart, productMap, sellerMap]);
 
   // itemId here is the productId (see `id: product._id` above)
-  const updateQty = (storeIdx, itemId, delta) => {
-    if (!userId) return;
-
-    const currentItem = cart.find((c) => getId(c.productId) === itemId);
-    if (!currentItem) return;
-
-    const nextQty = currentItem.qnty + delta;
-
-    if (nextQty < 1) {
-      // dropping to 0 (or below) removes the item instead of writing qnty: 0
-      dispatch(removeCart({ userId, productId: itemId }));
-      return;
-    }
-
-    dispatch(updateCartQty({ userId, productId: itemId, qnty: nextQty }));
-  };
-
-  const removeItem = (storeIdx, itemId) => {
-    if (!userId) return;
-    dispatch(removeCart({ userId, productId: itemId }));
-  };
 
   const filteredGroups = useMemo(() => {
     return groups
@@ -268,8 +245,6 @@ function Cart() {
             isFiltering={isFiltering}
             filteredGroups={filteredGroups}
             groups={groups}
-            removeItem={removeItem}
-            updateQty={updateQty}
             subtotal={subtotal}
             shipping={shipping}
             total={total}

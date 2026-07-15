@@ -1,7 +1,7 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import P2 from "./ui/P2";
 
-function CartProductCard({ item, storeIdx, removeItem, updateQty }) {
+function CartProductCard({ item, storeIdx }) {
   return (
     <div
       key={item.id}
@@ -22,7 +22,6 @@ function CartProductCard({ item, storeIdx, removeItem, updateQty }) {
             </P2>
           </div>
           <button
-            onClick={() => removeItem(storeIdx, item.id)}
             aria-label={`Remove ${item.name}`}
             className="text-neutral-400 hover:text-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg p-1"
           >
@@ -33,7 +32,6 @@ function CartProductCard({ item, storeIdx, removeItem, updateQty }) {
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center rounded-lg border border-neutral-200">
             <button
-              onClick={() => updateQty(storeIdx, item.id, -1)}
               aria-label="Decrease quantity"
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-l-lg"
             >
@@ -43,7 +41,6 @@ function CartProductCard({ item, storeIdx, removeItem, updateQty }) {
               {item.qty}
             </span>
             <button
-              onClick={() => updateQty(storeIdx, item.id, 1)}
               aria-label="Increase quantity"
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-r-lg"
             >

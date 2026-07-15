@@ -9,8 +9,6 @@ function CartSellerSeparation({
   isFiltering,
   filteredGroups,
   groups,
-  removeItem,
-  updateQty,
   subtotal,
   shipping,
   total,
@@ -44,8 +42,6 @@ function CartSellerSeparation({
                       key={item.id}
                       item={item}
                       storeIdx={storeIdx}
-                      removeItem={removeItem}
-                      updateQty={updateQty}
                     />
                   ))}
                 </div>

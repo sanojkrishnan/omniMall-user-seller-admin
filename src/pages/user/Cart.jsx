@@ -35,7 +35,7 @@ function Cart() {
     (state) => state.cart,
   );
 
-  console.log("CART FROM CART PAGE :", cart)
+  console.log("CART FROM CART PAGE :", cart);
 
   const {
     products = [],
@@ -168,8 +168,8 @@ function Cart() {
     dispatch(addCart({ data: { userId, productId, sellerId, qnty: newQty } }));
   };
 
-  const handleRemove = (productId, sellerId) => {
-    dispatch(removeCart({ data: { userId, productId, sellerId } }));
+  const handleRemove = (productId) => {
+    dispatch(removeCart({ productId }));
   };
 
   const filteredGroups = useMemo(() => {

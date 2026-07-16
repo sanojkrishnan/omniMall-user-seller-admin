@@ -7,7 +7,7 @@ export const cartAPI = {
   fetchCart: async (userId) => {
     return api.get("cart/fetch", { params: { userId } });
   },
-  removeCart: async (data) => {
-    return api.delete("cart/delete", data);
+  removeCart: async (productId) => {
+    return api.delete(`cart/remove/${productId}`);
   },
 };

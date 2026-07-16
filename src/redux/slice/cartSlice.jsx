@@ -5,6 +5,7 @@ import { cartAPI } from "../../services/cartService";
 const initialState = {
   cart: [],
   cartPage: 0,
+  message: null,
   cartTotalPages: 0,
   totalCarts: 0,
   cartError: null,
@@ -28,9 +29,9 @@ export const addCart = createAsyncThunk(
 // Fetch the cart for a specific user from backend
 export const fetchCart = createAsyncThunk(
   "cart/fetch",
-  async ({ userId }, { rejectWithValue }) => {
+  async ({ rejectWithValue }) => {
     try {
-      const allCarts = await cartAPI.fetchCart(userId);
+      const allCarts = await cartAPI.fetchCart();
       return allCarts;
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to load cart"));
@@ -41,9 +42,10 @@ export const fetchCart = createAsyncThunk(
 //remove cart from the backend
 export const removeCart = createAsyncThunk(
   "cart/remove",
-  async ({ data }, { rejectWithValue }) => {
+  async ({ productId }, { rejectWithValue }) => {
     try {
-      const cartData = await cartAPI.removeCart(data);
+      console.log("CART DATA TO THE BACKEND : ", productId);
+      const cartData = await cartAPI.removeCart(productId);
       return cartData;
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to remove item"));
@@ -57,10 +59,12 @@ const cartSlice = createSlice({
   reducers: {
     clearCartError(state) {
       state.cartError = null;
+      state.message = null;
     },
     clearCartState(state) {
       state.cartError = null;
       state.cart = [];
+      state.message = null;
       localStorage.removeItem("Cart");
     },
   },
@@ -73,7 +77,7 @@ const cartSlice = createSlice({
       })
       .addCase(addCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
-        state.cart = action.payload;
+        state.message = action.payload.message;
       })
       .addCase(addCart.rejected, (state, action) => {
         state.isCartLoading = false;
@@ -89,7 +93,7 @@ const cartSlice = createSlice({
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
         state.cartStatus = "succeeded";
-        state.cart = action.payload;
+        state.cart = action.payload.data.cart;
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.isCartLoading = false;
@@ -101,14 +105,17 @@ const cartSlice = createSlice({
       .addCase(removeCart.pending, (state) => {
         state.isCartLoading = true;
         state.cartError = null;
+        state.message = null;
       })
       .addCase(removeCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
-        state.cart = action.payload;
+        state.cart = action.payload.data.cart;
+        state.message = action.payload.message;
       })
       .addCase(removeCart.rejected, (state, action) => {
         state.isCartLoading = false;
         state.cartError = action.payload;
+        state.message = action.payload.message;
       });
   },
 });

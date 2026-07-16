@@ -67,11 +67,14 @@ function Header({ hideMenu, borderLine, selection }) {
                   }
                 >
                   {item === "Profile" ? (
-                    <div className="w-fit h-fit p-1 bg-white rounded-full text-black">
+                    <div
+                      className={`w-fit h-fit ${!user?.profileImage?.url && "p-1"} bg-white rounded-full text-black`}
+                    >
                       {user?.profileImage?.url ? (
                         <img
                           src={user.profileImage.url}
                           alt="Profile"
+                          referrerPolicy="no-referrer"
                           className="w-6 h-6 rounded-full object-cover"
                         />
                       ) : (
@@ -114,15 +117,14 @@ function Header({ hideMenu, borderLine, selection }) {
                   onClick={() => path && navigate(path, { replace: true })}
                 >
                   {item === "Profile" ? (
-                    <div className="w-fit h-fit p-1 bg-white rounded-full text-black">
+                    <div
+                      className={`w-fit h-fit ${!user?.profileImage?.url && "p-1"} bg-white rounded-full text-black`}
+                    >
                       {user?.profileImage?.url ? (
                         <img
-                          src={
-                            user.provider === "local"
-                              ? URL.createObjectURL(user.profileImage)
-                              : user.profileImage.url
-                          }
+                          src={user.profileImage.url}
                           alt="Profile"
+                          referrerPolicy="no-referrer"
                           className="w-6 h-6 rounded-full object-cover"
                         />
                       ) : (

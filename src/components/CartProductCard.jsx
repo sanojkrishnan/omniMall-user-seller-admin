@@ -23,7 +23,7 @@ function CartProductCard({ item, sellerId, onQtyChange, onRemove }) {
           </div>
           <button
             aria-label={`Remove ${item.name}`}
-            onClick={() => onRemove(item.id, sellerId)}
+            onClick={() => onRemove(item.id)}
             className="text-neutral-400 hover:text-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg p-1"
           >
             <Trash2 size={14} strokeWidth={2} />

@@ -1,11 +1,11 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import P2 from "./ui/P2";
 
-function CartProductCard({ item, sellerId, onQtyChange, onRemove }) {
+function CartProductCard({ item, onQtyChange, onRemove }) {
   return (
     <div
       key={item.id}
-      className="flex gap-4 rounded-lg border hover:shadow-lg hover:scale-105 transition-all duration-500 border-neutral-200 p-3 lg:p-4"
+      className="flex gap-4 rounded-lg border hover:shadow-md transition-all duration-500 border-neutral-200 p-3 lg:p-4"
     >
       <img
         src={item.img}
@@ -34,8 +34,8 @@ function CartProductCard({ item, sellerId, onQtyChange, onRemove }) {
           <div className="flex items-center rounded-lg border border-neutral-200">
             <button
               aria-label="Decrease quantity"
-              disabled={item.qty <= 1}
-              onClick={() => onQtyChange(item.id, sellerId, item.qty - 1)}
+              disabled={item.qty <= 0}
+              onClick={() => onQtyChange(item.id, item.qty - 1)}
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-l-lg disabled:opacity-30 disabled:hover:text-neutral-600"
             >
               <Minus size={12} strokeWidth={2} />
@@ -45,7 +45,7 @@ function CartProductCard({ item, sellerId, onQtyChange, onRemove }) {
             </span>
             <button
               aria-label="Increase quantity"
-              onClick={() => onQtyChange(item.id, sellerId, item.qty + 1)}
+              onClick={() => onQtyChange(item.id, item.qty + 1)}
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-r-lg"
             >
               <Plus size={12} strokeWidth={2} />

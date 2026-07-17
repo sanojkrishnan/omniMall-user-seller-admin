@@ -135,6 +135,12 @@ function Home() {
             </h1>
             <p>Save more with our exclusive deals</p>
           </div>
+          <div className="text-center w-full text-4xl font-bold py-10">
+            COMING SOON
+            <span className="animate-ping [animation-delay:150ms]">•</span>
+            <span className="animate-ping [animation-delay:300ms]">•</span>
+            <span className="animate-ping [animation-delay:500ms]">•</span>
+          </div>
         </div>
       </div>
     </div>

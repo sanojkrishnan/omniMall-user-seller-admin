@@ -16,7 +16,14 @@ import {
 } from "../../redux/slice/sellerSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
-import { fetchCart, addCart, removeCart } from "../../redux/slice/cartSlice";
+import {
+  clearCartError,
+  clearCartMessages,
+  fetchCart,
+  removeCart,
+  updateQuantity,
+} from "../../redux/slice/cartSlice";
+import { toast } from "react-toastify";
 
 const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
@@ -30,10 +37,15 @@ function Cart() {
     priceSort: "",
   });
 
-  // raw cart entries: [{ productId, userId, sellerId, qnty }]
-  const { cart, isCartLoading, cartError, cartStatus } = useSelector(
-    (state) => state.cart,
-  );
+  // raw cart entries: [{ productId, userId, sellerId, quantity }]
+  const {
+    cart,
+    isCartLoading,
+    cartError,
+    cartStatus,
+    cartUpdateMessage,
+    cartDeleteMessage,
+  } = useSelector((state) => state.cart);
 
   console.log("CART FROM CART PAGE :", cart);
 
@@ -44,15 +56,24 @@ function Cart() {
   } = useSelector((state) => state.product);
   const { seller } = useSelector((state) => state.seller);
 
-  // TODO: adjust this path to match your real auth slice
-  const userId = useSelector((state) => state.auth?.user?._id);
-
-  // load the cart from the backend once we know who the user is
   useEffect(() => {
-    if (userId) {
-      dispatch(fetchCart({ userId }));
+    dispatch(fetchCart());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (cartDeleteMessage) {
+      toast.success(cartDeleteMessage);
+      dispatch(clearCartMessages());
     }
-  }, [dispatch, userId]);
+    if (cartUpdateMessage) {
+      toast.success(cartUpdateMessage);
+      dispatch(clearCartMessages());
+    }
+    if (cartError) {
+      toast.error(cartError);
+      dispatch(clearCartError());
+    }
+  }, [dispatch, cartDeleteMessage, cartUpdateMessage, cartError]);
 
   const lastFetchedProductIdsRef = useRef("");
   const lastFetchedSellerIdsRef = useRef("");
@@ -108,6 +129,7 @@ function Cart() {
       dispatch(clearSellerError());
       dispatch(clearProductState());
       dispatch(clearSellerState());
+      dispatch(clearCartMessages());
     };
   }, []);
 
@@ -163,9 +185,10 @@ function Cart() {
 
   // itemId here is the productId (see `id: product._id` above)
 
-  const handleQtyChange = (productId, sellerId, newQty) => {
-    if (newQty < 1) return;
-    dispatch(addCart({ data: { userId, productId, sellerId, qnty: newQty } }));
+  const handleQtyChange = (productId, newQty) => {
+    if (newQty < 0) return;
+    console.log("QUANTITY CHECK :", newQty);
+    dispatch(updateQuantity({ data: { productId, qnty: newQty } }));
   };
 
   const handleRemove = (productId) => {

@@ -15,7 +15,7 @@ export const Button = forwardRef(
         ref={ref}
         disabled={disabled}
         className={cn(
-          "px-2 py-1 sm:py-2 sm:px-4 text-xs  md:text-base font-medium hover:scale-[102%] transition-all duration-200 w-full mt-4 sm:mt-2 rounded-lg",
+          "py-2 px-4 text-xs  md:text-base font-medium hover:scale-[102%] transition-all duration-200 w-full mt-4 sm:mt-2 rounded-lg",
           variants[variant],
           disabled && "opacity-50 cursor-not-allowed hover:scale-100",
           className,

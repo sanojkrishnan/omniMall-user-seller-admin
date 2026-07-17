@@ -5,7 +5,9 @@ import { cartAPI } from "../../services/cartService";
 const initialState = {
   cart: [],
   cartPage: 0,
-  message: null,
+  cartMessage: null,
+  cartDeleteMessage: null,
+  cartUpdateMessage: null,
   cartTotalPages: 0,
   totalCarts: 0,
   cartError: null,
@@ -26,12 +28,25 @@ export const addCart = createAsyncThunk(
   },
 );
 
+export const updateQuantity = createAsyncThunk(
+  "cart/update",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const cartData = await cartAPI.updateQuantity(data);
+      return cartData;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update cart"));
+    }
+  },
+);
+
 // Fetch the cart for a specific user from backend
 export const fetchCart = createAsyncThunk(
   "cart/fetch",
-  async ({ rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const allCarts = await cartAPI.fetchCart();
+      console.log("ALL CARTS FROM SLICE", allCarts);
       return allCarts;
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to load cart"));
@@ -59,13 +74,21 @@ const cartSlice = createSlice({
   reducers: {
     clearCartError(state) {
       state.cartError = null;
-      state.message = null;
+      state.cartMessage = null;
+      state.cartDeleteMessage = null;
+      state.cartUpdateMessage = null;
     },
     clearCartState(state) {
       state.cartError = null;
       state.cart = [];
-      state.message = null;
-      localStorage.removeItem("Cart");
+      state.cartMessage = null;
+      state.cartDeleteMessage = null;
+      state.cartUpdateMessage = null;
+    },
+    clearCartMessages(state) {
+      state.cartMessage = null;
+      state.cartDeleteMessage = null;
+      state.cartUpdateMessage = null;
     },
   },
   extraReducers: (builder) => {
@@ -77,11 +100,11 @@ const cartSlice = createSlice({
       })
       .addCase(addCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
-        state.message = action.payload.message;
+        state.cartMessage = action.payload.message;
       })
       .addCase(addCart.rejected, (state, action) => {
         state.isCartLoading = false;
-        state.cartError = action.payload;
+        state.cartError = action.payload?.data?.error;
       });
     builder
       // fetch cart
@@ -93,32 +116,51 @@ const cartSlice = createSlice({
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
         state.cartStatus = "succeeded";
-        state.cart = action.payload.data.cart;
+        state.cart = action.payload?.data?.cart;
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.isCartLoading = false;
         state.cartStatus = "failed";
         state.cartError = action.payload;
+        console.log("CART FETCH FAILED :", action.payload);
       });
     builder
       // remove from cart
       .addCase(removeCart.pending, (state) => {
         state.isCartLoading = true;
         state.cartError = null;
-        state.message = null;
+        state.cartDeleteMessage = null;
       })
       .addCase(removeCart.fulfilled, (state, action) => {
         state.isCartLoading = false;
-        state.cart = action.payload.data.cart;
-        state.message = action.payload.message;
+        state.cart = action.payload?.data?.cart;
+        state.cartDeleteMessage = action.payload?.message;
       })
       .addCase(removeCart.rejected, (state, action) => {
         state.isCartLoading = false;
         state.cartError = action.payload;
-        state.message = action.payload.message;
+        state.cartDeleteMessage = action.payload?.message;
+      });
+    builder
+      //update quantity
+      .addCase(updateQuantity.pending, (state) => {
+        state.isCartLoading = true;
+        state.cartError = null;
+        state.cartUpdateMessage = null;
+      })
+      .addCase(updateQuantity.fulfilled, (state, action) => {
+        state.isCartLoading = false;
+        state.cart = action.payload?.data?.cart;
+        state.cartUpdateMessage = action.payload?.message;
+      })
+      .addCase(updateQuantity.rejected, (state, action) => {
+        state.isCartLoading = false;
+        state.cartError = action.payload;
+        state.cartUpdateMessage = action.payload?.message;
       });
   },
 });
 
-export const { clearCartError, clearCartState } = cartSlice.actions;
+export const { clearCartError, clearCartState, clearCartMessages } =
+  cartSlice.actions;
 export default cartSlice.reducer;

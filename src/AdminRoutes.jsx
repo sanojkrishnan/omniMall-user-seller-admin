@@ -5,6 +5,7 @@ import AdminLayout from "./components/ui/AdminLayout";
 import Products from "./pages/admin/Products";
 import Users from "./pages/admin/Users";
 import Categories from "./pages/admin/Categories";
+import Coupon from "./pages/admin/Coupon";
 
 const adminRoutes = (
   <>
@@ -20,6 +21,7 @@ const adminRoutes = (
       <Route path="products" element={<Products />} />
       <Route path="users" element={<Users />} />
       <Route path="categories" element={<Categories />} />
+      <Route path="coupon" element={<Coupon />} />
     </Route>
   </>
 );

@@ -6,6 +6,8 @@ import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import { fetchAllCategories } from "../../redux/slice/categorySlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import P from "../../components/ui/P";
+import { Plus, TriangleAlert } from "lucide-react";
+import { Button } from "../../components/ui/Button";
 
 function Categories() {
   const [openCategory, setOpenCategory] = useState(false);
@@ -41,19 +43,24 @@ function Categories() {
 
   const columns = [
     {
+      header: "Category Image",
+      render: (item) =>
+        item.categoryImage?.url ? (
+          <img
+            src={item.categoryImage.url}
+            alt={item.categoryName}
+            className="w-12 h-12 rounded-md object-cover"
+          />
+        ) : (
+          <TriangleAlert />
+        ),
+    },
+    {
       header: "Category Name",
-      render: (item) => (
-        <>
-          <P className="text-left">{item.name}</P>
-        </>
-      ),
+      render: (item) => <div>{item.name || "N/A"}</div>,
     },
     {
-      header: "Sub Category",
-      render: (item) => <div>{item.subCategory?.name || "N/A"}</div>,
-    },
-    {
-      header: "Specifications",
+      header: "Status",
       render: (item) => <div>{item?.specSheets || "N/A"}</div>,
     },
     {
@@ -78,9 +85,8 @@ function Categories() {
     isLoading: isCategoryLoading,
     onLoadMore: () => setPage((prev) => prev + 1),
   });
-  
 
-   useSearchDebounce({
+  useSearchDebounce({
     setSearch,
     setPage,
     searchInput,
@@ -98,6 +104,18 @@ function Categories() {
         onChange={(e) => setSearchInput(e.target.value)}
         filterOn={"categories"}
       />
+
+      <div className="flex justify-start">
+        <Button
+          className={"bg-[#5f0000] w-fit px-4"}
+          // onClick={() => {
+          //   setAddProduct(true);
+          //   setOpenProduct(false);
+          // }}
+        >
+          <Plus /> Add Category
+        </Button>
+      </div>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
         <DataTable
           title="All Categories"

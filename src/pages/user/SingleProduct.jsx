@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
   Star,
@@ -8,6 +8,9 @@ import {
   Plus,
   ChevronDown,
   ChevronRight,
+  Check,
+  TriangleAlert,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import RelatedSuggestion from "../../components/ui/RelatedSuggestion";
@@ -32,6 +35,9 @@ import { useToastError } from "../../hooks/useToastError";
 import H1 from "../../components/ui/H1";
 import P2 from "../../components/ui/P2";
 import P from "../../components/ui/P";
+import Loading from "../../components/ui/Loading";
+import { useHandleCartClick } from "../../hooks/useHandleCartClick";
+import { toast } from "react-toastify";
 
 const defaultProduct = {
   subcategory: "Coats",
@@ -81,6 +87,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState("description");
+  const [status, setStatus] = useState({});
 
   //product selector
   const { singleProduct, isProductLoading, productError } = useSelector(
@@ -132,6 +139,49 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
   const toggleSection = (key) =>
     setOpenSection((prev) => (prev === key ? null : key));
+
+  //add to cart
+  console.log("PRODUCTS :", singleProduct);
+  const itemStatus = status[singleProduct._id] || "idle";
+  const isAdded = itemStatus === "added";
+  const isLoading = itemStatus === "loading";
+  const isError = itemStatus === "error";
+  const timeoutsRef = useRef({});
+  const handleCartClick = useHandleCartClick();
+  const handleAddToCart = async (e, singleProduct) => {
+    e.stopPropagation();
+    const setItemStatus = (id, value) => {
+      setStatus((prev) => ({ ...prev, [id]: value }));
+    };
+
+    if (status[singleProduct._id] === "loading") return;
+
+    if (timeoutsRef.current[singleProduct._id]) {
+      clearTimeout(timeoutsRef.current[singleProduct._id]);
+      delete timeoutsRef.current[singleProduct._id];
+    }
+
+    setItemStatus(singleProduct._id, "loading");
+
+    const result = await handleCartClick(singleProduct);
+    const succeeded = result?.meta?.requestStatus === "fulfilled";
+
+    if (succeeded) {
+      toast.success("Product added to cart");
+      setItemStatus(singleProduct._id, "added");
+      timeoutsRef.current[singleProduct._id] = setTimeout(() => {
+        setItemStatus(singleProduct._id, "idle");
+        delete timeoutsRef.current[singleProduct._id];
+      }, 1200);
+    } else {
+      toast.error(result?.payload || "Failed to add to cart");
+      setItemStatus(singleProduct._id, "error");
+      timeoutsRef.current[singleProduct._id] = setTimeout(() => {
+        setItemStatus(singleProduct._id, "idle");
+        delete timeoutsRef.current[singleProduct._id];
+      }, 1800);
+    }
+  };
 
   return (
     <>
@@ -365,8 +415,42 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                   </button>
                 </div>
 
-                <Button variant={"secondary"} className="mt-0 flex-1">
-                  Add to Cart
+                <Button
+                  variant="secondary"
+                  className={`flex-1 text-sm transition-all duration-300 ease-out ${
+                    isAdded
+                      ? "bg-green-500 border-green-500 text-white scale-[1.03]"
+                      : isError
+                        ? "bg-yellow-500 border-yellow-500 text-white scale-[1.03]"
+                        : ""
+                  }`}
+                  onClick={(e) => handleAddToCart(e, singleProduct)}
+                  disabled={isAdded || isLoading}
+                >
+                  <span
+                    key={itemStatus}
+                    className="flex items-center gap-1.5"
+                    style={{
+                      animation: "pop-in 0.35s ease",
+                    }}
+                  >
+                    {isAdded ? (
+                      <Check className="size-4" />
+                    ) : isLoading ? (
+                      <Loading className="size-4" />
+                    ) : isError ? (
+                      <TriangleAlert className="size-4" />
+                    ) : (
+                      <ShoppingCart className="size-4" />
+                    )}
+                    {isAdded
+                      ? "Added!"
+                      : isLoading
+                        ? "Adding..."
+                        : isError
+                          ? "Try again"
+                          : "Add to cart"}
+                  </span>
                 </Button>
 
                 <button

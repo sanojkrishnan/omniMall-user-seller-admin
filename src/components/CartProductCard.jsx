@@ -1,11 +1,16 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import P2 from "./ui/P2";
+import { useNavigate } from "react-router-dom";
 
 function CartProductCard({ item, onQtyChange, onRemove }) {
+  const navigate = useNavigate();
+
+  console.log("ITEM IN THE CART PRODUCT : ", item);
   return (
     <div
       key={item.id}
-      className="flex gap-4 rounded-lg border hover:shadow-md transition-all duration-500 border-neutral-200 p-3 lg:p-4"
+      className="flex gap-4 rounded-lg border cursor-pointer hover:shadow-md transition-all duration-500 border-neutral-200 p-3 lg:p-4"
+      onClick={() => navigate(`/user/shop/product/${item.id}`)}
     >
       <img
         src={item.img}
@@ -23,7 +28,10 @@ function CartProductCard({ item, onQtyChange, onRemove }) {
           </div>
           <button
             aria-label={`Remove ${item.name}`}
-            onClick={() => onRemove(item.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(item.id);
+            }}
             className="text-neutral-400 hover:text-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-lg p-1"
           >
             <Trash2 size={14} strokeWidth={2} />
@@ -35,7 +43,10 @@ function CartProductCard({ item, onQtyChange, onRemove }) {
             <button
               aria-label="Decrease quantity"
               disabled={item.qty <= 0}
-              onClick={() => onQtyChange(item.id, item.qty - 1)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onQtyChange(item.id, item.qty - 1);
+              }}
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-l-lg disabled:opacity-30 disabled:hover:text-neutral-600"
             >
               <Minus size={12} strokeWidth={2} />
@@ -45,7 +56,10 @@ function CartProductCard({ item, onQtyChange, onRemove }) {
             </span>
             <button
               aria-label="Increase quantity"
-              onClick={() => onQtyChange(item.id, item.qty + 1)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onQtyChange(item.id, item.qty + 1);
+              }}
               className="p-1.5 text-neutral-600 hover:text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-r-lg"
             >
               <Plus size={12} strokeWidth={2} />

@@ -5,6 +5,7 @@ import sellerSlice from "./slice/sellerSlice";
 import categorySlice from "./slice/categorySlice";
 import cartSlice from "./slice/cartSlice";
 import { getStoredUser } from "../utils/apiClient";
+import couponSlice from "./slice/couponSlice";
 
 const storedUser = getStoredUser(); // reads "user" OR "seller" OR "admin" key correctly
 
@@ -20,6 +21,7 @@ export const store = configureStore({
     seller: sellerSlice,
     category: categorySlice,
     cart: cartSlice,
+    coupon: couponSlice,
   },
   preloadedState: {
     auth: {

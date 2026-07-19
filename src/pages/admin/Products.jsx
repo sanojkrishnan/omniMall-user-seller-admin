@@ -338,7 +338,7 @@ function Products() {
                     categoryData: categoryMap[getId(item.categoryId)] ?? null,
                   });
                 }}
-                footer={<div id={triggerId} className="h-10" />}
+                footer={<div id={triggerId} className="h-5" />}
               />
             </>
           )}
@@ -356,7 +356,7 @@ function Products() {
             </div>
           )}
 
-          <div id={triggerId} className="h-10" />
+          <div id={triggerId} className="h-5" />
         </div>
       </div>
     </>

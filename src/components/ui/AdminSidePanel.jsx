@@ -110,13 +110,11 @@ function AdminSidePanel({ setSelection, selection }) {
             <LogOut className="size-5" />
           </button>
 
-          <div className="w-full h-[0.5px] rounded-full bg-white mt-10"></div>
+          <div className="w-full rounded-full border-[0.5px] border-white mt-10"></div>
         </div>
         {/* menu view */}
         <div className="mt-10">
-          <ul
-            className={`${menuClick ? "p-1" : "p-4"} bg-[#550017] rounded-xl`}
-          >
+          <ul className={`${menuClick ? "p-1" : "p-4"} rounded-xl`}>
             {dashMenu.map((item, index) => (
               <li
                 className={`${activeItem === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}

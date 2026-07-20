@@ -7,6 +7,7 @@ import Users from "./pages/admin/Users";
 import Categories from "./pages/admin/Categories";
 import Coupon from "./pages/admin/Coupon";
 import SingleCouponDetail from "./components/SingleCouponDetail";
+import SingleProductInAdmin from "./components/SingleProductInAdmin";
 
 const adminRoutes = (
   <>
@@ -24,6 +25,7 @@ const adminRoutes = (
       <Route path="categories" element={<Categories />} />
       <Route path="coupon" element={<Coupon />} />
       <Route path={`coupon/:couponId`} element={<SingleCouponDetail />} />
+      <Route path={`products/:productId`} element={<SingleProductInAdmin />} />
     </Route>
   </>
 );

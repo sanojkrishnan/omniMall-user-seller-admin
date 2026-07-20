@@ -228,14 +228,16 @@ function Dashboard() {
       </div>
       <div className="w-full h-[0.5px] border mb-6"></div>
       <div className="flex justify-end mr-10">
-        <SelectionButton className={"w-fit"} defaultValue={filter[0]}>{filter}</SelectionButton>
+        <SelectionButton className={"w-fit"} defaultValue={filter[0]}>
+          {filter}
+        </SelectionButton>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 place-items-center ">
         {/* Sales Overview */}
         <FormCard
           className={
-            "flex-col items-center border min-w-[400px] p-2 justify-center mt-6"
+            "flex-col items-center border min-w-[400px] shadow-none p-2 justify-center mt-6"
           }
         >
           <div className=" p-2 mb-4 text-center border-b ">
@@ -268,7 +270,7 @@ function Dashboard() {
         {/* category py chart  */}
         <FormCard
           className={
-            "flex-col items-center border min-w-[400px] p-2 justify-center mt-6"
+            "flex-col items-center shadow-none border min-w-[400px] p-2 justify-center mt-6"
           }
         >
           <div className=" p-2 mb-4 text-center border-b ">
@@ -323,7 +325,7 @@ function Dashboard() {
           </div>
         </FormCard>
         {/* recent orders  */}
-        <FormCard className="flex-col overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+        <FormCard className="flex-col shadow-none overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
           {/* Header */}
           <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
             <h1 className="justify-self-start">Recent Orders</h1>
@@ -401,7 +403,7 @@ function Dashboard() {
           </div>
         </FormCard>
         {/* Sellers List  */}
-        <FormCard className="flex-col overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+        <FormCard className="flex-col shadow-none overflow-y-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
           {/* Header */}
           <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
             <h1 className="justify-self-start">Top Sellers</h1>
@@ -481,7 +483,7 @@ function Dashboard() {
       </div>
 
       {/* top selling product */}
-      <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+      <div className="flex flex-col col-span-2 rounded-lg w-full items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
         {/* Header */}
         <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
           <h1 className="justify-self-start">Top Selling Product</h1>
@@ -494,7 +496,7 @@ function Dashboard() {
           </Button>
         </div>
 
-        <div className="w-full flex-1 overflow-y-auto px-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="w-full flex-1 overflow-y-auto px-4 custom-scrollbar">
           <ul className="w-full">
             {products.length !== 0 ? (
               products.map(

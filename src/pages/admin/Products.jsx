@@ -45,7 +45,7 @@ function Products() {
   const { seller } = useSelector((state) => state.seller);
   const { category } = useSelector((state) => state.category);
 
-  const [openProduct, setOpenProduct] = useState(false);
+  const [openProduct,setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
   const [hadError, setHadError] = useState(false);
   const [addProduct, setAddProduct] = useState(false);

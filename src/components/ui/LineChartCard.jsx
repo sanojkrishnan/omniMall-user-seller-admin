@@ -21,7 +21,7 @@ function LineChart({ children, index }) {
   return (
     <div
       className={
-        "w-fit mb-4 px-4 p-2 border overflow-hidden shadow-lg bg-gradient-to-br  from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl"
+        "w-fit mb-4 px-4 p-2 border overflow-hidden bg-gradient-to-br  from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl"
       }
     >
       <div className="w-fit">

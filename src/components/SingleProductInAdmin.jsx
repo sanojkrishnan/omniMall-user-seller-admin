@@ -1,52 +1,35 @@
 import { useState } from "react";
 import { Button } from "./ui/Button";
+import { useCurrency } from "../hooks/useCurrency";
+import { useDateFormatter } from "../hooks/useDateFormatter";
+import { AdminStockBar, FieldRow, SectionLabel } from "./AdminProductSupport";
 
-// ---------------------------------------------------------
-// COLOR PALETTE
-// Change these hex values to re-theme the whole page.
-// ---------------------------------------------------------
-const OXBLOOD = "#5f0000"; // primary brand color (buttons, accents, borders)
-const INK = "#241a1a"; // main text color (near-black, warm tone)
-const STONE = "#8a7873"; // secondary/muted text (labels, captions)
-const HAIRLINE = "#e8e1df"; // light borders/dividers
-const PAPER_TINT = "#faf7f6"; // very light background for cards/panels
-const SUCCESS = "#3f6b52"; // green - used for "in stock", discounts, positive states
-const SUCCESS_BG = "#eef4f0"; // light green background behind SUCCESS text
-const AMBER = "#a97327"; // amber/orange - used for warnings, low stock, flags
-const AMBER_BG = "#faf3e7"; // light amber background behind AMBER text
+// COLOR PALETTE (for reference — used as Tailwind arbitrary values below)
+// OXBLOOD #5f0000 · INK #241a1a · STONE #8a7873 · HAIRLINE #e8e1df
+// PAPER_TINT #faf7f6 · SUCCESS #3f6b52 · SUCCESS_BG #eef4f0
+// AMBER #a97327 · AMBER_BG #faf3e7
 
-// Plain system fonts only (no external font files loaded)
-const SANS =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"; // normal text
-const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"; // used for IDs, prices, numbers
-
-// ---------------------------------------------------------
-// MOCK PRODUCT DATA
-// Replace this whole object with data from your API/database.
-// Structure matches your MongoDB document (categoryId, sellerId, etc.)
-// ---------------------------------------------------------
 const product = {
-  id: "6a4a41dc4e2a2b76f619961a", // _id from the database
+  id: "6a4a41dc4e2a2b76f619961a",
   productName: "Samsung Galaxy S25 Ultra",
   brand: "Samsung",
   productDesc:
     "Flagship Android phone with S-Pen, 200MP camera and AI features.",
-  category: { id: "6a493ee8d8dca79e5dd3c9df", name: "Smartphones" }, // categoryId + a display name (name would normally come from a separate categories lookup)
+  category: { id: "6a493ee8d8dca79e5dd3c9df", name: "Smartphones" },
   seller: {
-    id: "6a213d5a23da8241fc385b3d", // sellerId
-    name: "TechHub Retail Pvt Ltd", // extra seller info you'd fetch by joining on sellerId
+    id: "6a213d5a23da8241fc385b3d",
+    name: "TechHub Retail Pvt Ltd",
     rating: 4.6,
     totalListings: 128,
     joined: "2024-03-11T00:00:00.000+00:00",
   },
-  couponId: null, // null = no coupon currently attached
-  stock: 40, // units available
-  mrp: 129999, // original listed price
-  offerPrice: 119999, // discounted/selling price
-  offerPercentage: 8, // % off, shown as a badge
-  ordered: 0, // how many units have been sold/ordered so far
+  couponId: null,
+  stock: 40,
+  mrp: 129999,
+  offerPrice: 119999,
+  offerPercentage: 8,
+  ordered: 0,
   productImage: [
-    // array so it supports 1 or many images
     {
       url: "https://placehold.co/500x500?text=Front",
       publicId: "seed_samsung_galaxy_s25_ultra_1",
@@ -66,138 +49,20 @@ const product = {
   ],
   createdAt: "2026-07-05T11:37:00.611+00:00",
   updatedAt: "2026-07-05T11:37:00.611+00:00",
-  version: 0, // mongoose's __v field
+  version: 0,
 };
 
-// ---------------------------------------------------------
-// HELPER FUNCTIONS
-// ---------------------------------------------------------
-
-// Formats a number as Indian Rupees, e.g. 119999 -> "₹1,19,999"
-function currency(n) {
-  return `\u20b9${n.toLocaleString("en-IN")}`;
-}
-
-// Formats an ISO date string into a readable "05 Jul 2026, 05:07 PM" style string
-function formatDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-// ---------------------------------------------------------
-// SMALL REUSABLE COMPONENTS
-// ---------------------------------------------------------
-
-// Little horizontal bar showing stock level, colored green/amber/red depending on how low it is.
-// "max" just controls what counts as a "full" bar visually — tweak if your typical stock levels differ.
-function StockBar({ stock, max = 100 }) {
-  const pct = Math.min(100, Math.round((stock / max) * 100));
-  const color = stock === 0 ? OXBLOOD : stock <= 10 ? AMBER : SUCCESS; // red if none left, amber if low, green otherwise
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div
-        style={{
-          width: 72,
-          height: 5,
-          background: HAIRLINE,
-          borderRadius: 3,
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ width: `${pct}%`, height: "100%", background: color }} />
-      </div>
-      <span style={{ fontFamily: MONO, fontSize: 12, color: INK }}>
-        {stock}
-      </span>
-    </div>
-  );
-}
-
-// Small uppercase heading used above each section (e.g. "DESCRIPTION", "PRICING")
-// Renders a little square dot + label + a line that fills the rest of the row.
-function SectionLabel({ children }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 14,
-      }}
-    >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          background: OXBLOOD,
-          display: "inline-block",
-        }}
-      />
-      <span
-        style={{
-          fontFamily: SANS,
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          color: STONE,
-        }}
-      >
-        {children}
-      </span>
-      <div style={{ flex: 1, height: 1, background: HAIRLINE }} />
-    </div>
-  );
-}
-
-// A single "label ---- value" row, used in the Seller/Record tabs to list raw fields.
-// Pass mono=true to render the value in monospace (good for IDs/technical values).
-function FieldRow({ label, value, mono }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "9px 0",
-        fontSize: 13,
-        borderTop: `1px solid ${HAIRLINE}`,
-      }}
-    >
-      <span style={{ color: STONE }}>{label}</span>
-      <span
-        style={{
-          fontWeight: mono ? 400 : 500,
-          fontFamily: mono ? MONO : SANS,
-          fontSize: mono ? 12.5 : 13,
-          textAlign: "right",
-          maxWidth: "62%",
-          wordBreak: "break-all",
-        }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------
-// MAIN PAGE COMPONENT
-// ---------------------------------------------------------
 export default function ProductAdminView() {
-  const [tab, setTab] = useState("overview"); // which tab is currently active
-  const [activeImg, setActiveImg] = useState(0); // which gallery image is currently shown
-  const [confirmDelete, setConfirmDelete] = useState(false); // whether the delete confirm popup is open
+  const [tab, setTab] = useState("overview");
+  const [activeImg, setActiveImg] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const inStock = product.stock > 0; // true/false used for the stamp badge
-  const savings = product.mrp - product.offerPrice; // rupee amount saved vs MRP
+  const currency = useCurrency(); //digit to currency
+  const formatDate = useDateFormatter(); // formats dates into readable date values
 
-  // Tab definitions — add/remove entries here to change what tabs show up
+  const inStock = product.stock > 0;
+  const savings = product.mrp - product.offerPrice;
+
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "pricing", label: "Pricing & stock" },
@@ -206,458 +71,193 @@ export default function ProductAdminView() {
   ];
 
   return (
-    <div
-      style={{
-        fontFamily: SANS,
-        color: INK,
-        background: "#ffffff",
-        minHeight: "100vh",
-        padding: "32px 40px 64px",
-      }}
-    >
+    <div className="font-sans text-[#241a1a] min-h-screen">
       <style>{`
         * { box-sizing: border-box; }
-        button { font-family: inherit; cursor: pointer; }
         table { border-collapse: collapse; width: 100%; }
-        .row-hover:hover { background: ${PAPER_TINT}; } /* highlights table rows on hover */
+        .row-hover:hover { background: #faf7f6; }
       `}</style>
 
-      {/* ===================== TOP BAR: breadcrumb + action buttons ===================== */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 28,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        {/* Breadcrumb trail: Products / Category / Product name */}
-        <div
-          style={{
-            fontSize: 13,
-            color: STONE,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
+      <div className="flex justify-between items-start mb-7 flex-wrap gap-3">
+        <div className="text-[13px] text-[#8a7873] flex items-center gap-1.5">
           <span>Products</span>
-          <span style={{ opacity: 0.5 }}>/</span>
+          <span className="opacity-50">/</span>
           <span>{product.category.name}</span>
-          <span style={{ opacity: 0.5 }}>/</span>
-          <span style={{ color: INK, fontWeight: 500 }}>
+          <span className="opacity-50">/</span>
+          <span className="text-[#241a1a] font-medium">
             {product.productName}
           </span>
         </div>
 
-        {/* Admin action buttons.
-            NOTE: no "Edit product" button here on purpose — since sellers own their
-            own listings, admin gets moderation actions instead of direct editing. */}
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           <Button
-            style={{
-              border: `1px solid ${HAIRLINE}`,
-              background: "#fff",
-              color: INK,
-              borderRadius: 6,
-              padding: "8px 14px",
-              fontSize: 13,
-              fontWeight: 500,
-            }}
+            variant="secondary"
+            className=" border-[#e8e1df] text-[#241a1a]"
           >
             Duplicate
           </Button>
-          <button
-            style={{
-              border: `1px solid ${HAIRLINE}`,
-              background: "#fff",
-              color: AMBER,
-              borderRadius: 6,
-              padding: "8px 14px",
-              fontSize: 13,
-              fontWeight: 500,
-            }}
+          <Button
+            variant="secondary"
+            className="border-[#e8e1df] text-[#a97327] "
           >
             Flag for review
-          </button>
-          <button
-            style={{
-              border: `1px solid ${HAIRLINE}`,
-              background: "#fff",
-              color: OXBLOOD,
-              borderRadius: 6,
-              padding: "8px 14px",
-              fontSize: 13,
-              fontWeight: 500,
-            }}
+          </Button>
+          <Button
+            variant="secondary"
+            className="border-[#e8e1df] text-[#5f0000] "
           >
             Suspend listing
-          </button>
+          </Button>
 
-          {/* Delete button: clicking it toggles a small confirm popup instead of deleting instantly */}
-          <button
-            onMouseLeave={() => setConfirmDelete(false)} // closes the popup if the mouse leaves the button area
+          <Button
+            onMouseLeave={() => setConfirmDelete(false)}
             onClick={() => setConfirmDelete((v) => !v)}
-            style={{
-              position: "relative",
-              border: `1px solid ${OXBLOOD}`,
-              background: OXBLOOD,
-              color: "#fff",
-              borderRadius: 6,
-              padding: "8px 16px",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
+            className="relative border border-[#5f0000] bg-[#5f0000] text-white rounded-md px-4 py-2 text-[13px] font-semibold cursor-pointer"
           >
             Delete product
-            {/* Confirm/Cancel popup — only rendered when confirmDelete is true */}
             {confirmDelete && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 6px)",
-                  right: 0,
-                  background: "#fff",
-                  border: `1px solid ${HAIRLINE}`,
-                  borderRadius: 8,
-                  padding: 12,
-                  width: 220,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-                  textAlign: "left",
-                  zIndex: 10,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    color: INK,
-                    marginBottom: 10,
-                    fontWeight: 500,
-                  }}
-                >
+              <div className="absolute top-[calc(100%+6px)] right-0 bg-white border border-[#e8e1df] rounded-lg p-3 w-[220px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] text-left z-10">
+                <div className="text-[12.5px] text-[#241a1a] mb-2.5 font-medium">
                   Permanently delete this listing? This can't be undone.
                 </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  {/* Hook this up to your actual delete API call */}
-                  <button
-                    style={{
-                      flex: 1,
-                      border: `1px solid ${OXBLOOD}`,
-                      background: OXBLOOD,
-                      color: "#fff",
-                      borderRadius: 6,
-                      padding: "6px 0",
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                    }}
-                  >
+                <div className="flex gap-1.5">
+                  <Button className="flex-1 border border-[#5f0000] bg-[#5f0000] text-white rounded-md py-1.5 text-[12.5px] font-semibold cursor-pointer">
                     Confirm
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setConfirmDelete(false)}
-                    style={{
-                      flex: 1,
-                      border: `1px solid ${HAIRLINE}`,
-                      background: "#fff",
-                      color: INK,
-                      borderRadius: 6,
-                      padding: "6px 0",
-                      fontSize: 12.5,
-                      fontWeight: 500,
-                    }}
+                    className="flex-1 border border-[#e8e1df] bg-white text-[#241a1a] rounded-md py-1.5 text-[12.5px] font-medium cursor-pointer"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* ===================== MAIN PANEL (image + details side by side) ===================== */}
-      <div
-        style={{
-          display: "flex",
-          border: `1px solid ${HAIRLINE}`,
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        {/* Thin colored bar down the left edge — purely decorative "ledger spine" accent */}
-        <div style={{ width: 5, background: OXBLOOD, flexShrink: 0 }} />
+      <div className="flex border border-[#e8e1df] rounded-xl overflow-hidden">
+        <div className="w-[5px] bg-[#5f0000] shrink-0" />
 
-        <div style={{ display: "flex", flex: 1, minWidth: 0 }}>
-          {/* ---------- LEFT COLUMN: image gallery + attributes ---------- */}
-          <div
-            style={{
-              width: "36%",
-              padding: 28,
-              borderRight: `1px solid ${HAIRLINE}`,
-            }}
-          >
-            {/* Main large image — shows whichever thumbnail is currently selected (activeImg) */}
-            <div
-              style={{
-                aspectRatio: "1 / 1",
-                borderRadius: 10,
-                overflow: "hidden",
-                background: PAPER_TINT,
-                border: `1px solid ${HAIRLINE}`,
-              }}
-            >
+        <div className="flex flex-1 min-w-0">
+          <div className="w-[36%] p-7 border-r border-[#e8e1df]">
+            <div className="aspect-square rounded-[10px] overflow-hidden bg-[#faf7f6] border border-[#e8e1df]">
               <img
                 src={product.productImage[activeImg].url}
                 alt={product.productName}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                className="w-full h-full object-cover"
               />
             </div>
 
-            {/* Thumbnail strip — loops over ALL images in productImage, however many there are */}
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <div className="flex gap-2 mt-2.5">
               {product.productImage.map((img, i) => (
-                <button
+                <Button
                   key={img.publicId}
-                  onClick={() => setActiveImg(i)} // clicking a thumbnail swaps the main image
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: 6,
-                    overflow: "hidden",
-                    padding: 0,
-                    border:
-                      i === activeImg
-                        ? `2px solid ${OXBLOOD}`
-                        : `1px solid ${HAIRLINE}`,
-                    background: "none",
-                  }}
+                  onClick={() => setActiveImg(i)}
+                  className={`w-[52px] h-[52px] rounded-md overflow-hidden p-0 bg-transparent cursor-pointer ${
+                    i === activeImg
+                      ? "border-2 border-[#5f0000]"
+                      : "border border-[#e8e1df]"
+                  }`}
                 >
                   <img
                     src={img.url}
                     alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
+                    className="w-full h-full object-cover"
                   />
-                </button>
+                </Button>
               ))}
             </div>
 
-            {/* Shows total image count + the publicId of whichever image is active (useful for admins matching to storage) */}
-            <div
-              style={{
-                fontSize: 11,
-                color: STONE,
-                marginTop: 8,
-                fontFamily: MONO,
-              }}
-            >
+            <div className="text-[11px] text-[#8a7873] mt-2 font-mono">
               {product.productImage.length} images &middot;{" "}
               {product.productImage[activeImg].publicId}
             </div>
 
-            {/* Quick-glance attributes: brand, category, coupon */}
-            <div style={{ marginTop: 24 }}>
+            <div className="mt-6">
               <SectionLabel>Attributes</SectionLabel>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "7px 0",
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ color: STONE }}>Brand</span>
-                <span style={{ fontWeight: 500 }}>{product.brand}</span>
+              <div className="flex justify-between py-[7px] text-[13px]">
+                <span className="text-[#8a7873]">Brand</span>
+                <span className="font-medium">{product.brand}</span>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "7px 0",
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ color: STONE }}>Category</span>
-                <span style={{ fontWeight: 500 }}>{product.category.name}</span>
+              <div className="flex justify-between py-[7px] text-[13px]">
+                <span className="text-[#8a7873]">Category</span>
+                <span className="font-medium">{product.category.name}</span>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "7px 0",
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ color: STONE }}>Coupon</span>
-                <span style={{ fontWeight: 500 }}>
+              <div className="flex justify-between py-[7px] text-[13px]">
+                <span className="text-[#8a7873]">Coupon</span>
+                <span className="font-medium">
                   {product.couponId ? product.couponId : "None applied"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* ---------- RIGHT COLUMN: title, price, tabs, tab content ---------- */}
-          <div style={{ flex: 1, padding: 28, minWidth: 0 }}>
-            {/* Title row + status stamp badge */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: 16,
-              }}
-            >
+          <div className="flex-1 p-7 min-w-0">
+            <div className="flex justify-between items-start gap-4">
               <div>
-                <h1
-                  style={{
-                    fontFamily: SANS,
-                    fontWeight: 600,
-                    fontSize: 26,
-                    margin: 0,
-                    color: INK,
-                  }}
-                >
+                <h1 className="font-sans font-semibold text-[26px] m-0 text-[#241a1a]">
                   {product.productName}
                 </h1>
-                <div
-                  style={{
-                    fontFamily: MONO,
-                    fontSize: 12,
-                    color: STONE,
-                    marginTop: 6,
-                  }}
-                >
+                <div className="font-mono text-xs text-[#8a7873] mt-1.5">
                   {product.id}
                 </div>
               </div>
 
-              {/* Circular "stamp" badge — flips between In stock / Sold out based on product.stock */}
               <div
-                style={{
-                  width: 68,
-                  height: 68,
-                  borderRadius: "50%",
-                  border: `2px solid ${inStock ? OXBLOOD : STONE}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transform: "rotate(-6deg)",
-                  flexShrink: 0,
-                }}
+                className={`w-[68px] h-[68px] rounded-full border-2 flex items-center justify-center -rotate-6 shrink-0 ${
+                  inStock ? "border-[#5f0000]" : "border-[#8a7873]"
+                }`}
               >
                 <span
-                  style={{
-                    fontFamily: MONO,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: "0.04em",
-                    color: inStock ? OXBLOOD : STONE,
-                    textTransform: "uppercase",
-                  }}
+                  className={`font-mono text-[11px] font-semibold tracking-[0.04em] uppercase ${
+                    inStock ? "text-[#5f0000]" : "text-[#8a7873]"
+                  }`}
                 >
                   {inStock ? "In stock" : "Sold out"}
                 </span>
               </div>
             </div>
 
-            {/* Price row: offer price, crossed-out MRP, discount badge */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 10,
-                marginTop: 18,
-              }}
-            >
-              <span style={{ fontFamily: MONO, fontSize: 24, fontWeight: 500 }}>
+            <div className="flex items-baseline gap-2.5 mt-[18px]">
+              <span className="font-mono text-2xl font-medium">
                 {currency(product.offerPrice)}
               </span>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 14,
-                  color: STONE,
-                  textDecoration: "line-through",
-                }}
-              >
+              <span className="font-mono text-sm text-[#8a7873] line-through">
                 {currency(product.mrp)}
               </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  color: SUCCESS,
-                  background: SUCCESS_BG,
-                  padding: "3px 8px",
-                  borderRadius: 4,
-                }}
-              >
+              <span className="text-xs text-[#3f6b52] bg-[#eef4f0] px-2 py-[3px] rounded">
                 {product.offerPercentage}% off
               </span>
             </div>
 
-            {/* Tab bar — clicking a tab updates the "tab" state, which controls what renders below */}
-            <div
-              style={{
-                display: "flex",
-                gap: 4,
-                marginTop: 26,
-                borderBottom: `1px solid ${HAIRLINE}`,
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="flex justify-between gap-1 mt-[26px] border-b pb-1 border-[#e8e1df] flex-wrap">
               {tabs.map((t) => (
-                <button
+                <Button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: "10px 14px",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: tab === t.id ? OXBLOOD : STONE,
-                    borderBottom:
-                      tab === t.id
-                        ? `2px solid ${OXBLOOD}`
-                        : "2px solid transparent",
-                    marginBottom: -1,
-                  }}
+                  variant={"secondary"}
+                  className={` border-0 w-fit shadow-none text-[13px] font-medium -mb-px cursor-pointer ${
+                    tab === t.id
+                      ? "text-[#5f0000] border-b-2 border-[#5f0000]"
+                      : "text-[#8a7873] border-b-2 border-transparent"
+                  }`}
                 >
                   {t.label}
-                </button>
+                </Button>
               ))}
             </div>
 
-            {/* ---------- TAB CONTENT: only one block renders at a time, based on "tab" ---------- */}
-            <div style={{ paddingTop: 22 }}>
-              {/* --- OVERVIEW TAB: description + quick stats --- */}
+            <div className="pt-[22px]">
               {tab === "overview" && (
                 <div>
                   <SectionLabel>Description</SectionLabel>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      lineHeight: 1.65,
-                      color: INK,
-                      margin: "0 0 22px",
-                    }}
-                  >
+                  <p className="text-sm leading-[1.65] text-[#241a1a] mt-0 mb-[22px]">
                     {product.productDesc}
                   </p>
                   <SectionLabel>Snapshot</SectionLabel>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, 1fr)",
-                      gap: 12,
-                    }}
-                  >
-                    {/* Three quick stat cards — stock left, units ordered, and rupees saved */}
+                  <div className="grid grid-cols-3 gap-3">
                     {[
                       ["In stock", product.stock],
                       ["Units ordered", product.ordered],
@@ -665,23 +265,10 @@ export default function ProductAdminView() {
                     ].map(([label, val]) => (
                       <div
                         key={label}
-                        style={{
-                          background: PAPER_TINT,
-                          borderRadius: 8,
-                          padding: "14px 16px",
-                        }}
+                        className="bg-[#faf7f6] rounded-lg px-4 py-3.5"
                       >
-                        <div style={{ fontSize: 12, color: STONE }}>
-                          {label}
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: MONO,
-                            fontSize: 20,
-                            fontWeight: 500,
-                            marginTop: 4,
-                          }}
-                        >
+                        <div className="text-xs text-[#8a7873]">{label}</div>
+                        <div className="font-mono text-xl font-medium mt-1">
                           {val}
                         </div>
                       </div>
@@ -690,85 +277,33 @@ export default function ProductAdminView() {
                 </div>
               )}
 
-              {/* --- PRICING & STOCK TAB: MRP/offer/discount table + stock bar --- */}
               {tab === "pricing" && (
                 <div>
                   <SectionLabel>Pricing</SectionLabel>
                   <table>
                     <tbody>
-                      <tr
-                        style={{ borderTop: `1px solid ${HAIRLINE}` }}
-                        className="row-hover"
-                      >
-                        <td
-                          style={{
-                            padding: "10px 8px",
-                            fontSize: 13,
-                            color: STONE,
-                          }}
-                        >
+                      <tr className="border-t border-[#e8e1df] row-hover">
+                        <td className="py-2.5 px-2 text-[13px] text-[#8a7873]">
                           MRP
                         </td>
-                        <td
-                          style={{
-                            padding: "10px 8px",
-                            fontSize: 13,
-                            fontFamily: MONO,
-                            textAlign: "right",
-                          }}
-                        >
+                        <td className="py-2.5 px-2 text-[13px] font-mono text-right">
                           {currency(product.mrp)}
                         </td>
                       </tr>
-                      <tr
-                        style={{ borderTop: `1px solid ${HAIRLINE}` }}
-                        className="row-hover"
-                      >
-                        <td
-                          style={{
-                            padding: "10px 8px",
-                            fontSize: 13,
-                            color: STONE,
-                          }}
-                        >
+                      <tr className="border-t border-[#e8e1df] row-hover">
+                        <td className="py-2.5 px-2 text-[13px] text-[#8a7873]">
                           Offer price
                         </td>
-                        <td
-                          style={{
-                            padding: "10px 8px",
-                            fontSize: 13,
-                            fontFamily: MONO,
-                            textAlign: "right",
-                            fontWeight: 500,
-                          }}
-                        >
+                        <td className="py-2.5 px-2 text-[13px] font-mono text-right font-medium">
                           {currency(product.offerPrice)}
                         </td>
                       </tr>
-                      <tr
-                        style={{ borderTop: `1px solid ${HAIRLINE}` }}
-                        className="row-hover"
-                      >
-                        <td
-                          style={{
-                            padding: "10px 8px",
-                            fontSize: 13,
-                            color: STONE,
-                          }}
-                        >
+                      <tr className="border-t border-[#e8e1df] row-hover">
+                        <td className="py-2.5 px-2 text-[13px] text-[#8a7873]">
                           Discount
                         </td>
-                        <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                          <span
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 500,
-                              padding: "3px 8px",
-                              borderRadius: 4,
-                              background: SUCCESS_BG,
-                              color: SUCCESS,
-                            }}
-                          >
+                        <td className="py-2.5 px-2 text-right">
+                          <span className="text-xs font-medium px-2 py-[3px] rounded bg-[#eef4f0] text-[#3f6b52]">
                             {product.offerPercentage}%
                           </span>
                         </td>
@@ -776,34 +311,19 @@ export default function ProductAdminView() {
                     </tbody>
                   </table>
 
-                  <div style={{ marginTop: 24 }}>
+                  <div className="mt-6">
                     <SectionLabel>Stock</SectionLabel>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "10px 8px",
-                      }}
-                    >
-                      <span style={{ fontSize: 13, color: STONE }}>
+                    <div className="flex items-center justify-between py-2.5 px-2">
+                      <span className="text-[13px] text-[#8a7873]">
                         Available units
                       </span>
-                      <StockBar stock={product.stock} />
+                      <AdminStockBar stock={product.stock} />
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "10px 8px",
-                        borderTop: `1px solid ${HAIRLINE}`,
-                      }}
-                    >
-                      <span style={{ fontSize: 13, color: STONE }}>
+                    <div className="flex items-center justify-between py-2.5 px-2 border-t border-[#e8e1df]">
+                      <span className="text-[13px] text-[#8a7873]">
                         Units ordered
                       </span>
-                      <span style={{ fontFamily: MONO, fontSize: 13 }}>
+                      <span className="font-mono text-[13px]">
                         {product.ordered}
                       </span>
                     </div>
@@ -811,41 +331,18 @@ export default function ProductAdminView() {
                 </div>
               )}
 
-              {/* --- SELLER & CATEGORY TAB --- */}
               {tab === "seller" && (
                 <div>
                   <SectionLabel>Seller</SectionLabel>
-                  {/* Seller avatar (just first letter of name in a circle), name, rating, listing count */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      marginBottom: 4,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        background: PAPER_TINT,
-                        border: `1px solid ${HAIRLINE}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: OXBLOOD,
-                      }}
-                    >
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="w-10 h-10 rounded-full bg-[#faf7f6] border border-[#e8e1df] flex items-center justify-center font-semibold text-sm text-[#5f0000]">
                       {product.seller.name.slice(0, 1)}
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 500 }}>
+                      <div className="text-sm font-medium">
                         {product.seller.name}
                       </div>
-                      <div style={{ fontSize: 12, color: STONE }}>
+                      <div className="text-xs text-[#8a7873]">
                         Rating {product.seller.rating} &middot;{" "}
                         {product.seller.totalListings} listings
                       </div>
@@ -857,7 +354,7 @@ export default function ProductAdminView() {
                     value={formatDate(product.seller.joined)}
                   />
 
-                  <div style={{ marginTop: 24 }}>
+                  <div className="mt-6">
                     <SectionLabel>Category</SectionLabel>
                     <FieldRow label="Name" value={product.category.name} />
                     <FieldRow
@@ -869,7 +366,6 @@ export default function ProductAdminView() {
                 </div>
               )}
 
-              {/* --- RECORD TAB: raw database fields, for debugging/admin reference --- */}
               {tab === "record" && (
                 <div>
                   <SectionLabel>Database record</SectionLabel>

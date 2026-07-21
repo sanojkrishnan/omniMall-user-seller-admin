@@ -28,9 +28,11 @@ import { clearAuthError } from "../../redux/slice/authSlice";
 import { useToastError } from "../../hooks/useToastError";
 import DataTable from "../../components/ui/DataTable";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
+import { useNavigate } from "react-router-dom";
 
 function Products() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
@@ -45,7 +47,8 @@ function Products() {
   const { seller } = useSelector((state) => state.seller);
   const { category } = useSelector((state) => state.category);
 
-  const [openProduct,setOpenProduct] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [openProduct, setOpenProduct] = useState(false);
   const [singleProduct, setSingleProduct] = useState([]);
   const [hadError, setHadError] = useState(false);
   const [addProduct, setAddProduct] = useState(false);
@@ -87,18 +90,24 @@ function Products() {
     filterValues.sort,
   ]);
 
+  //click navigation
+  useEffect(() => {
+    if (openProduct && selectedProductId) {
+      navigate(`/admin/products/${selectedProductId}`);
+    }
+  }, [openProduct, selectedProductId, navigate]);
+
   // error toast
   useEffect(() => {
     if (productError) {
       toast.error(productError);
       if (products.length !== 0) dispatch(clearProductError());
-      clearProductError();
+      dispatch(clearProductError());
     }
   }, [productError, dispatch]);
 
   const lastFetchedSellerIdsRef = useRef("");
   const lastFetchedCategoryIdsRef = useRef("");
-  const isFirstRender = useRef(true);
 
   // infinite scrolling
   const triggerId = useInfiniteScroll({
@@ -331,7 +340,7 @@ function Products() {
                 onRowClick={(item) => {
                   setOpenProduct(true);
                   setAddProduct(false);
-
+                  setSelectedProductId(item._id);
                   setSingleProduct({
                     ...item,
                     sellerData: sellerMap[getId(item.sellerId)] ?? null,

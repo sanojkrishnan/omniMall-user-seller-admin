@@ -87,6 +87,8 @@ function Coupon() {
     );
   }, [dispatch, page, search, filterValues.sort]);
 
+
+  //click navigation
   useEffect(() => {
     if (openCoupon && selectedCouponId) {
       navigate(`/admin/coupon/${selectedCouponId}`);
@@ -129,7 +131,7 @@ function Coupon() {
         onChange={(e) => setSearchInput(e.target.value)}
         filterOn={"categories"}
       />
-      <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
+      <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] justify-between">
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 custom-scrollBar">
           {isBusy && !couponError && (
             <div className="w-full h-[65vh] flex items-center justify-center">

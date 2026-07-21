@@ -1,13 +1,13 @@
 import { Route } from "react-router-dom";
-import Dashboard from "./pages/admin/Dashboard";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import AdminLayout from "./components/ui/AdminLayout";
-import Products from "./pages/admin/Products";
-import Users from "./pages/admin/Users";
-import Categories from "./pages/admin/Categories";
-import Coupon from "./pages/admin/Coupon";
-import SingleCouponDetail from "./components/SingleCouponDetail";
-import SingleProductInAdmin from "./components/SingleProductInAdmin";
+import Dashboard from "../pages/admin/Dashboard";
+import { ProtectedRoute } from "./ProtectedRoute";
+import AdminLayout from "../layouts/AdminLayout";
+import Products from "../pages/admin/Products";
+import Users from "../pages/admin/Users";
+import Categories from "../pages/admin/Categories";
+import Coupon from "../pages/admin/Coupon";
+import SingleCouponDetail from "../components/SingleCouponDetail";
+import SingleProductInAdmin from "../components/SingleProductInAdmin";
 
 const adminRoutes = (
   <>

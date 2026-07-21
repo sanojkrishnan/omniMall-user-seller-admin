@@ -1,12 +1,12 @@
-import Home from "./pages/public/Home";
+import Home from "../pages/public/Home";
 import { Route } from "react-router-dom";
-import { PublicRoute, RestrictRoles } from "./components/ProtectedRoute";
-import Login from "./pages/public/Login";
-import Register from "./pages/public/Register";
-import OTP from "./pages/public/OTP";
-import ResetPass from "./pages/public/ResetPass";
-import Shop from "./pages/user/Shop";
-import PublicLayout from "./components/ui/PublicLayout";
+import { PublicRoute, RestrictRoles } from "./ProtectedRoute";
+import Login from "../pages/public/Login";
+import Register from "../pages/public/Register";
+import OTP from "../pages/public/OTP";
+import ResetPass from "../pages/public/ResetPass";
+import Shop from "../pages/user/Shop";
+import PublicLayout from "../layouts/PublicLayout";
 
 const publicRoutes = (
   <>

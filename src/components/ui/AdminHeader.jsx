@@ -3,11 +3,17 @@ import { Button } from "./Button";
 import { BellIcon } from "lucide-react";
 import P2 from "./P2";
 import H1 from "./H1";
+import { useActiveSegment } from "../../hooks/useActiveSegment";
 
-function AdminHeader({ selection }) {
+function AdminHeader() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationDot, setNotificationDot] = useState(true);
   const [ringKey, setRingKey] = useState(0);
+
+  //location finder
+  const activeSection = useActiveSegment("admin");
+  const capSelection =
+    activeSection.charAt(0).toUpperCase() + activeSection.slice(1);
 
   const divRef = useRef(null);
 
@@ -27,7 +33,7 @@ function AdminHeader({ selection }) {
 
   return (
     <div className="w-full py-4 px-6 sticky top-0 z-40 bg-white items-center flex justify-between border-b shadow-lg">
-      <h1 className="text-black md:ml-14 text-2xl font-bold">{selection}</h1>
+      <h1 className="text-black md:ml-14 text-2xl font-bold">{capSelection}</h1>
       <div className="flex justify-start items-center mr-4">
         <div ref={divRef} className="relative">
           <Button

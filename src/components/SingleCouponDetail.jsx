@@ -19,6 +19,10 @@ import {
 import { Button } from "./ui/Button";
 import { fetchCouponById } from "../redux/slice/couponSlice";
 import CartLoading from "./ui/CartLoading";
+import ToggleSwitch from "./ui/ToggleSwitch";
+import P from "./ui/P";
+import { useDateFormatter } from "../hooks/useDateFormatter";
+import { Pill, Row, Section, Stat } from "./AdminCouponSupport";
 
 // ---- label maps: keep raw enum values out of the UI ----
 const STATUS_STYLES = {
@@ -44,72 +48,28 @@ const PAYMENT_METHOD_LABELS = {
   UPI: "UPI",
 };
 
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function daysBetween(a, b) {
   const ms = new Date(b) - new Date(a);
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
-// small stat block used in the header strip
-function Stat({ label, value }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] uppercase tracking-wide text-white/60">
-        {label}
-      </span>
-      <span className="text-lg font-semibold text-white">{value}</span>
-    </div>
-  );
-}
-
-// section wrapper used throughout the body
-function Section({ icon: Icon, title, children }) {
-  return (
-    <div className="border border-gray-200 rounded-lg p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Icon size={16} className="text-[#5f0000]" />
-        <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-800 text-right">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function Pill({ children }) {
-  return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#5f0000]/[0.06] text-[#5f0000] text-xs font-medium border border-[#5f0000]/10">
-      {children}
-    </span>
-  );
-}
 
 function SingleCouponDetail() {
+
   const { couponId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+   const formatDate = useDateFormatter(); // formats dates into readable date values
+
   const { singleCoupon, isCouponLoading, couponError } = useSelector(
     (state) => state.coupon,
   );
+
+  //toggle switch
+  const handleSwitchChange = (status) => {
+    console.log("The switch state is:", status); // true or false
+  };
 
   useEffect(() => {
     if (couponId) dispatch(fetchCouponById(couponId));
@@ -202,11 +162,15 @@ function SingleCouponDetail() {
           </div>
 
           {/* Coupon code — the signature element */}
-          <div className="mt-6 inline-flex items-center gap-3 bg-white/10 border border-dashed border-white/30 rounded-lg px-4 py-2.5">
+          <div className="mt-6 inline-flex items-center gap-3 bg-white/10 border border-dashed border-white/30 rounded-lg px-4 py-2">
             <Tag size={16} className="text-white/70" />
             <span className="font-mono text-lg tracking-[0.15em] text-white">
               {coupon.code || "N/A"}
             </span>
+          </div>
+          <div className="mt-6 flex justify-start items-center">
+            <P className={"text-white mr-4 pt-0 text-md"}>Activate coupon :</P>
+            <ToggleSwitch initialState={false} onChange={handleSwitchChange} />
           </div>
         </div>
 

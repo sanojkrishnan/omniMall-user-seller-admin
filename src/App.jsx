@@ -3,9 +3,9 @@ import { Toastify } from "./utils/toastify";
 import NotFound from "./components/NotFound";
 import { Suspense } from "react";
 import CartLoading from "./components/ui/CartLoading";
-import adminRoutes from "./AdminRoutes";
-import publicRoutes from "./PublicRoutes";
-import userRoutes from "./UserRoutes";
+import adminRoutes from "./routes/AdminRoutes";
+import publicRoutes from "./routes/PublicRoutes";
+import userRoutes from "./routes/UserRoutes";
 import useScrollToTop from "./hooks/useScrollToTop";
 
 function ScrollToTop() {
@@ -14,8 +14,6 @@ function ScrollToTop() {
 }
 
 function App() {
-
-  
   return (
     <>
       <BrowserRouter>

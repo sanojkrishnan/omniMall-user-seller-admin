@@ -1,11 +1,11 @@
 import { Route } from "react-router-dom";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import ProfileComplete from "./pages/user/ProfileComplete";
-import UserLayout from "./components/ui/UserLayout";
-import Shop from "./pages/user/Shop";
-import Home from "./pages/public/Home";
-import SingleProduct from "./pages/user/SingleProduct";
-import Cart from "./pages/user/Cart";
+import { ProtectedRoute } from "./ProtectedRoute";
+import ProfileComplete from "../pages/user/ProfileComplete";
+import UserLayout from "../layouts/UserLayout";
+import Shop from "../pages/user/Shop";
+import Home from "../pages/public/Home";
+import SingleProduct from "../pages/user/SingleProduct";
+import Cart from "../pages/user/Cart";
 
 const userRoutes = (
   <>

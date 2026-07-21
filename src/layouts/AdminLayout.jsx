@@ -1,17 +1,14 @@
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
-import AdminHeader from "./AdminHeader";
-import AdminSidePanel from "./AdminSidePanel";
+import AdminHeader from "../components/ui/AdminHeader";
+import AdminSidePanel from "../components/ui/AdminSidePanel";
 
 function AdminLayout() {
-  const [selection, setSelection] = useState("Dashboard");
-
   return (
     <div className="flex">
-      <AdminSidePanel selection={selection} setSelection={setSelection} />
+      <AdminSidePanel />
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <AdminHeader selection={selection} setSelection={setSelection} />
+        <AdminHeader />
 
         {/* pt-[73px] pushes content below the fixed header */}
         <main className="pt-[30px] p-6 flex-1">

@@ -10,12 +10,13 @@ import {
   Van,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../../redux/slice/authSlice";
 import { useDispatch } from "react-redux";
 import H2 from "./H2";
 import P from "./P";
 import P2 from "./P2";
+import { useActiveSegment } from "../../hooks/useActiveSegment";
 
 const dashMenu = [
   "Dashboard",
@@ -28,19 +29,16 @@ const dashMenu = [
   "Settings",
 ];
 
-function AdminSidePanel({ setSelection, selection }) {
+function AdminSidePanel() {
   const [menuClick, setMenuClick] = useState(window.innerWidth <= 1280);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation();
-  const activeItem =
-    dashMenu.find(
-      (item) => location.pathname === `/admin/${item.toLowerCase()}`,
-    ) || selection;
 
-  useEffect(() => {
-    if (activeItem) setSelection(activeItem);
-  }, [activeItem]); // sync parent whenever URL changes
+  //location finder
+  const activeSection = useActiveSegment("admin");
+  const activeItem = dashMenu.find(
+    (item) => activeSection === item.toLowerCase(),
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,7 +53,6 @@ function AdminSidePanel({ setSelection, selection }) {
   }, []);
 
   const handleClick = (item) => {
-    setSelection(item);
     navigate(`/admin/${item.toLowerCase()}`);
   };
 
@@ -117,7 +114,7 @@ function AdminSidePanel({ setSelection, selection }) {
           <ul className={`${menuClick ? "p-1" : "p-4"} rounded-xl`}>
             {dashMenu.map((item, index) => (
               <li
-                className={`${activeItem === item ? "bg-[#26000a]" : "bg-[#3f0011]"} flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+                className={`${activeItem === item ? "bg-[#26000a]" : "bg-[#3f0011]"} cursor-pointer flex justify-start ${menuClick ? "p-2 my-1" : "p-2 md:p-4 my-2"} rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
                 key={index}
                 onClick={() => handleClick(item)}
               >

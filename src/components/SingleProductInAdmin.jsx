@@ -1,67 +1,100 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/Button";
 import { useCurrency } from "../hooks/useCurrency";
 import { useDateFormatter } from "../hooks/useDateFormatter";
 import { AdminStockBar, FieldRow, SectionLabel } from "./AdminProductSupport";
-
-// COLOR PALETTE (for reference — used as Tailwind arbitrary values below)
-// OXBLOOD #5f0000 · INK #241a1a · STONE #8a7873 · HAIRLINE #e8e1df
-// PAPER_TINT #faf7f6 · SUCCESS #3f6b52 · SUCCESS_BG #eef4f0
-// AMBER #a97327 · AMBER_BG #faf3e7
-
-const product = {
-  id: "6a4a41dc4e2a2b76f619961a",
-  productName: "Samsung Galaxy S25 Ultra",
-  brand: "Samsung",
-  productDesc:
-    "Flagship Android phone with S-Pen, 200MP camera and AI features.",
-  category: { id: "6a493ee8d8dca79e5dd3c9df", name: "Smartphones" },
-  seller: {
-    id: "6a213d5a23da8241fc385b3d",
-    name: "TechHub Retail Pvt Ltd",
-    rating: 4.6,
-    totalListings: 128,
-    joined: "2024-03-11T00:00:00.000+00:00",
-  },
-  couponId: null,
-  stock: 40,
-  mrp: 129999,
-  offerPrice: 119999,
-  offerPercentage: 8,
-  ordered: 0,
-  productImage: [
-    {
-      url: "https://placehold.co/500x500?text=Front",
-      publicId: "seed_samsung_galaxy_s25_ultra_1",
-    },
-    {
-      url: "https://placehold.co/500x500?text=Back",
-      publicId: "seed_samsung_galaxy_s25_ultra_2",
-    },
-    {
-      url: "https://placehold.co/500x500?text=Side",
-      publicId: "seed_samsung_galaxy_s25_ultra_3",
-    },
-    {
-      url: "https://placehold.co/500x500?text=Box",
-      publicId: "seed_samsung_galaxy_s25_ultra_4",
-    },
-  ],
-  createdAt: "2026-07-05T11:37:00.611+00:00",
-  updatedAt: "2026-07-05T11:37:00.611+00:00",
-  version: 0,
-};
+import ConfirmProvider from "./ui/ConfirmProvider";
+import {
+  clearProductError,
+  clearProductState,
+  deleteSingleProduct,
+  singleProductFetch,
+} from "../redux/slice/productSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  clearCategoryError,
+  clearCategoryState,
+  singleCategoryFetch,
+} from "../redux/slice/categorySlice";
+import {
+  clearCouponError,
+  clearCouponState,
+  fetchCouponById,
+} from "../redux/slice/couponSlice";
+import {
+  clearSellerError,
+  clearSellerState,
+  singleSellerFetch,
+} from "../redux/slice/sellerSlice";
+import CartLoading from "./ui/CartLoading";
+import ErrorFallback from "./ui/ErrorFallback";
+import { toast } from "react-toastify";
 
 export default function ProductAdminView() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { productId } = useParams();
+
+  //product fetch
+  const { singleProduct, isProductLoading, productError } = useSelector(
+    (state) => state.product,
+  );
+  //coupon fetch
+  const { singleCoupon, isCouponLoading, couponError } = useSelector(
+    (state) => state.coupon,
+  );
+  //single category fetch
+  const { singleCategory, isCategoryLoading, categoryError } = useSelector(
+    (state) => state.category,
+  );
+  //single seller fetch
+  const { singleSeller, isSellerLoading, sellerError } = useSelector(
+    (state) => state.seller,
+  );
+
+  useEffect(() => {
+    if (productId) {
+      dispatch(singleProductFetch({ id: productId }));
+    }
+  }, [dispatch, productId]);
+
+  useEffect(() => {
+    if (productError) {
+      toast.error(productError);
+      dispatch(clearProductError());
+    }
+  });
+
+  useEffect(() => {
+    if (!singleProduct?._id) return;
+
+    dispatch(singleCategoryFetch({ id: singleProduct.categoryId }));
+    dispatch(singleSellerFetch({ id: singleProduct.sellerId }));
+
+    if (singleProduct.couponId) {
+      dispatch(fetchCouponById({ id: singleProduct.couponId }));
+    }
+  }, [singleProduct, dispatch]);
+
   const [tab, setTab] = useState("overview");
   const [activeImg, setActiveImg] = useState(0);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [open, setOpen] = useState(false);
 
+  function handleResult(confirmed) {
+    setOpen(false);
+    if (confirmed) {
+      dispatch(deleteSingleProduct({ id: singleProduct._id }));
+      clearProductState();
+      toast.success("Product deleted successfully");
+      navigate("/admin/products");
+    }
+  }
   const currency = useCurrency(); //digit to currency
   const formatDate = useDateFormatter(); // formats dates into readable date values
 
-  const inStock = product.stock > 0;
-  const savings = product.mrp - product.offerPrice;
+  const inStock = singleProduct?.stock > 0;
+  const savings = singleProduct?.mrp - singleProduct?.offerPrice;
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -70,8 +103,38 @@ export default function ProductAdminView() {
     { id: "record", label: "Record" },
   ];
 
+  const isBusy =
+    isProductLoading || isCategoryLoading || isCouponLoading || isSellerLoading;
+
+  const productReady = Boolean(singleProduct?._id);
+  const categoryReady = Boolean(singleCategory?._id);
+  const sellerReady = Boolean(singleSeller?._id);
+  const couponReady = !singleProduct?.couponId || Boolean(singleCoupon?._id);
+  const imagesReady = (singleProduct?.productImage?.length ?? 0) > 0;
+
+  const onLaunch =
+    productReady && categoryReady && sellerReady && couponReady && imagesReady;
+
+  const isError = couponError || sellerError || categoryError || productError;
+
+  if (isError) {
+    return <ErrorFallback loading={isBusy} error={isError} />;
+  }
+
+  if (isBusy || !onLaunch) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <CartLoading />
+      </div>
+    );
+  }
+
   return (
     <div className="font-sans text-[#241a1a] min-h-screen">
+      <ConfirmProvider variant="admin" open={open} onResult={handleResult}>
+        Are you sure, you want to delete?
+      </ConfirmProvider>
+
       <style>{`
         * { box-sizing: border-box; }
         table { border-collapse: collapse; width: 100%; }
@@ -82,10 +145,10 @@ export default function ProductAdminView() {
         <div className="text-[13px] text-[#8a7873] flex items-center gap-1.5">
           <span>Products</span>
           <span className="opacity-50">/</span>
-          <span>{product.category.name}</span>
+          <span>{singleCategory.name}</span>
           <span className="opacity-50">/</span>
           <span className="text-[#241a1a] font-medium">
-            {product.productName}
+            {singleProduct.productName}
           </span>
         </div>
 
@@ -110,29 +173,10 @@ export default function ProductAdminView() {
           </Button>
 
           <Button
-            onMouseLeave={() => setConfirmDelete(false)}
-            onClick={() => setConfirmDelete((v) => !v)}
+            onClick={() => setOpen(true)}
             className="relative border border-[#5f0000] bg-[#5f0000] text-white rounded-md px-4 py-2 text-[13px] font-semibold cursor-pointer"
           >
             Delete product
-            {confirmDelete && (
-              <div className="absolute top-[calc(100%+6px)] right-0 bg-white border border-[#e8e1df] rounded-lg p-3 w-[220px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] text-left z-10">
-                <div className="text-[12.5px] text-[#241a1a] mb-2.5 font-medium">
-                  Permanently delete this listing? This can't be undone.
-                </div>
-                <div className="flex gap-1.5">
-                  <Button className="flex-1 border border-[#5f0000] bg-[#5f0000] text-white rounded-md py-1.5 text-[12.5px] font-semibold cursor-pointer">
-                    Confirm
-                  </Button>
-                  <Button
-                    onClick={() => setConfirmDelete(false)}
-                    className="flex-1 border border-[#e8e1df] bg-white text-[#241a1a] rounded-md py-1.5 text-[12.5px] font-medium cursor-pointer"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
           </Button>
         </div>
       </div>
@@ -144,17 +188,21 @@ export default function ProductAdminView() {
           <div className="w-[36%] p-7 border-r border-[#e8e1df]">
             <div className="aspect-square rounded-[10px] overflow-hidden bg-[#faf7f6] border border-[#e8e1df]">
               <img
-                src={product.productImage[activeImg].url}
-                alt={product.productName}
+                src={singleProduct.productImage[activeImg].url}
+                alt={singleProduct.productName}
                 className="w-full h-full object-cover"
               />
             </div>
 
             <div className="flex gap-2 mt-2.5">
-              {product.productImage.map((img, i) => (
+              {singleProduct.productImage.map((img, i) => (
                 <Button
                   key={img.publicId}
-                  onClick={() => setActiveImg(i)}
+                  onClick={() =>
+                    singleProduct.productImage.length >= i
+                      ? setActiveImg(i)
+                      : null
+                  }
                   className={`w-[52px] h-[52px] rounded-md overflow-hidden p-0 bg-transparent cursor-pointer ${
                     i === activeImg
                       ? "border-2 border-[#5f0000]"
@@ -171,24 +219,26 @@ export default function ProductAdminView() {
             </div>
 
             <div className="text-[11px] text-[#8a7873] mt-2 font-mono">
-              {product.productImage.length} images &middot;{" "}
-              {product.productImage[activeImg].publicId}
+              {singleProduct.productImage.length} images &middot;{" "}
+              {singleProduct.productImage[activeImg].publicId}
             </div>
 
             <div className="mt-6">
               <SectionLabel>Attributes</SectionLabel>
               <div className="flex justify-between py-[7px] text-[13px]">
                 <span className="text-[#8a7873]">Brand</span>
-                <span className="font-medium">{product.brand}</span>
+                <span className="font-medium">{singleProduct.brand}</span>
               </div>
               <div className="flex justify-between py-[7px] text-[13px]">
                 <span className="text-[#8a7873]">Category</span>
-                <span className="font-medium">{product.category.name}</span>
+                <span className="font-medium">{singleCategory.name}</span>
               </div>
               <div className="flex justify-between py-[7px] text-[13px]">
                 <span className="text-[#8a7873]">Coupon</span>
                 <span className="font-medium">
-                  {product.couponId ? product.couponId : "None applied"}
+                  {singleProduct.couponId
+                    ? singleProduct.couponId
+                    : "None applied"}
                 </span>
               </div>
             </div>
@@ -198,10 +248,10 @@ export default function ProductAdminView() {
             <div className="flex justify-between items-start gap-4">
               <div>
                 <h1 className="font-sans font-semibold text-[26px] m-0 text-[#241a1a]">
-                  {product.productName}
+                  {singleProduct.productName}
                 </h1>
                 <div className="font-mono text-xs text-[#8a7873] mt-1.5">
-                  {product.id}
+                  {singleProduct.id}
                 </div>
               </div>
 
@@ -222,13 +272,13 @@ export default function ProductAdminView() {
 
             <div className="flex items-baseline gap-2.5 mt-[18px]">
               <span className="font-mono text-2xl font-medium">
-                {currency(product.offerPrice)}
+                {currency(singleProduct.offerPrice)}
               </span>
               <span className="font-mono text-sm text-[#8a7873] line-through">
-                {currency(product.mrp)}
+                {currency(singleProduct.mrp)}
               </span>
               <span className="text-xs text-[#3f6b52] bg-[#eef4f0] px-2 py-[3px] rounded">
-                {product.offerPercentage}% off
+                {singleProduct.offerPercentage}% off
               </span>
             </div>
 
@@ -254,13 +304,13 @@ export default function ProductAdminView() {
                 <div>
                   <SectionLabel>Description</SectionLabel>
                   <p className="text-sm leading-[1.65] text-[#241a1a] mt-0 mb-[22px]">
-                    {product.productDesc}
+                    {singleProduct.productDesc}
                   </p>
                   <SectionLabel>Snapshot</SectionLabel>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      ["In stock", product.stock],
-                      ["Units ordered", product.ordered],
+                      ["In stock", singleProduct.stock],
+                      ["Units ordered", singleProduct.ordered],
                       ["You save", currency(savings)],
                     ].map(([label, val]) => (
                       <div
@@ -287,7 +337,7 @@ export default function ProductAdminView() {
                           MRP
                         </td>
                         <td className="py-2.5 px-2 text-[13px] font-mono text-right">
-                          {currency(product.mrp)}
+                          {currency(singleProduct.mrp)}
                         </td>
                       </tr>
                       <tr className="border-t border-[#e8e1df] row-hover">
@@ -295,7 +345,7 @@ export default function ProductAdminView() {
                           Offer price
                         </td>
                         <td className="py-2.5 px-2 text-[13px] font-mono text-right font-medium">
-                          {currency(product.offerPrice)}
+                          {currency(singleProduct.offerPrice)}
                         </td>
                       </tr>
                       <tr className="border-t border-[#e8e1df] row-hover">
@@ -304,7 +354,7 @@ export default function ProductAdminView() {
                         </td>
                         <td className="py-2.5 px-2 text-right">
                           <span className="text-xs font-medium px-2 py-[3px] rounded bg-[#eef4f0] text-[#3f6b52]">
-                            {product.offerPercentage}%
+                            {singleProduct.offerPercentage}%
                           </span>
                         </td>
                       </tr>
@@ -317,14 +367,17 @@ export default function ProductAdminView() {
                       <span className="text-[13px] text-[#8a7873]">
                         Available units
                       </span>
-                      <AdminStockBar stock={product.stock} />
+                      <AdminStockBar
+                        stock={singleProduct.stock - singleProduct.ordered}
+                        max={singleProduct.stock}
+                      />
                     </div>
                     <div className="flex items-center justify-between py-2.5 px-2 border-t border-[#e8e1df]">
                       <span className="text-[13px] text-[#8a7873]">
                         Units ordered
                       </span>
                       <span className="font-mono text-[13px]">
-                        {product.ordered}
+                        {singleProduct.ordered}
                       </span>
                     </div>
                   </div>
@@ -336,30 +389,34 @@ export default function ProductAdminView() {
                   <SectionLabel>Seller</SectionLabel>
                   <div className="flex items-center gap-3 mb-1">
                     <div className="w-10 h-10 rounded-full bg-[#faf7f6] border border-[#e8e1df] flex items-center justify-center font-semibold text-sm text-[#5f0000]">
-                      {product.seller.name.slice(0, 1)}
+                      {singleSeller.firstName.slice(0, 1)}
                     </div>
                     <div>
                       <div className="text-sm font-medium">
-                        {product.seller.name}
+                        {singleSeller.firstName + " " + singleSeller.lastName}
                       </div>
                       <div className="text-xs text-[#8a7873]">
-                        Rating {product.seller.rating} &middot;{" "}
-                        {product.seller.totalListings} listings
+                        Rating {singleSeller.rating ? singleSeller.rating : 0}{" "}
+                        &middot;{" "}
+                        {singleSeller.totalListings
+                          ? singleSeller.totalListings
+                          : 0}{" "}
+                        listings
                       </div>
                     </div>
                   </div>
-                  <FieldRow label="Seller ID" value={product.seller.id} mono />
+                  <FieldRow label="Seller ID" value={singleSeller._id} mono />
                   <FieldRow
                     label="Joined"
-                    value={formatDate(product.seller.joined)}
+                    value={formatDate(singleSeller.createdAt)}
                   />
 
                   <div className="mt-6">
                     <SectionLabel>Category</SectionLabel>
-                    <FieldRow label="Name" value={product.category.name} />
+                    <FieldRow label="Name" value={singleCategory.name} />
                     <FieldRow
                       label="Category ID"
-                      value={product.category.id}
+                      value={singleCategory._id}
                       mono
                     />
                   </div>
@@ -369,29 +426,31 @@ export default function ProductAdminView() {
               {tab === "record" && (
                 <div>
                   <SectionLabel>Database record</SectionLabel>
-                  <FieldRow label="_id" value={product.id} mono />
+                  <FieldRow label="_id" value={singleProduct._id} mono />
                   <FieldRow
                     label="categoryId"
-                    value={product.category.id}
+                    value={singleCategory._id}
                     mono
                   />
-                  <FieldRow label="sellerId" value={product.seller.id} mono />
+                  <FieldRow label="sellerId" value={singleCategory._id} mono />
                   <FieldRow
                     label="couponId"
                     value={
-                      product.couponId === null ? "null" : product.couponId
+                      singleProduct.couponId === null
+                        ? "null"
+                        : singleProduct.couponId
                     }
                     mono
                   />
-                  <FieldRow label="__v" value={product.version} mono />
+                  <FieldRow label="__v" value={singleProduct.__v} mono />
                   <FieldRow
                     label="createdAt"
-                    value={formatDate(product.createdAt)}
+                    value={formatDate(singleProduct.createdAt)}
                     mono
                   />
                   <FieldRow
                     label="updatedAt"
-                    value={formatDate(product.updatedAt)}
+                    value={formatDate(singleProduct.updatedAt)}
                     mono
                   />
                 </div>

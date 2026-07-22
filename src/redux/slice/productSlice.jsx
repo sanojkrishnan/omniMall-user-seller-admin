@@ -71,6 +71,7 @@ export const singleProductFetch = createAsyncThunk(
   "product/fetchSingleProduct",
   async ({ id }, { rejectWithValue }) => {
     try {
+      console.log("ID FROM FRONTEND", id);
       const data = await productAPI.fetchOneProduct(id);
       return data;
     } catch (err) {

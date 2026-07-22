@@ -19,7 +19,6 @@ import {
 import CartLoading from "../../components/ui/CartLoading";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import ProductListTile from "../../components/ProductListTile";
 import Loading from "../../components/ui/Loading";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import ErrorFallback from "../../components/ui/ErrorFallback";
@@ -293,15 +292,7 @@ function Products() {
               setAddProduct(false);
             }
           }}
-        >
-          <ProductListTile
-            setOpenProduct={setOpenProduct}
-            product={singleProduct}
-            addProduct={addProduct}
-            setAddProduct={setAddProduct}
-            openProduct={openProduct}
-          />
-        </div>
+        ></div>
         <div className="w-full">
           <SearchBar
             colorVariants="admin"

@@ -12,10 +12,7 @@ import {
   clearSellerError,
   clearSellerState,
 } from "../../redux/slice/sellerSlice";
-import {
-  fetchAllCategories,
-  clearCategoryError,
-} from "../../redux/slice/categorySlice";
+import { fetchAllCategories } from "../../redux/slice/categorySlice";
 import CartLoading from "../../components/ui/CartLoading";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -24,7 +21,6 @@ import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import { clearAuthError } from "../../redux/slice/authSlice";
-import { useToastError } from "../../hooks/useToastError";
 import DataTable from "../../components/ui/DataTable";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import { useNavigate } from "react-router-dom";
@@ -48,8 +44,6 @@ function Products() {
 
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [openProduct, setOpenProduct] = useState(false);
-  const [singleProduct, setSingleProduct] = useState([]);
-  const [hadError, setHadError] = useState(false);
   const [addProduct, setAddProduct] = useState(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -100,7 +94,6 @@ function Products() {
   useEffect(() => {
     if (productError) {
       toast.error(productError);
-      if (products.length !== 0) dispatch(clearProductError());
       dispatch(clearProductError());
     }
   }, [productError, dispatch]);
@@ -197,22 +190,7 @@ function Products() {
     return map;
   }, [category]);
 
-  // Top Selling stays fixed at the first 7 products ever fetched.
-  // Locked via ref so it doesn't keep shifting as more pages load
-  // through infinite scroll. "All Products" below still shows every
-  // product, including these same 7 — no exclusion needed there.
-  const topSellingRef = useRef(null);
-  if (!topSellingRef.current && products.length >= 7) {
-    topSellingRef.current = products.slice(0, 7);
-  }
-  const topSellingProducts = topSellingRef.current ?? products.slice(0, 7);
-
-  useToastError({
-    errorMessage: productError,
-    fallbackErrorMessage: "Failed to log in",
-  });
   useEffect(() => {
-    setHadError(true);
     return () => {
       dispatch(clearAuthError());
     };
@@ -274,10 +252,10 @@ function Products() {
 
   useEffect(() => {
     return () => {
-      dispatch(clearProductError);
-      dispatch(clearSellerError);
-      dispatch(clearProductState);
-      dispatch(clearSellerState);
+      dispatch(clearProductError());
+      dispatch(clearSellerError());
+      dispatch(clearProductState());
+      dispatch(clearSellerState());
     };
   }, []);
 
@@ -332,11 +310,6 @@ function Products() {
                   setOpenProduct(true);
                   setAddProduct(false);
                   setSelectedProductId(item._id);
-                  setSingleProduct({
-                    ...item,
-                    sellerData: sellerMap[getId(item.sellerId)] ?? null,
-                    categoryData: categoryMap[getId(item.categoryId)] ?? null,
-                  });
                 }}
                 footer={<div id={triggerId} className="h-5" />}
               />
@@ -355,8 +328,6 @@ function Products() {
               <Loading className={"size-6"} />
             </div>
           )}
-
-          <div id={triggerId} className="h-5" />
         </div>
       </div>
     </>

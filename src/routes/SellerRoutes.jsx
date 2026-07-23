@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
-import { ProtectedRoute } from "../ProtectedRoute";
-import SellerPanel from "../../pages/seller/SellerPanel";
+import { ProtectedRoute } from "../components/ProtectedRoute";
+import SellerPanel from "../pages/seller/SellerPanel";
 
 const sellerRoutes = (
   <>

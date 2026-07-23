@@ -77,7 +77,7 @@ function AdminSidePanel() {
         </div>
         <div className="grid grid-cols-1 place-items-center">
           <H2
-            className={`${menuClick ? "text-sm font-semibold" : "font-bold"} mt-0 transition-all duration-500 text font-hurricane`}
+            className={`${menuClick ? "text-sm font-semibold" : "font-bold"} mt-6 transition-all duration-500 text font-hurricane`}
           >
             OmniMall
           </H2>
@@ -91,7 +91,7 @@ function AdminSidePanel() {
 
           {/* logout button */}
           <button
-            className={`flex justify-start ${menuClick ? "p-2 my-1" : "p-3 my-2"} mt-8 w-fit bg-[#5f0000] rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
+            className={`flex justify-start ${menuClick ? "p-2 my-1" : "p-3 my-2"} mt-6 w-fit bg-[#5f0000] rounded-lg hover:scale-105 overflow-hidden transition-all duration-500 shadow-lg`}
             onClick={() => {
               dispatch(logout());
               navigate("/login", { replace: true });
@@ -107,10 +107,10 @@ function AdminSidePanel() {
             <LogOut className="size-5" />
           </button>
 
-          <div className="w-full rounded-full border-[0.5px] border-white mt-10"></div>
+          <div className="w-full rounded-full border-[0.5px] border-white mt-6"></div>
         </div>
         {/* menu view */}
-        <div className="mt-10">
+        <div className="mt-8">
           <ul className={`${menuClick ? "p-1" : "p-4"} rounded-xl`}>
             {dashMenu.map((item, index) => (
               <li

@@ -12,29 +12,22 @@ import {
 } from "../redux/slice/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  clearCategoryError,
-  clearCategoryState,
-  singleCategoryFetch,
-} from "../redux/slice/categorySlice";
-import {
-  clearCouponError,
-  clearCouponState,
-  fetchCouponById,
-} from "../redux/slice/couponSlice";
-import {
-  clearSellerError,
-  clearSellerState,
-  singleSellerFetch,
-} from "../redux/slice/sellerSlice";
+import { singleCategoryFetch } from "../redux/slice/categorySlice";
+import { fetchCouponById } from "../redux/slice/couponSlice";
+import { singleSellerFetch } from "../redux/slice/sellerSlice";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
 import { toast } from "react-toastify";
+import { Copy, Flag, MonitorPause, Pen, Trash2 } from "lucide-react";
 
 export default function ProductAdminView() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { productId } = useParams();
+
+  //for edit products
+  const [editOpen, setEditOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   //product fetch
   const { singleProduct, isProductLoading, productError } = useSelector(
@@ -52,6 +45,22 @@ export default function ProductAdminView() {
   const { singleSeller, isSellerLoading, sellerError } = useSelector(
     (state) => state.seller,
   );
+
+  //edit submission
+  async function handleEditSubmit(values) {
+    setIsSaving(true);
+    try {
+      await dispatch(
+        updateProduct({ id: singleProduct._id, ...values }),
+      ).unwrap();
+      toast.success("Product updated");
+      setEditOpen(false);
+    } catch (err) {
+      toast.error(err?.message ?? "Failed to update product");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   useEffect(() => {
     if (productId) {
@@ -85,7 +94,7 @@ export default function ProductAdminView() {
     setOpen(false);
     if (confirmed) {
       dispatch(deleteSingleProduct({ id: singleProduct._id }));
-      clearProductState();
+      dispatch(clearProductState());
       toast.success("Product deleted successfully");
       navigate("/admin/products");
     }
@@ -131,7 +140,12 @@ export default function ProductAdminView() {
 
   return (
     <div className="font-sans text-[#241a1a] min-h-screen">
-      <ConfirmProvider variant="admin" open={open} onResult={handleResult}>
+      <ConfirmProvider
+        variant="admin"
+        open={open}
+        onResult={handleResult}
+        setOpen={setOpen}
+      >
         Are you sure, you want to delete?
       </ConfirmProvider>
 
@@ -157,26 +171,26 @@ export default function ProductAdminView() {
             variant="secondary"
             className=" border-[#e8e1df] text-[#241a1a]"
           >
-            Duplicate
+            <Copy />
           </Button>
           <Button
             variant="secondary"
             className="border-[#e8e1df] text-[#a97327] "
           >
-            Flag for review
+            <Flag />
           </Button>
           <Button
             variant="secondary"
             className="border-[#e8e1df] text-[#5f0000] "
           >
-            Suspend listing
+            <MonitorPause />
+          </Button>
+          <Button className=" bg-[#5f0000]">
+            <Pen />
           </Button>
 
-          <Button
-            onClick={() => setOpen(true)}
-            className="relative border border-[#5f0000] bg-[#5f0000] text-white rounded-md px-4 py-2 text-[13px] font-semibold cursor-pointer"
-          >
-            Delete product
+          <Button onClick={() => setOpen(true)} className="bg-[#5f0000] ">
+            <Trash2 />
           </Button>
         </div>
       </div>
@@ -198,11 +212,7 @@ export default function ProductAdminView() {
               {singleProduct.productImage.map((img, i) => (
                 <Button
                   key={img.publicId}
-                  onClick={() =>
-                    singleProduct.productImage.length >= i
-                      ? setActiveImg(i)
-                      : null
-                  }
+                  onClick={() => setActiveImg(i)}
                   className={`w-[52px] h-[52px] rounded-md overflow-hidden p-0 bg-transparent cursor-pointer ${
                     i === activeImg
                       ? "border-2 border-[#5f0000]"
@@ -432,7 +442,7 @@ export default function ProductAdminView() {
                     value={singleCategory._id}
                     mono
                   />
-                  <FieldRow label="sellerId" value={singleCategory._id} mono />
+                  <FieldRow label="sellerId" value={singleSeller._id} mono />
                   <FieldRow
                     label="couponId"
                     value={

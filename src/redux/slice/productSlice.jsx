@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { extractError } from "../../utils/ErrorExtractor";
 import { productAPI } from "../../services/productService";
+import { data } from "react-router-dom";
 
 const initialState = {
   products: [],
@@ -89,6 +90,18 @@ export const deleteSingleProduct = createAsyncThunk(
       return { id };
     } catch (err) {
       return rejectWithValue(extractError(err, "deletion failed"));
+    }
+  },
+);
+
+export const updateProduct = createAsyncThunk(
+  "product/updateProduct",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      await productAPI.updateProduct(id, data);
+      return { data };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update the product"));
     }
   },
 );
@@ -187,6 +200,21 @@ const productSlice = createSlice({
       .addCase(deleteSingleProduct.rejected, (state, action) => {
         state.isProductLoading = false;
         state.productError = action.payload;
+      });
+    //update a product
+    builder
+      .addCase(updateProduct.pending, (state) => {
+        state.productError = null;
+        state.isProductLoading = true;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.isProductLoading = false;
+        state.singleProduct = action.payload.data;
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.isProductLoading = false;
+        state.productError = action.payload;
+        state.singleProduct = {};
       });
   },
 });

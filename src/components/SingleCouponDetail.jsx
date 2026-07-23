@@ -48,20 +48,18 @@ const PAYMENT_METHOD_LABELS = {
   UPI: "UPI",
 };
 
-//validity 
+//validity
 function daysBetween(a, b) {
   const ms = new Date(b) - new Date(a);
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
-
 function SingleCouponDetail() {
-
   const { couponId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-   const formatDate = useDateFormatter(); // formats dates into readable date values
+  const formatDate = useDateFormatter(); // formats dates into readable date values
 
   const { singleCoupon, isCouponLoading, couponError } = useSelector(
     (state) => state.coupon,
@@ -138,6 +136,11 @@ function SingleCouponDetail() {
                     <Layers size={10} /> Stackable
                   </span>
                 )}
+                <span
+                  className={`text-[11px] font-medium px-2 py-0.5 rounded-full border bg-white/10 border-white/20 text-white`}
+                >
+                  Coupon ID : {coupon._id}
+                </span>
               </div>
               <h1 className="text-2xl font-bold text-white">
                 {coupon.name || "Untitled coupon"}
@@ -149,13 +152,13 @@ function SingleCouponDetail() {
             <div>
               <Button
                 className="bg-white w-fit text-[#5f0000] px-3 py-2 flex items-center gap-1.5 shrink-0 hover:bg-white/90"
-                onClick={() => navigate(`/admin/coupons/${coupon._id}/edit`)}
+                onClick={() => navigate(`/admin/coupon/${coupon._id}/edit`)}
               >
                 <Pencil size={14} />
               </Button>
               <Button
                 className="bg-white w-fit text-[#5f0000] px-3 py-2 flex items-center gap-1.5 shrink-0 hover:bg-white/90"
-                onClick={() => navigate(`/admin/coupons/${coupon._id}/edit`)}
+                onClick={() => navigate(`/admin/coupon/`)}
               >
                 <Trash2 size={14} />
               </Button>

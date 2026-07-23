@@ -12,8 +12,8 @@ import {
   TriangleAlert,
   ShoppingCart,
 } from "lucide-react";
+import RelatedSuggestion from "../../components/RelatedSuggestion";
 import { Button } from "../../components/ui/Button";
-import RelatedSuggestion from "../../components/ui/RelatedSuggestion";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearProductError,

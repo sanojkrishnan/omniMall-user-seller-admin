@@ -1,5 +1,5 @@
-import H2 from "./H2";
-import P from "./P";
+import H2 from "./ui/H2";
+import P from "./ui/P";
 
 function RelatedSuggestion({ product, related }) {
   return (

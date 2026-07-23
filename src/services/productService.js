@@ -11,7 +11,7 @@ export const productAPI = {
     const query = new URLSearchParams(queryParams).toString();
     return api.post(`product/fetch?${query}`, { uniqueProducts });
   },
-
+  //fetch single product
   fetchOneProduct: async (id) => {
     return api.get(`product/fetch-single/${id}`);
   },
@@ -19,5 +19,9 @@ export const productAPI = {
   //delete product
   deleteProduct: async (id) => {
     return api.delete(`product/delete/${id}`);
+  },
+  //update product
+  updateProduct: async (data, id) => {
+    return api.patch(`product/update/${id}`, data);
   },
 };

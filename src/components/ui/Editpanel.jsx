@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { cn } from "../lib/cn"; // adjust this import to wherever your `cn` (clsx + twMerge) helper lives
-import { Button } from "./ui/Button";
+import { cn } from "../../utils/CN"; // adjust this import to wherever your `cn` (clsx + twMerge) helper lives
+import { Button } from "./Button";
 
 // Two distinct visual identities, not just a recolored accent.
 // admin: warm maroon/cream, matching the existing admin screens.
@@ -48,7 +48,13 @@ function buildValidationSchema(fields) {
     let rule;
     switch (field.type) {
       case "number":
-        rule = Yup.number().typeError(`${field.label} must be a number`);
+        // transform empty string -> undefined so optional number fields
+        // left blank don't get flagged by the typeError below
+        rule = Yup.number()
+          .typeError(`${field.label} must be a number`)
+          .transform((value, originalValue) =>
+            originalValue === "" ? undefined : value,
+          );
         break;
       case "toggle":
         rule = Yup.boolean();
@@ -272,7 +278,7 @@ function renderField(field, formik) {
  *   // optional: validationSchema={Yup.object({ ... })} to override entirely
  * />
  */
-export default function EditPanel({
+export function EditPanel({
   variant = "admin",
   open,
   onClose,

@@ -9,6 +9,7 @@ import {
   clearProductState,
   deleteSingleProduct,
   singleProductFetch,
+  updateProduct,
 } from "../redux/slice/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -19,6 +20,23 @@ import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
 import { toast } from "react-toastify";
 import { Copy, Flag, MonitorPause, Pen, Trash2 } from "lucide-react";
+import { EditPanel } from "./ui/EditPanel";
+
+const PRODUCT_EDIT_FIELDS = [
+  { name: "productName", label: "Product name", type: "text", required: true },
+  { name: "brand", label: "Brand", type: "text", required: true },
+  {
+    name: "productDesc",
+    label: "Description",
+    type: "textarea",
+    span: "full",
+    required: true,
+  },
+  { name: "stock", label: "Stock", type: "number", required: true, min: 0 },
+  { name: "mrp", label: "MRP", type: "number", required: true },
+  { name: "offerPrice", label: "Offer price", type: "number", required: true },
+  { name: "offerPercentage", label: "Offer %", type: "number" },
+];
 
 export default function ProductAdminView() {
   const dispatch = useDispatch();
@@ -149,6 +167,19 @@ export default function ProductAdminView() {
         Are you sure, you want to delete?
       </ConfirmProvider>
 
+      {editOpen && (
+        <EditPanel
+          variant="admin"
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          title="Edit product"
+          fields={PRODUCT_EDIT_FIELDS}
+          initialValues={singleProduct}
+          onSubmit={handleEditSubmit}
+          isSubmitting={isSaving}
+        />
+      )}
+
       <style>{`
         * { box-sizing: border-box; }
         table { border-collapse: collapse; width: 100%; }
@@ -185,7 +216,7 @@ export default function ProductAdminView() {
           >
             <MonitorPause />
           </Button>
-          <Button className=" bg-[#5f0000]">
+          <Button className=" bg-[#5f0000]" onClick={() => setEditOpen(true)}>
             <Pen />
           </Button>
 

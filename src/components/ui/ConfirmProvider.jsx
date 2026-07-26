@@ -33,7 +33,7 @@ function ConfirmProvider({
     <div
       className={`${
         open ? "opacity-100" : "opacity-0 pointer-events-none"
-      } transition-all duration-300 flex items-center justify-center bg-black/5 absolute inset-0 z-10`}
+      } transition-all duration-300 flex items-center justify-center bg-black/20 absolute inset-0 z-50`}
     >
       <FormCard
         ref={confirmCardRef}

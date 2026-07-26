@@ -12,6 +12,7 @@ import {
   resendOTP,
   clearAuthState,
   clearAuthError,
+  resetOtpFlow,
 } from "../../redux/slice/authSlice";
 import Loading from "../../components/ui/Loading";
 import { useToastError } from "../../hooks/useToastError";
@@ -53,12 +54,6 @@ function OTP() {
       navigate("/register");
     }
   }, [otpSent.status, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
 
   useEffect(() => {
     if (user) {
@@ -116,15 +111,25 @@ function OTP() {
         <div className=" w-full flex justify-center items-center my-4">
           <div className="text-center">
             <OmniMall />
-            <H3 className=" font-bold text-blue-800">
-              Confirm OTP
-            </H3>
+            <H3 className=" font-bold text-blue-800">Confirm OTP</H3>
           </div>
         </div>
         <form onSubmit={formik.handleSubmit}>
-          <label className="font-semibold" htmlFor="otp">
-            OTP :
-          </label>
+          <div className="flex justify-between items-center">
+            <label className="font-semibold w-1/2" htmlFor="otp">
+              OTP :
+            </label>
+            <div className="w-full cursor-pointer flex justify-end">
+              <button
+                type="button"
+                className="text-blue-600 disabled:text-gray-500"
+                disabled={resentButton || isLoading}
+                onClick={handleResendOtp}
+              >
+                {resentButton ? `Resend in ${secondsLeft}s` : "Resend OTP"}
+              </button>
+            </div>
+          </div>
           <input
             className="p-2 cursor-pointer placeholder:text-gray-900 rounded-lg bg-transparent border-[0.5px] border-black/50 w-full"
             type="password"
@@ -142,20 +147,22 @@ function OTP() {
                 {formik.errors.otp}
               </p>
             )}
-            <div className="w-full cursor-pointer flex justify-end">
-              <button
-                type="button"
-                className="text-blue-600 disabled:text-gray-500"
-                disabled={resentButton}
-                onClick={handleResendOtp}
-              >
-                {resentButton ? `Resend in ${secondsLeft}s` : "Resend OTP"}
-              </button>
-            </div>
           </div>
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? <Loading variant="secondary" /> : "Confirm"}
+          </Button>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => {
+              navigate("/register", { replace: true });
+              dispatch(clearAuthError());
+              dispatch(clearAuthState());
+              dispatch(resetOtpFlow());
+            }}
+          >
+            Back
           </Button>
         </form>
       </FormCard>

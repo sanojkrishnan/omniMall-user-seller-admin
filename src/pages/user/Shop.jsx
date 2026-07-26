@@ -14,7 +14,6 @@ import SearchNotFound from "../../components/ui/SearchNotFound";
 import { useToastError } from "../../hooks/useToastError";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import H1 from "../../components/ui/H1";
-import P from "../../components/ui/P";
 import P2 from "../../components/ui/P2";
 
 function Shop() {
@@ -118,7 +117,7 @@ function Shop() {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 mt-8 pb-24">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 mt-8 pb-4">
         {/* initial load or searching */}
         {isBusy && !productError && (
           <div className="w-full h-[60vh] flex justify-center items-center">

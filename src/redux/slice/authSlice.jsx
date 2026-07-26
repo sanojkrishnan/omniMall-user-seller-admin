@@ -162,6 +162,13 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
     },
+    resetOtpFlow(state) {
+      state.otpSent = {
+        sentToMail: null,
+        status: false,
+        lastSentAt: null,
+      };
+    },
     logout(state) {
       state.user = null;
       state.token = null;
@@ -235,10 +242,13 @@ const authSlice = createSlice({
       });
 
     //resend OTP
+    //resend OTP
     builder
       .addCase(resendOTP.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        // don't touch otpSent here — a resend in flight doesn't mean the
+        // current OTP session is invalid
       })
       .addCase(resendOTP.fulfilled, (state, action) => {
         state.otpSent = {
@@ -252,8 +262,9 @@ const authSlice = createSlice({
       .addCase(resendOTP.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        // don't wipe otpSent here either — the existing OTP is still valid,
+        // the resend attempt itself just failed (e.g. rate-limited)
       });
-
     // google register
     builder
       .addCase(googleRegister.pending, (state) => {
@@ -385,6 +396,11 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, clearAuthState, logout, fetchLoggedUser } =
-  authSlice.actions;
+export const {
+  clearAuthError,
+  clearAuthState,
+  resetOtpFlow,
+  logout,
+  fetchLoggedUser,
+} = authSlice.actions;
 export default authSlice.reducer;

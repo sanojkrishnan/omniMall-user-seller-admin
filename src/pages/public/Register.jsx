@@ -27,6 +27,7 @@ function Register() {
   const [stepErrors, setStepErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false); //for password showing
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); //for confirm password showing
+  const dispatch = useDispatch();
 
   // getting the auth state from the redux store
   const { message, isLoading, error, otpSent } = useSelector(
@@ -38,10 +39,9 @@ function Register() {
       navigate(`/otp`);
       toast.success(message);
       console.log(message);
+      dispatch(clearAuthState);
     }
-  }, [otpSent, navigate, message]);
-
-  const dispatch = useDispatch();
+  }, [otpSent, navigate, message, dispatch]);
 
   // error toast
   useToastError({
@@ -53,7 +53,13 @@ function Register() {
     return () => {
       dispatch(clearAuthError());
     };
-  }, []);
+  }, [dispatch]);
+
+  // Only the fields belonging to the currently visible step should be
+  // reachable via keyboard Tab. Fields in off-screen steps get tabIndex={-1}
+  // so Tab can't "leak" into hidden/unvalidated steps.
+  const tabIndexFor = (stepIndex) => (step === stepIndex ? 0 : -1);
+
   return (
     <>
       <div className="bg-[url('/logo%20and%20other%20utilities/register.jpg')] bg-cover bg-center h-[100vh] w-[100vw] flex items-center justify-center">
@@ -64,15 +70,16 @@ function Register() {
               <H3 className="font-bold text-blue-800">Sign Up</H3>
             </div>
           </div>
-          {/* Step indicator */}
           <div className="relative mb-2">
             <div className="flex  items-center justify-center w-full">
               {[0, 1, 2, 3].map((i) => (
-                <div className="w-fit h-10 flex justify-center items-center">
+                <div
+                  key={i}
+                  className="w-fit h-10 flex justify-center items-center"
+                >
                   <div
-                    key={i}
                     className={` rounded-full flex items-center justify-center transition-all duration-500
-          ${i < step ? "w-5 h-5 border-black bg-black" : i === step ? "w-5 h-5 border-4 animate-pulse border-black" : "w-0"}`}
+        ${i < step ? "w-5 h-5 border-black bg-black" : i === step ? "w-5 h-5 border-4 animate-pulse border-black" : "w-0"}`}
                   >
                     {i < step && (
                       <svg
@@ -143,7 +150,10 @@ function Register() {
                     style={{ transform: `translateX(-${step * 100}%)` }}
                   >
                     {/* first set */}
-                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                    <div
+                      className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                      aria-hidden={step !== 0}
+                    >
                       <div className="sm:flex justify-between">
                         <div>
                           {/* First Name : */}
@@ -159,16 +169,17 @@ function Register() {
                             name="firstName"
                             id="firstName"
                             placeholder="Your First Name"
+                            tabIndex={tabIndexFor(0)}
                           />
 
                           <div className="h-5">
                             {stepErrors.firstName && (
-                              <P2 className="text-red-500 text-left">
+                              <P2 className="text-red-500 text-xs text-left">
                                 <TriangleAlert className="size-3 inline-block" />{" "}
                                 {stepErrors.firstName}
                               </P2>
                             )}
-                          </div>z
+                          </div>
                         </div>
                         <div>
                           {/* last Name  */}
@@ -184,10 +195,11 @@ function Register() {
                             name="lastName"
                             id="lastName"
                             placeholder="Your last Name"
+                            tabIndex={tabIndexFor(0)}
                           />
                           <div className="h-5">
                             {stepErrors.lastName && (
-                              <P2 className="text-red-500 text-left">
+                              <P2 className="text-red-500 text-xs text-left">
                                 <TriangleAlert className="size-3 inline-block" />{" "}
                                 {stepErrors.lastName}
                               </P2>
@@ -206,10 +218,11 @@ function Register() {
                         name="email"
                         id="email"
                         placeholder="Your Email"
+                        tabIndex={tabIndexFor(0)}
                       />
                       <div className="h-5">
                         {stepErrors.email && (
-                          <P2 className="text-red-500 text-left">
+                          <P2 className="text-red-500 text-xs text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.email}
                           </P2>
@@ -219,7 +232,10 @@ function Register() {
 
                     {/* second set */}
 
-                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                    <div
+                      className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                      aria-hidden={step !== 1}
+                    >
                       {/* date of birth */}
                       <label className="font-semibold" htmlFor="date">
                         Date Of Birth :
@@ -230,10 +246,11 @@ function Register() {
                         name="dateOfBirth"
                         id="date"
                         placeholder="Your DAte Of Birth"
+                        tabIndex={tabIndexFor(1)}
                       />
                       <div className="h-5">
                         {stepErrors.dateOfBirth && (
-                          <P2 className="text-red-500 text-left">
+                          <P2 className="text-red-500 text-xs text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.dateOfBirth}
                           </P2>
@@ -251,6 +268,7 @@ function Register() {
                           id="male"
                           value="male"
                           placeholder="Date Of Birth"
+                          tabIndex={tabIndexFor(1)}
                         />
                         <label className="cursor-pointer" htmlFor="male">
                           Male
@@ -265,6 +283,7 @@ function Register() {
                           id="female"
                           value="female"
                           placeholder="Date Of Birth"
+                          tabIndex={tabIndexFor(1)}
                         />
                         <label className="cursor-pointer" htmlFor="female">
                           Female
@@ -272,7 +291,7 @@ function Register() {
                       </div>
                       <div className="h-5">
                         {stepErrors.gender && (
-                          <P2 className="text-red-500 text-left">
+                          <P2 className="text-red-500 text-xs text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.gender}
                           </P2>
@@ -281,7 +300,10 @@ function Register() {
                     </div>
 
                     {/* third set */}
-                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                    <div
+                      className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                      aria-hidden={step !== 2}
+                    >
                       {/* Profile picture */}
                       <div className="w-full flex justify-center items-center">
                         <div>
@@ -305,6 +327,7 @@ function Register() {
                                 accept="image/*"
                                 type="file"
                                 name="profileImage"
+                                tabIndex={tabIndexFor(2)}
                                 onChange={async (e) => {
                                   const file = e.target.files[0];
                                   if (!file) return;
@@ -335,7 +358,9 @@ function Register() {
                         </div>
                       </div>
                       <div className="text-center">
-                        <H2 className="font-semibold mb-6">Profile picture</H2>
+                        <H2 className="font-semibold m-2 mb-4">
+                          Profile picture
+                        </H2>
                         <P2>
                           Add your profile picture here. The profile picture is
                           not mandatory, click next to skip
@@ -343,7 +368,10 @@ function Register() {
                       </div>
                     </div>
                     {/* fourth set */}
-                    <div className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl">
+                    <div
+                      className="min-w-full p-2 border-[0.5px] border-black/40 rounded-xl"
+                      aria-hidden={step !== 3}
+                    >
                       {/* password */}
                       <label className="font-semibold" htmlFor="password">
                         Password :
@@ -355,11 +383,13 @@ function Register() {
                           name="password"
                           id="password"
                           placeholder="Password"
+                          tabIndex={tabIndexFor(3)}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-6 top-1/2 -translate-y-1/2"
+                          tabIndex={tabIndexFor(3)}
                         >
                           {showPassword ? (
                             <EyeOff size={18} />
@@ -368,9 +398,9 @@ function Register() {
                           )}
                         </button>
                       </div>
-                      <div className="h-5">
+                      <div className="h-4">
                         {stepErrors.password && (
-                          <P2 className="text-red-500 text-left">
+                          <P2 className="text-red-500 text-xs text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.password}
                           </P2>
@@ -390,6 +420,7 @@ function Register() {
                           name="confirmPassword"
                           id="confirmPassword"
                           placeholder="Confirm Password"
+                          tabIndex={tabIndexFor(3)}
                         />
                         <button
                           type="button"
@@ -397,6 +428,7 @@ function Register() {
                             setShowConfirmPassword(!showConfirmPassword)
                           }
                           className="absolute right-6 top-1/2 -translate-y-1/2"
+                          tabIndex={tabIndexFor(3)}
                         >
                           {showConfirmPassword ? (
                             <EyeOff size={18} />
@@ -405,9 +437,9 @@ function Register() {
                           )}
                         </button>
                       </div>
-                      <div className="h-5">
+                      <div className="h-4">
                         {stepErrors.confirmPassword && (
-                          <P2 className="text-red-500 text-left">
+                          <P2 className="text-red-500 text-xs text-lef">
                             <TriangleAlert className="size-3 inline-block" />{" "}
                             {stepErrors.confirmPassword}
                           </P2>
@@ -419,6 +451,7 @@ function Register() {
                         id="condition"
                         type="checkbox"
                         name="conditionCheck"
+                        tabIndex={tabIndexFor(3)}
                       />
                       <label
                         className={`cursor-pointer font-semibold  text-black `}
@@ -426,7 +459,7 @@ function Register() {
                       >
                         &nbsp; I agree to the terms and conditions
                       </label>
-                      <div className="h-5">
+                      <div className="h-4">
                         {stepErrors.conditionCheck && (
                           <P2 className="text-red-500 text-left">
                             <TriangleAlert className="size-3 inline-block" />{" "}

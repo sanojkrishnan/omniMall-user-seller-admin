@@ -40,6 +40,18 @@ export const fetchCouponById = createAsyncThunk(
   },
 );
 
+export const updateCoupon = createAsyncThunk(
+  "coupon/updateCoupon",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      await couponAPI.updateCoupon(id, data);
+      return { data };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update the product"));
+    }
+  },
+);
+
 const couponSlice = createSlice({
   name: "coupon",
   initialState,
@@ -87,11 +99,26 @@ const couponSlice = createSlice({
       .addCase(fetchCouponById.fulfilled, (state, action) => {
         state.isCouponLoading = false;
         state.singleCoupon = action.payload?.data;
-        console.log("SINGLE COUPON :", action.payload, )
+        console.log("SINGLE COUPON :", action.payload);
       })
       .addCase(fetchCouponById.rejected, (state, action) => {
         state.isCouponLoading = false;
         state.couponError = action.payload;
+      });
+    //update a product
+    builder
+      .addCase(updateCoupon.pending, (state) => {
+        state.couponError = null;
+        state.isCouponLoading = true;
+      })
+      .addCase(updateCoupon.fulfilled, (state, action) => {
+        state.isCouponLoading = false;
+        state.singleCoupon = action.payload.data;
+      })
+      .addCase(updateCoupon.rejected, (state, action) => {
+        state.isCouponLoading = false;
+        state.couponError = action.payload;
+        state.singleCoupon = null;
       });
   },
 });

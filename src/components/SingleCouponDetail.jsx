@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -23,13 +23,25 @@ import ToggleSwitch from "./ui/ToggleSwitch";
 import P from "./ui/P";
 import { useDateFormatter } from "../hooks/useDateFormatter";
 import { Pill, Row, Section, Stat } from "./AdminCouponSupport";
+import { EditPanel } from "./ui/EditPanel";
+import { updateProduct } from "../redux/slice/productSlice";
+import { toast } from "react-toastify";
 
-// ---- label maps: keep raw enum values out of the UI ----
-const STATUS_STYLES = {
-  active: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  inactive: "bg-gray-100 text-gray-500 border-gray-200",
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-};
+const COUPON_EDIT_FIELDS = [
+  { name: "productName", label: "Product name", type: "text", required: true },
+  { name: "brand", label: "Brand", type: "text", required: true },
+  {
+    name: "productDesc",
+    label: "Description",
+    type: "textarea",
+    span: "full",
+    required: true,
+  },
+  { name: "stock", label: "Stock", type: "number", required: true, min: 0 },
+  { name: "mrp", label: "MRP", type: "number", required: true },
+  { name: "offerPrice", label: "Offer price", type: "number", required: true },
+  { name: "offerPercentage", label: "Offer %", type: "number" },
+];
 
 const DISCOUNT_TYPE_LABELS = {
   percentage: "Percentage off",
@@ -61,6 +73,10 @@ function SingleCouponDetail() {
 
   const formatDate = useDateFormatter(); // formats dates into readable date values
 
+  //edit panel
+  const [editOpen, setEditOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   const { singleCoupon, isCouponLoading, couponError } = useSelector(
     (state) => state.coupon,
   );
@@ -80,6 +96,22 @@ function SingleCouponDetail() {
         <CartLoading />
       </div>
     );
+  }
+
+  //edit submission
+  async function handleEditSubmit(values) {
+    setIsSaving(true);
+    try {
+      await dispatch(
+        updateProduct({ id: singleCoupon._id, ...values }),
+      ).unwrap();
+      toast.success("Product updated");
+      setEditOpen(false);
+    } catch (err) {
+      toast.error(err?.message ?? "Failed to update product");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   if (couponError || !singleCoupon) {
@@ -114,6 +146,17 @@ function SingleCouponDetail() {
         <ArrowLeft size={15} />
         All coupons
       </button>
+
+      <EditPanel
+        variant="admin"
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title="Edit coupon"
+        fields={COUPON_EDIT_FIELDS}
+        initialValues={singleCoupon}
+        onSubmit={handleEditSubmit}
+        isSubmitting={isSaving}
+      />
 
       {/* Header card — the coupon "ticket" */}
       <div className="relative rounded-xl overflow-hidden bg-[#5f0000] shadow-lg">
@@ -152,7 +195,7 @@ function SingleCouponDetail() {
             <div>
               <Button
                 className="bg-white w-fit text-[#5f0000] px-3 py-2 flex items-center gap-1.5 shrink-0 hover:bg-white/90"
-                onClick={() => navigate(`/admin/coupon/${coupon._id}/edit`)}
+                onClick={() => setEditOpen(true)}
               >
                 <Pencil size={14} />
               </Button>

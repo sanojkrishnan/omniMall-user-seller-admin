@@ -1,16 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { cn } from "../../utils/CN"; // adjust this import to wherever your `cn` (clsx + twMerge) helper lives
+import { cn } from "../../utils/CN";
 import { Button } from "./Button";
+import { FormCard } from "./FormCard";
+import { TriangleAlert } from "lucide-react";
 
-// Two distinct visual identities, not just a recolored accent.
-// admin: warm maroon/cream, matching the existing admin screens.
-// user: cool navy/slate, for anything shown to a shopper (profile, etc).
 const THEMES = {
   admin: {
-    text: "#241a1a",
-    muted: "#8a7873",
+    text: "black",
+    muted: "black",
     border: "#e8e1df",
     soft: "#faf7f6",
     accent: "#5f0000",
@@ -18,11 +17,11 @@ const THEMES = {
     danger: "#b3261e",
   },
   user: {
-    text: "#black",
-    muted: "#748094",
+    text: "black",
+    muted: "black",
     border: "#dde3ea",
     soft: "#f4f6f9",
-    accent: "#black",
+    accent: "black",
     accentSoft: "#e7edf3",
     danger: "#b3261e",
   },
@@ -33,10 +32,6 @@ const inputBase =
   "border-[var(--edit-border)] text-[var(--edit-text)] placeholder:text-[var(--edit-muted)] " +
   "focus:border-[var(--edit-accent)] focus:ring-2 focus:ring-[var(--edit-accent-soft)]";
 
-// Builds a Yup shape from the `fields` schema so every entity (product,
-// coupon, category, profile...) gets sensible validation for free.
-// Pass `field.validation` (a Yup schema) to override a single field, or
-// pass `validationSchema` on EditPanel itself to override everything.
 function buildValidationSchema(fields) {
   const shape = {};
   fields.forEach((field) => {
@@ -48,8 +43,6 @@ function buildValidationSchema(fields) {
     let rule;
     switch (field.type) {
       case "number":
-        // transform empty string -> undefined so optional number fields
-        // left blank don't get flagged by the typeError below
         rule = Yup.number()
           .typeError(`${field.label} must be a number`)
           .transform((value, originalValue) =>
@@ -87,7 +80,10 @@ function FieldLabel({ children, required }) {
 function FieldError({ message }) {
   if (!message) return null;
   return (
-    <p className="mt-1 text-[12px] text-[var(--edit-danger)]">{message}</p>
+    <p className="mt-1 flex items-center gap-1 text-[12px] text-red-500">
+      <TriangleAlert className="size-3 text-red-500" />
+      {message}
+    </p>
   );
 }
 
@@ -257,27 +253,6 @@ function renderField(field, formik) {
   }
 }
 
-/**
- * EditPanel — a Formik + Yup driven edit form usable for any entity
- * (product, coupon, category, user profile, ...).
- *
- * <EditPanel
- *   variant="admin" | "user"
- *   open={open}
- *   onClose={() => setOpen(false)}
- *   title="Edit product"
- *   fields={[
- *     { name: "productName", label: "Product name", type: "text", required: true },
- *     { name: "productDesc", label: "Description", type: "textarea", span: "full" },
- *     { name: "mrp", label: "MRP", type: "number", required: true },
- *     { name: "categoryId", label: "Category", type: "select", options: categoryOptions },
- *     { name: "productImage", label: "Image", type: "image", span: "full" },
- *   ]}
- *   initialValues={singleProduct}
- *   onSubmit={(values) => dispatch(updateProduct(values))}
- *   // optional: validationSchema={Yup.object({ ... })} to override entirely
- * />
- */
 export function EditPanel({
   variant = "admin",
   open,
@@ -294,6 +269,8 @@ export function EditPanel({
   error,
 }) {
   const theme = THEMES[variant] ?? THEMES.admin;
+  const [shouldRender, setShouldRender] = useState(open);
+  const [isVisible, setIsVisible] = useState(false);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -302,18 +279,34 @@ export function EditPanel({
     onSubmit: (values) => onSubmit?.(values),
   });
 
-  // Reset to a clean state each time the panel opens, rather than on
-  // every initialValues reference change (enableReinitialize alone
-  // would re-sync on every parent re-render while open).
   useEffect(() => {
+    let rafId;
+    let timeoutId;
+
     if (open) {
+      setShouldRender(true);
       formik.resetForm({ values: initialValues });
+      // Mount first at the "closed" visual state (isVisible still false),
+      // then flip to "open" on a later frame so the browser actually
+      // paints the closed state before transitioning to open. A single
+      // rAF is sometimes coalesced into the same paint as the mount, so
+      // we nest two.
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => setIsVisible(true));
+      });
+    } else {
+      setIsVisible(false);
+      timeoutId = setTimeout(() => setShouldRender(false), 300); // match duration-300
     }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  if (!open) return null;
-
+  if (!shouldRender) return null;
   const submitting = isSubmitting ?? formik.isSubmitting;
 
   return (
@@ -327,13 +320,15 @@ export function EditPanel({
         "--edit-accent-soft": theme.accentSoft,
         "--edit-danger": theme.danger,
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className={`${isVisible ? "opacity-100" : "opacity-0"} duration-300 transition-opacity fixed inset-0 z-50 flex items-center justify-center bg-black/10 p-4`}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
     >
-      <div className="w-full max-w-lg rounded-xl border border-[var(--edit-border)] bg-white shadow-xl">
-        <div className="flex items-start justify-between gap-4 border-b border-[var(--edit-border)] px-6 py-5">
+      <FormCard
+        className={`${isVisible ? "scale-100" : "scale-0"} duration-300 transition-transform`}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-black px-6 py-5">
           <div>
             <h2 className="font-sans text-[18px] font-semibold text-[var(--edit-text)]">
               {title}
@@ -354,7 +349,7 @@ export function EditPanel({
         </div>
 
         <form onSubmit={formik.handleSubmit}>
-          <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto px-6 py-5">
+          <div className="grid max-h-[40vh] overflow-y-auto custom-scrollbar grid-cols-2 gap-4 px-6 py-5">
             {fields.map((field) => (
               <div
                 key={field.name}
@@ -382,17 +377,18 @@ export function EditPanel({
           </div>
 
           {error && (
-            <div className="mx-6 mb-4 rounded-lg bg-[var(--edit-danger)]/10 px-3 py-2 text-[13px] text-[var(--edit-danger)]">
+            <div className="mx-6 mb-4 flex items-center gap-2 rounded-lg bg-[var(--edit-danger)]/10 px-3 py-2 text-[13px] text-red-500">
+              <TriangleAlert className="size-3 text-red-500" />
               {error}
             </div>
           )}
 
-          <div className="flex justify-end gap-2 border-t border-[var(--edit-border)] px-6 py-4">
+          <div className="flex justify-end gap-2 border-t border-black px-6 py-4">
             <Button
               type="button"
               variant="secondary"
               onClick={onClose}
-              className="border-[var(--edit-border)] text-[var(--edit-text)]"
+              className=" text-[var(--edit-text)]"
             >
               {cancelLabel}
             </Button>
@@ -409,7 +405,7 @@ export function EditPanel({
             </Button>
           </div>
         </form>
-      </div>
+      </FormCard>
     </div>
   );
 }

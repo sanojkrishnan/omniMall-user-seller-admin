@@ -117,9 +117,24 @@ apiClient.interceptors.response.use(
       "An unexpected error occurred";
 
     if (status === 401) {
-      const isLoginRequest = error.config?.url?.includes("auth/login");
+      // Public/pre-auth endpoints never carry a session token, so a 401 from
+      // them means "bad credentials/OTP", not "your session expired". Don't
+      // treat these as a global logout trigger.
+      const publicAuthPaths = [
+        "auth/login",
+        "auth/register",
+        "auth/verify-otp",
+        "auth/resend-otp",
+        "auth/forgot-password",
+        "auth/reset-password",
+        "auth/google",
+      ];
 
-      if (!isLoginRequest) {
+      const isPublicAuthRequest = publicAuthPaths.some((path) =>
+        error.config?.url?.includes(path),
+      );
+
+      if (!isPublicAuthRequest) {
         clearTokens();
         toast.error("Session expired. Please login again.");
         window.location.href = "/login";

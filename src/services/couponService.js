@@ -11,8 +11,8 @@ export const couponAPI = {
       params: { page, limit, search, sort },
     });
   },
-  updateCoupon: async (data, id) => {
-    return api.patch(`coupon/update/${id}`, data);
+  updateCoupon: async (id, values) => {
+    return api.patch(`coupon/update/${id}`, values);
   },
   fetchCouponById: async (id) => {
     return api.get(`coupon/singleFetch/${id}`);

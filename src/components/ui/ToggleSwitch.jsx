@@ -1,35 +1,34 @@
-import { useState } from "react";
+import { cn } from "../../utils/CN";
 
-export default function ToggleSwitch({ initialState = false, onChange }) {
-  const [isOn, setIsOn] = useState(initialState);
-
-  const handleToggle = () => {
-    const nextState = !isOn;
-    setIsOn(nextState);
-    if (onChange) {
-      onChange(nextState);
-    }
-  };
+export default function ToggleSwitch({
+  checked = false,
+  onChange,
+  disabled = false,
+}) {
+  function handleClick() {
+    if (disabled) return;
+    onChange?.(!checked);
+  }
 
   return (
-    <label className="inline-flex items-center cursor-pointer select-none">
-      <input
-        type="checkbox"
-        checked={isOn}
-        onChange={handleToggle}
-        className="sr-only"
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={handleClick}
+      className={cn(
+        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-300",
+        checked ? "bg-[#f3e9e8]" : "bg-gray-200",
+        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all duration-300 transform",
+          checked ? "translate-x-full bg-[#5f0000]" : "bg-[#b17b7b]",
+        )}
       />
-
-      <div
-        className={`relative w-11 h-6 rounded-full transition-colors duration-300 bg-gray-200
-        `}
-      >
-        <div
-          className={`absolute top-[2px] left-[2px]  rounded-full h-5 w-5 transition-all duration-300 transform ${
-            isOn ? "translate-x-full bg-[#5f0000]" : "bg-[#b17b7b]"
-          }`}
-        ></div>
-      </div>
-    </label>
+    </button>
   );
 }

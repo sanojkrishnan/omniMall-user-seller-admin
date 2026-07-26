@@ -17,7 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "./ui/Button";
-import { fetchCouponById } from "../redux/slice/couponSlice";
+import { fetchCouponById, updateCoupon } from "../redux/slice/couponSlice";
 import CartLoading from "./ui/CartLoading";
 import ToggleSwitch from "./ui/ToggleSwitch";
 import P from "./ui/P";
@@ -27,20 +27,159 @@ import { EditPanel } from "./ui/EditPanel";
 import { updateProduct } from "../redux/slice/productSlice";
 import { toast } from "react-toastify";
 
+//edit fields
 const COUPON_EDIT_FIELDS = [
-  { name: "productName", label: "Product name", type: "text", required: true },
-  { name: "brand", label: "Brand", type: "text", required: true },
+  { name: "name", label: "Coupon Name", type: "text", required: true },
+
   {
-    name: "productDesc",
+    name: "code",
+    label: "Coupon Code",
+    type: "text",
+    required: true,
+  },
+
+  {
+    name: "description",
     label: "Description",
     type: "textarea",
     span: "full",
     required: true,
   },
-  { name: "stock", label: "Stock", type: "number", required: true, min: 0 },
-  { name: "mrp", label: "MRP", type: "number", required: true },
-  { name: "offerPrice", label: "Offer price", type: "number", required: true },
-  { name: "offerPercentage", label: "Offer %", type: "number" },
+
+  {
+    name: "discountType",
+    label: "Discount Type",
+    type: "select",
+    required: true,
+    options: [
+      { value: "percentage", label: "Percentage" },
+      { value: "flat", label: "Flat" },
+    ],
+  },
+
+  {
+    name: "discountValue",
+    label: "Discount Value",
+    type: "number",
+    required: true,
+    min: 0,
+  },
+
+  {
+    name: "maxDiscount",
+    label: "Maximum Discount",
+    type: "number",
+    min: 0,
+  },
+
+  {
+    name: "minOrderAmount",
+    label: "Minimum Order Amount",
+    type: "number",
+    required: true,
+    min: 0,
+  },
+
+  {
+    name: "startDate",
+    label: "Start Date",
+    type: "datetime-local",
+    required: true,
+  },
+
+  {
+    name: "endDate",
+    label: "End Date",
+    type: "datetime-local",
+    required: true,
+  },
+
+  {
+    name: "status",
+    label: "Status",
+    type: "select",
+    required: true,
+    options: [
+      { value: "pending", label: "Pending" },
+      { value: "active", label: "Active" },
+      { value: "inactive", label: "Inactive" },
+    ],
+  },
+
+  {
+    name: "usageLimit",
+    label: "Usage Limit",
+    type: "number",
+    required: true,
+    min: 1,
+  },
+
+  {
+    name: "usagePerUser",
+    label: "Usage Per User",
+    type: "number",
+    required: true,
+    min: 1,
+  },
+
+  {
+    name: "eligibleUsers",
+    label: "Eligible Users",
+    type: "select",
+    required: true,
+    options: [
+      { value: "all", label: "All Users" },
+      { value: "new", label: "New Users" },
+      { value: "existing", label: "Existing Users" },
+    ],
+  },
+
+  {
+    name: "paymentMethods",
+    label: "Payment Methods",
+    type: "multiselect",
+    options: [
+      { value: "COD", label: "Cash on Delivery" },
+      { value: "CARD", label: "Card" },
+      { value: "UPI", label: "UPI" },
+    ],
+  },
+
+  {
+    name: "stackable",
+    label: "Stackable",
+    type: "checkbox",
+  },
+
+  {
+    name: "autoApply",
+    label: "Auto Apply",
+    type: "checkbox",
+  },
+
+  {
+    name: "applicableProducts",
+    label: "Applicable Products",
+    type: "multiselect",
+  },
+
+  {
+    name: "applicableCategories",
+    label: "Applicable Categories",
+    type: "multiselect",
+  },
+
+  {
+    name: "excludedProducts",
+    label: "Excluded Products",
+    type: "multiselect",
+  },
+
+  {
+    name: "sellerIds",
+    label: "Applicable Sellers",
+    type: "multiselect",
+  },
 ];
 
 const DISCOUNT_TYPE_LABELS = {
@@ -103,12 +242,12 @@ function SingleCouponDetail() {
     setIsSaving(true);
     try {
       await dispatch(
-        updateProduct({ id: singleCoupon._id, ...values }),
+        updateCoupon({ id: singleCoupon._id, ...values }),
       ).unwrap();
-      toast.success("Product updated");
+      toast.success("Coupon updated");
       setEditOpen(false);
     } catch (err) {
-      toast.error(err?.message ?? "Failed to update product");
+      toast.error(err?.message ?? "Failed to update coupon");
     } finally {
       setIsSaving(false);
     }

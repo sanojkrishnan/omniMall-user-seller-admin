@@ -42,10 +42,12 @@ export const fetchCouponById = createAsyncThunk(
 
 export const updateCoupon = createAsyncThunk(
   "coupon/updateCoupon",
-  async ({ id, data }, { rejectWithValue }) => {
+  async ({ id, values }, { rejectWithValue }) => {
     try {
-      await couponAPI.updateCoupon(id, data);
-      return { data };
+      console.log("ID FOR UPDATING COUPON :", id);
+      console.log("DATA FOR UPDATING COUPON :", values);
+      await couponAPI.updateCoupon(id, values);
+      return { values };
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to update the product"));
     }

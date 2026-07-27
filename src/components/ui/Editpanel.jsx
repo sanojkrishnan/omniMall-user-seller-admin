@@ -6,6 +6,7 @@ import { Button } from "./Button";
 import { FormCard } from "./FormCard";
 import { TriangleAlert, ChevronDown, Eye, EyeOff, X } from "lucide-react";
 import ToggleSwitch from "./ToggleSwitch";
+import { createPortal } from "react-dom";
 
 const THEMES = {
   admin: {
@@ -277,6 +278,7 @@ function CheckboxGroupField({ field, value, onChange }) {
 
 function MultiSelectField({ field, value, onChange }) {
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
   const ref = useRef(null);
   const selected = Array.isArray(value) ? value : [];
   const options = field.options ?? [];
@@ -286,11 +288,29 @@ function MultiSelectField({ field, value, onChange }) {
 
   useEffect(() => {
     function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        !e.target.closest("[data-multiselect-portal]")
+      ) {
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  function openMenu() {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+    setOpen((o) => !o);
+  }
 
   function toggle(optValue) {
     const next = selected.includes(optValue)
@@ -304,7 +324,7 @@ function MultiSelectField({ field, value, onChange }) {
       <button
         type="button"
         disabled={field.disabled}
-        onClick={() => setOpen((o) => !o)}
+        onClick={openMenu}
         className={cn(
           inputBase,
           "flex items-center justify-between gap-2 text-left",
@@ -322,27 +342,38 @@ function MultiSelectField({ field, value, onChange }) {
         </span>
         <ChevronDown className="size-4 shrink-0 text-[var(--edit-muted)]" />
       </button>
-      {open && (
-        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto custom-scrollbar rounded-lg border border-[var(--edit-border)] bg-white p-1 shadow-lg">
-          {options.length === 0 && (
-            <p className="px-2 py-1.5 text-[12px] text-[var(--edit-muted)]">
-              No options
-            </p>
-          )}
-          {options.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[var(--edit-soft)]"
-            >
-              <ToggleSwitch
-                checked={selected.includes(opt.value)}
-                onChange={() => toggle(opt.value)}
-              />
-              {opt.label}
-            </label>
-          ))}
-        </div>
-      )}
+      {open &&
+        createPortal(
+          <div
+            data-multiselect-portal
+            style={{
+              position: "absolute",
+              top: coords.top,
+              left: coords.left,
+              width: coords.width,
+            }}
+            className="z-[9999] max-h-48 overflow-y-auto custom-scrollbar rounded-lg border border-[var(--edit-border)] bg-white p-1 shadow-lg"
+          >
+            {options.length === 0 && (
+              <p className="px-2 py-1.5 text-[12px] text-[var(--edit-muted)]">
+                No options
+              </p>
+            )}
+            {options.map((opt) => (
+              <label
+                key={opt.value}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[var(--edit-soft)]"
+              >
+                <ToggleSwitch
+                  checked={selected.includes(opt.value)}
+                  onChange={() => toggle(opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

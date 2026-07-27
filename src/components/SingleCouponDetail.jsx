@@ -24,8 +24,8 @@ import P from "./ui/P";
 import { useDateFormatter } from "../hooks/useDateFormatter";
 import { Pill, Row, Section, Stat } from "./AdminCouponSupport";
 import { EditPanel } from "./ui/EditPanel";
-import { updateProduct } from "../redux/slice/productSlice";
 import { toast } from "react-toastify";
+import ErrorFallback from "../components/ui/ErrorFallback";
 
 //edit fields
 const COUPON_EDIT_FIELDS = [
@@ -238,11 +238,16 @@ function SingleCouponDetail() {
   }
 
   //edit submission
+  const editableInitialValues = COUPON_EDIT_FIELDS.reduce((acc, field) => {
+    acc[field.name] = singleCoupon?.[field.name];
+    return acc;
+  }, {});
+
   async function handleEditSubmit(values) {
     setIsSaving(true);
     try {
       await dispatch(
-        updateCoupon({ id: singleCoupon._id, ...values }),
+        updateCoupon({ id: singleCoupon._id, data: values }),
       ).unwrap();
       toast.success("Coupon updated");
       setEditOpen(false);
@@ -254,17 +259,7 @@ function SingleCouponDetail() {
   }
 
   if (couponError || !singleCoupon) {
-    return (
-      <div className="w-full py-24 flex flex-col items-center justify-center gap-3 text-center">
-        <p className="text-gray-600 text-sm">This coupon couldn't be found.</p>
-        <Button
-          className="bg-[#5f0000] text-white px-4"
-          onClick={() => navigate(-1)}
-        >
-          Back to coupons
-        </Button>
-      </div>
-    );
+    return <ErrorFallback loading={isCouponLoading} error={couponError} />;
   }
 
   const coupon = singleCoupon;
@@ -292,7 +287,7 @@ function SingleCouponDetail() {
         onClose={() => setEditOpen(false)}
         title="Edit coupon"
         fields={COUPON_EDIT_FIELDS}
-        initialValues={singleCoupon}
+        initialValues={editableInitialValues}
         onSubmit={handleEditSubmit}
         isSubmitting={isSaving}
       />

@@ -144,7 +144,34 @@ const COUPON_EDIT_FIELDS = [
       { value: "UPI", label: "UPI" },
     ],
   },
-
+  {
+    name: "applicableProducts",
+    label: "Applicable Products",
+    type: "async-multiselect",
+    asyncEntity: "product",
+    span: "full",
+  },
+  {
+    name: "applicableCategories",
+    label: "Applicable Categories",
+    type: "async-multiselect",
+    asyncEntity: "category",
+    span: "full",
+  },
+  {
+    name: "excludedProducts",
+    label: "Excluded Products",
+    type: "async-multiselect",
+    asyncEntity: "product",
+    span: "full",
+  },
+  {
+    name: "sellerIds",
+    label: "Applicable Sellers",
+    type: "async-multiselect",
+    asyncEntity: "seller",
+    span: "full",
+  },
   {
     name: "stackable",
     label: "Stackable",
@@ -155,30 +182,6 @@ const COUPON_EDIT_FIELDS = [
     name: "autoApply",
     label: "Auto Apply",
     type: "checkbox",
-  },
-
-  {
-    name: "applicableProducts",
-    label: "Applicable Products",
-    type: "multiselect",
-  },
-
-  {
-    name: "applicableCategories",
-    label: "Applicable Categories",
-    type: "multiselect",
-  },
-
-  {
-    name: "excludedProducts",
-    label: "Excluded Products",
-    type: "multiselect",
-  },
-
-  {
-    name: "sellerIds",
-    label: "Applicable Sellers",
-    type: "multiselect",
   },
 ];
 

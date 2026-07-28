@@ -57,13 +57,13 @@ function AdminSidePanel() {
   };
 
   return (
-    <div className={` sticky h-screen  top-0 left-0 z-50 w-24 xl:w-[340px]`}>
+    <div className={` sticky h-screen  top-0 left-0 z-50 w-16 xl:w-[340px]`}>
       <div
-        className={` ${menuClick ? "w-24" : "w-[350px] "} fixed transition-all p-6 duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto custom-scrollbar bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
+        className={` ${menuClick ? "w-16 p-2" : "w-[350px] p-6"} fixed transition-all duration-500 text-white text-center shadow-xl rounded-tr-lg self-start h-screen overflow-y-auto custom-scrollbar bg-gradient-to-tl from-[#60001A] via-[#480014] to-[#60001A] `}
       >
         <div
           onClick={() => setMenuClick((prev) => !prev)}
-          className={` ${menuClick ? "m-9" : "m-4"}  xl:hidden flex flex-col justify-center items-center transition-all duration-500 absolute right-0 top-0 mt-5 w-5 bg-transparent cursor-pointer`}
+          className={`m-6 xl:hidden flex flex-col justify-center items-center transition-all duration-500 absolute right-0 top-0 mt-5 w-5 bg-transparent cursor-pointer`}
         >
           <div
             className={`${menuClick ? "w-5" : "w-1"} transition-all duration-300 h-1 rounded-full mb-1 bg-white`}
@@ -77,7 +77,7 @@ function AdminSidePanel() {
         </div>
         <div className="grid grid-cols-1 place-items-center">
           <H2
-            className={`${menuClick ? "text-sm font-semibold" : "font-bold"} mt-6 transition-all duration-500 text font-hurricane`}
+            className={`${menuClick ? "scale-0" : "scale-100"} mt-6 transition-all duration-500 text font-hurricane`}
           >
             OmniMall
           </H2>

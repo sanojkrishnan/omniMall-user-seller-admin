@@ -11,7 +11,6 @@ import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import Loading from "../../components/ui/Loading";
-import SingleCouponDetail from "../../components/SingleCouponDetail";
 import { useNavigate } from "react-router-dom";
 
 function formatDate(value) {

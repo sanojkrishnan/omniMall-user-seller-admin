@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { cn } from "../../utils/CN";
 import { ChevronDown, Search } from "lucide-react";
 import Loading from "./Loading";
+import { isTriggerVisible } from "../../utils/getScrollParent";
 
 const variants = {
   primary:
@@ -42,12 +43,19 @@ function SelectionButton({
     });
   };
 
-  // Replace the old scroll-close useEffect with this
+  // Reposition while scrolling, but close if the trigger button has
+  // scrolled outside its container's visible area — otherwise, since the
+  // menu is portaled to document.body, it would just float past the
+  // edge of the modal/form instead of disappearing with its trigger.
   useEffect(() => {
     if (!showOptions) return;
 
     const updateOnScroll = () => {
-      updatePosition(); //  recalculate position instead of closing
+      if (!isTriggerVisible(buttonRef.current)) {
+        setShowOptions(false);
+        return;
+      }
+      updatePosition();
     };
 
     window.addEventListener("scroll", updateOnScroll, true);

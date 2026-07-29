@@ -86,7 +86,6 @@ function Coupon() {
     );
   }, [dispatch, page, search, filterValues.sort]);
 
-
   //click navigation
   useEffect(() => {
     if (openCoupon && selectedCouponId) {
@@ -113,15 +112,6 @@ function Coupon() {
 
   return (
     <div className="w-full">
-      <Button
-        className={"bg-[#5f0000] w-fit px-4"}
-        onClick={() => {
-          setAddCoupon(true);
-          setOpenCoupon(false);
-        }}
-      >
-        <Plus /> Add Coupon
-      </Button>
       <SearchBar
         colorVariants="admin"
         filterValues={filterValues}
@@ -130,6 +120,15 @@ function Coupon() {
         onChange={(e) => setSearchInput(e.target.value)}
         filterOn={"categories"}
       />
+      <Button
+        className={"bg-[#5f0000] w-fit px-4 mb-8"}
+        onClick={() => {
+          setAddCoupon(true);
+          setOpenCoupon(false);
+        }}
+      >
+        <Plus /> Add Coupon
+      </Button>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] justify-between">
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 custom-scrollBar">
           {isBusy && !couponError && (

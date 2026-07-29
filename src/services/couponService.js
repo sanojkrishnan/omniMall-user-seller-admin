@@ -18,4 +18,8 @@ export const couponAPI = {
   fetchCouponById: async (id) => {
     return api.get(`coupon/singleFetch/${id}`);
   },
+  //delete product
+  deleteCoupon: async (id) => {
+    return api.delete(`coupon/delete/${id}`);
+  },
 };

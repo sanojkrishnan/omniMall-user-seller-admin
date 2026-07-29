@@ -17,7 +17,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "./ui/Button";
-import { fetchCouponById, updateCoupon } from "../redux/slice/couponSlice";
+import {
+  clearCouponState,
+  deleteSingleCoupon,
+  fetchCouponById,
+  updateCoupon,
+} from "../redux/slice/couponSlice";
 import CartLoading from "./ui/CartLoading";
 import ToggleSwitch from "./ui/ToggleSwitch";
 import P from "./ui/P";
@@ -26,6 +31,7 @@ import { Pill, Row, Section, Stat } from "./AdminCouponSupport";
 import { EditPanel } from "./ui/EditPanel";
 import { toast } from "react-toastify";
 import ErrorFallback from "../components/ui/ErrorFallback";
+import ConfirmProvider from "./ui/ConfirmProvider";
 
 //edit fields
 const COUPON_EDIT_FIELDS = [
@@ -213,11 +219,22 @@ function SingleCouponDetail() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  function handleResult(confirmed) {
+    setOpen(false);
+    if (confirmed) {
+      dispatch(deleteSingleCoupon({ id: singleCoupon._id }));
+      dispatch(clearCouponState());
+      toast.success("Coupon deleted successfully");
+      navigate("/admin/coupon");
+    }
+  }
+
   const formatDate = useDateFormatter(); // formats dates into readable date values
 
   //edit panel
   const [editOpen, setEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { singleCoupon, isCouponLoading, couponError } = useSelector(
     (state) => state.coupon,
@@ -284,6 +301,16 @@ function SingleCouponDetail() {
         All coupons
       </button>
 
+      <ConfirmProvider
+        variant="admin"
+        open={open}
+        onResult={handleResult}
+        setOpen={setOpen}
+      >
+        {" "}
+        Are you sure, you want to delete?
+      </ConfirmProvider>
+
       <EditPanel
         variant="admin"
         open={editOpen}
@@ -338,7 +365,7 @@ function SingleCouponDetail() {
               </Button>
               <Button
                 className="bg-white w-fit text-[#5f0000] px-3 py-2 flex items-center gap-1.5 shrink-0 hover:bg-white/90"
-                onClick={() => navigate(`/admin/coupon/`)}
+                onClick={() => setOpen(true)}
               >
                 <Trash2 size={14} />
               </Button>
@@ -354,7 +381,7 @@ function SingleCouponDetail() {
           </div>
           <div className="mt-6 flex justify-start items-center">
             <P className={"text-white mr-4 pt-0 text-md"}>Activate coupon :</P>
-            <ToggleSwitch initialState={false} onChange={handleSwitchChange} />
+            <ToggleSwitch checked={false} onChange={handleSwitchChange} />
           </div>
         </div>
 

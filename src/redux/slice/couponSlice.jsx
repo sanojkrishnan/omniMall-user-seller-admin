@@ -28,6 +28,19 @@ export const fetchCoupon = createAsyncThunk(
   },
 );
 
+//delete product
+export const deleteSingleCoupon = createAsyncThunk(
+  "coupon/deleteCoupon",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      await couponAPI.deleteCoupon(id);
+      return { id };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "deletion failed"));
+    }
+  },
+);
+
 export const fetchCouponById = createAsyncThunk(
   "coupon/fetchById",
   async (id, { rejectWithValue }) => {
@@ -121,6 +134,23 @@ const couponSlice = createSlice({
         state.isCouponLoading = false;
         state.couponError = action.payload;
         state.singleCoupon = null;
+      });
+
+    //delete products
+    builder
+      .addCase(deleteSingleCoupon.pending, (state) => {
+        state.couponError = null;
+        state.isCouponLoading = true;
+      })
+      .addCase(deleteSingleCoupon.fulfilled, (state, action) => {
+        state.isCouponLoading = false;
+        state.coupon = state.coupon.filter(
+          (coupon) => coupon._id !== action.payload.id,
+        );
+      })
+      .addCase(deleteSingleCoupon.rejected, (state, action) => {
+        state.isCouponLoading = false;
+        state.couponError = action.payload;
       });
   },
 });

@@ -1,5 +1,4 @@
-import { Plus, TriangleAlert } from "lucide-react";
-import { Button } from "../../components/ui/Button";
+
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -102,7 +101,7 @@ function Products() {
   const lastFetchedCategoryIdsRef = useRef("");
 
   // infinite scrolling
-  const triggerId = useInfiniteScroll({
+  const triggerRef = useInfiniteScroll({
     hasNextPage,
     isLoading: isProductLoading,
     onLoadMore: () => setPage((prev) => prev + 1),
@@ -281,17 +280,6 @@ function Products() {
           />
         </div>
       </div>
-      <div className="flex justify-start">
-        <Button
-          className={"bg-[#5f0000] w-fit px-4"}
-          onClick={() => {
-            setAddProduct(true);
-            setOpenProduct(false);
-          }}
-        >
-          <Plus /> Add Products
-        </Button>
-      </div>
       <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
         <div className="w-full flex-1 overflow-y-auto px-4 pb-4 custom-scrollBar">
           {isBusy && !productError && (
@@ -311,7 +299,7 @@ function Products() {
                   setAddProduct(false);
                   setSelectedProductId(item._id);
                 }}
-                footer={<div id={triggerId} className="h-5" />}
+                footer={<div ref={triggerRef} className="h-10" />}
               />
             </>
           )}

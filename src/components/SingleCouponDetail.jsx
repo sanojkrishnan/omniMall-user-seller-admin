@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import {
+  changeCouponStatus,
   clearCouponState,
   deleteSingleCoupon,
   fetchCouponById,
@@ -242,7 +243,12 @@ function SingleCouponDetail() {
 
   //toggle switch
   const handleSwitchChange = (status) => {
-    console.log("The switch state is:", status); // true or false
+    dispatch(
+      changeCouponStatus({
+        id: singleCoupon._id,
+        status: status ? "active" : "inactive",
+      }),
+    );
   };
 
   useEffect(() => {
@@ -381,7 +387,11 @@ function SingleCouponDetail() {
           </div>
           <div className="mt-6 flex justify-start items-center">
             <P className={"text-white mr-4 pt-0 text-md"}>Activate coupon :</P>
-            <ToggleSwitch checked={false} onChange={handleSwitchChange} />
+            <ToggleSwitch
+              checked={singleCoupon.status === "active"}
+              disabled={singleCoupon.status === " pending"}
+              onChange={handleSwitchChange}
+            />
           </div>
         </div>
 

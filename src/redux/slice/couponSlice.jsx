@@ -27,6 +27,17 @@ export const fetchCoupon = createAsyncThunk(
     }
   },
 );
+export const changeCouponStatus = createAsyncThunk(
+  "coupon/changeStatus",
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const coupon = await couponAPI.changeCouponStatus(id, status);
+      return coupon;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch Coupon"));
+    }
+  },
+);
 
 //delete product
 export const deleteSingleCoupon = createAsyncThunk(
@@ -128,7 +139,7 @@ const couponSlice = createSlice({
       })
       .addCase(updateCoupon.fulfilled, (state, action) => {
         state.isCouponLoading = false;
-        state.singleCoupon = action.payload.data;
+        state.singleCoupon = action.payload?.data;
       })
       .addCase(updateCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;
@@ -149,6 +160,22 @@ const couponSlice = createSlice({
         );
       })
       .addCase(deleteSingleCoupon.rejected, (state, action) => {
+        state.isCouponLoading = false;
+        state.couponError = action.payload;
+      });
+
+    //change coupon status
+    builder
+      .addCase(changeCouponStatus.pending, (state) => {
+        state.couponError = null;
+        state.isCouponLoading = true;
+      })
+      .addCase(changeCouponStatus.fulfilled, (state, action) => {
+        state.isCouponLoading = false;
+        state.coupon = action.coupon?.data;
+        console.log("SINGLE COUPON :", action.payload);
+      })
+      .addCase(changeCouponStatus.rejected, (state, action) => {
         state.isCouponLoading = false;
         state.couponError = action.payload;
       });

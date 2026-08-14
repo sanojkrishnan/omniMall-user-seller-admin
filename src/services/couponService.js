@@ -22,4 +22,7 @@ export const couponAPI = {
   deleteCoupon: async (id) => {
     return api.delete(`coupon/delete/${id}`);
   },
+  changeCouponStatus: async (id, status) => {
+    return api.patch(`coupon/updateStatus/${id}`, { status });
+  },
 };

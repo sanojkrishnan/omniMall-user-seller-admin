@@ -25,4 +25,7 @@ export const couponAPI = {
   changeCouponStatus: async (id, status) => {
     return api.patch(`coupon/updateStatus/${id}`, { status });
   },
+  createCoupon: async (data) => {
+    return api.post("coupon/add", data, { authRole: "admin" });
+  },
 };

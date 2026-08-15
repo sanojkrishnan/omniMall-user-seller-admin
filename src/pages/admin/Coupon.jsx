@@ -5,13 +5,174 @@ import { SearchBar } from "../../components/ui/SearchBar";
 import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { fetchCoupon } from "../../redux/slice/couponSlice";
+import { addCoupon, fetchCoupon } from "../../redux/slice/couponSlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import Loading from "../../components/ui/Loading";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { CreatePanel } from "../../components/ui/AddPanel";
+import { couponSchema } from "../../validation/couponSchema";
+
+//fields for coupon adding
+const COUPON_FIELDS = [
+  { name: "name", label: "Coupon Name", type: "text", required: true },
+
+  {
+    name: "code",
+    label: "Coupon Code",
+    type: "text",
+    required: true,
+  },
+
+  {
+    name: "description",
+    label: "Description",
+    type: "textarea",
+    span: "full",
+    required: true,
+  },
+
+  {
+    name: "discountType",
+    label: "Discount Type",
+    type: "select",
+    required: true,
+    options: [
+      { value: "percentage", label: "Percentage" },
+      { value: "flat", label: "Flat" },
+    ],
+  },
+
+  {
+    name: "discountValue",
+    label: "Discount Value",
+    type: "number",
+    required: true,
+    min: 0,
+  },
+
+  {
+    name: "maxDiscount",
+    label: "Maximum Discount",
+    type: "number",
+    min: 0,
+  },
+
+  {
+    name: "minOrderAmount",
+    label: "Minimum Order Amount",
+    type: "number",
+    required: true,
+    min: 0,
+  },
+
+  {
+    name: "startDate",
+    label: "Start Date",
+    type: "datetime-local",
+    required: true,
+  },
+
+  {
+    name: "endDate",
+    label: "End Date",
+    type: "datetime-local",
+    required: true,
+  },
+
+  {
+    name: "status",
+    label: "Status",
+    type: "select",
+    required: true,
+    options: [
+      { value: "pending", label: "Pending" },
+      { value: "active", label: "Active" },
+      { value: "inactive", label: "Inactive" },
+    ],
+  },
+
+  {
+    name: "usageLimit",
+    label: "Usage Limit",
+    type: "number",
+    required: true,
+    min: 1,
+  },
+
+  {
+    name: "usagePerUser",
+    label: "Usage Per User",
+    type: "number",
+    required: true,
+    min: 1,
+  },
+
+  {
+    name: "eligibleUsers",
+    label: "Eligible Users",
+    type: "select",
+    required: true,
+    options: [
+      { value: "all", label: "All Users" },
+      { value: "new", label: "New Users" },
+      { value: "existing", label: "Existing Users" },
+    ],
+  },
+
+  {
+    name: "paymentMethods",
+    label: "Payment Methods",
+    type: "multiselect",
+    options: [
+      { value: "COD", label: "Cash on Delivery" },
+      { value: "CARD", label: "Card" },
+      { value: "UPI", label: "UPI" },
+    ],
+  },
+  {
+    name: "applicableProducts",
+    label: "Applicable Products",
+    type: "async-multiselect",
+    asyncEntity: "product",
+    span: "full",
+  },
+  {
+    name: "applicableCategories",
+    label: "Applicable Categories",
+    type: "async-multiselect",
+    asyncEntity: "category",
+    span: "full",
+  },
+  {
+    name: "excludedProducts",
+    label: "Excluded Products",
+    type: "async-multiselect",
+    asyncEntity: "product",
+    span: "full",
+  },
+  {
+    name: "sellerIds",
+    label: "Applicable Sellers",
+    type: "async-multiselect",
+    asyncEntity: "seller",
+    span: "full",
+  },
+  {
+    name: "stackable",
+    label: "Stackable",
+    type: "checkbox",
+  },
+
+  {
+    name: "autoApply",
+    label: "Auto Apply",
+    type: "checkbox",
+  },
+];
 
 function formatDate(value) {
   if (!value) return "N/A";
@@ -67,7 +228,7 @@ function Coupon() {
   const [searchInput, setSearchInput] = useState(""); // raw input value
   const [isSearching, setIsSearching] = useState(false); //searching loading
   const [openCoupon, setOpenCoupon] = useState(false);
-  const [addCoupon, setAddCoupon] = useState(false);
+  const [createCoupon, setCreateCoupon] = useState(false);
   const [filterValues, setFilterValues] = useState({
     sort: "newest",
   });
@@ -106,12 +267,28 @@ function Coupon() {
     isLoading: isCouponLoading,
   });
 
+  //handle add click
+  async function handleCreateSubmit(values) {
+    await dispatch(addCoupon({ data: values })).unwrap();
+    toast.success("Coupon created");
+    setCreateCoupon(false); // or leave open to create several in a row
+  }
+
   const isFirstLoad = isCouponLoading && coupon.length === 0;
   const isLoadingMore = isCouponLoading && coupon.length !== 0 && !isSearching;
   const isBusy = isSearching || isFirstLoad;
 
   return (
     <div className="w-full">
+      <CreatePanel
+        variant="admin"
+        open={createCoupon}
+        onClose={() => setCreateCoupon(false)}
+        title="Create coupon"
+        fields={COUPON_FIELDS}
+        validationSchema={couponSchema}
+        onSubmit={handleCreateSubmit}
+      />
       <SearchBar
         colorVariants="admin"
         filterValues={filterValues}
@@ -122,10 +299,7 @@ function Coupon() {
       />
       <Button
         className={"bg-[#5f0000] w-fit px-4 mb-8"}
-        onClick={() => {
-          setAddCoupon(true);
-          setOpenCoupon(false);
-        }}
+        onClick={() => setCreateCoupon(true)}
       >
         <Plus /> Add Coupon
       </Button>
@@ -146,7 +320,7 @@ function Coupon() {
                 onRowClick={(item) => {
                   setSelectedCouponId(item._id);
                   setOpenCoupon(true);
-                  setAddCoupon(false);
+                  setCreateCoupon(false);
                 }}
                 footer={<div id={triggerId} className="h-5" />}
               />

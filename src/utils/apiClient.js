@@ -18,6 +18,8 @@ const apiClient = axios.create({
 // In-memory cache to avoid repeated localStorage reads
 let _authToken = null;
 let _adminToken = null;
+let _sellerToken = null;
+
 //token collecting for user
 export const getAuthToken = () => {
   if (!_authToken) _authToken = localStorage.getItem(AUTH_CONFIG.tokenKey);
@@ -29,6 +31,13 @@ export const getAdminToken = () => {
     _adminToken = localStorage.getItem(AUTH_CONFIG.adminTokenKey);
   return _adminToken;
 };
+//token collecting for seller
+export const getSellerToken = () => {
+  if (!_sellerToken)
+    _sellerToken = localStorage.getItem(AUTH_CONFIG.sellerTokenKey);
+  return _sellerToken;
+};
+
 //token save and removal for user
 export const setAuthToken = (token) => {
   _authToken = token;
@@ -47,14 +56,27 @@ export const setAdminToken = (token) => {
     localStorage.removeItem(AUTH_CONFIG.adminTokenKey);
   }
 };
+//token save and removal for seller
+export const setSellerToken = (token) => {
+  _sellerToken = token;
+  if (token) {
+    localStorage.setItem(AUTH_CONFIG.sellerTokenKey, token);
+  } else {
+    localStorage.removeItem(AUTH_CONFIG.sellerTokenKey);
+  }
+};
+
 // Clear all tokens and user data on logout or session expiry
 export const clearTokens = () => {
   _authToken = null;
   _adminToken = null;
+  _sellerToken = null;
   localStorage.removeItem(AUTH_CONFIG.tokenKey);
   localStorage.removeItem(AUTH_CONFIG.adminTokenKey);
+  localStorage.removeItem(AUTH_CONFIG.sellerTokenKey);
   localStorage.removeItem(AUTH_CONFIG.userKey);
   localStorage.removeItem(AUTH_CONFIG.adminKey);
+  localStorage.removeItem(AUTH_CONFIG.sellerKey);
   delete apiClient.defaults.headers.common["Authorization"];
 };
 
@@ -85,11 +107,23 @@ export const getStoredUser = () => {
 // Request Interceptor
 // Automatically attaches the correct token to every outgoing request
 
+const TOKEN_GETTERS = {
+  admin: getAdminToken,
+  seller: getSellerToken,
+  user: getAuthToken,
+};
+
 apiClient.interceptors.request.use(
   (config) => {
-    // Admin routes use admin token, everything else uses auth token
-    const isAdminRoute = config.url?.startsWith("/admin");
-    const token = isAdminRoute ? getAdminToken() : getAuthToken();
+    // Explicit role decides which token to attach — do NOT infer this from
+    // the URL shape, since protected routes in this app live under normal
+    // resource paths like "/coupon/add", "/product/add", etc. and are not
+    // prefixed by role. Pass `authRole: "admin" | "seller" | "user"` in the
+    // request config for any call that hits a protected endpoint.
+    // Defaults to "user" when not specified.
+    const role = config.authRole ?? "user";
+    const getToken = TOKEN_GETTERS[role] ?? getAuthToken;
+    const token = getToken();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -169,6 +203,8 @@ apiClient.interceptors.response.use(
 );
 
 // Optional wrappers so callers get data directly instead of response.data
+// Pass { authRole: "admin" | "seller" } in `config` for protected calls
+// that aren't a regular user request (user is the default).
 
 export const api = {
   get: (url, config) => apiClient.get(url, config).then((res) => res.data),

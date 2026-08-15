@@ -52,6 +52,18 @@ export const deleteSingleCoupon = createAsyncThunk(
   },
 );
 
+export const addCoupon = createAsyncThunk(
+  "coupon/addCoupon",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const response = await couponAPI.createCoupon(data);
+      return response;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to create coupon"));
+    }
+  },
+);
+
 export const fetchCouponById = createAsyncThunk(
   "coupon/fetchById",
   async (id, { rejectWithValue }) => {
@@ -172,7 +184,8 @@ const couponSlice = createSlice({
       })
       .addCase(changeCouponStatus.fulfilled, (state, action) => {
         state.isCouponLoading = false;
-        state.coupon = action.coupon?.data;
+        console.log("STATUS UPDATION SLICE DATA :", action.payload);
+        state.singleCoupon = action.payload?.data;
         console.log("SINGLE COUPON :", action.payload);
       })
       .addCase(changeCouponStatus.rejected, (state, action) => {

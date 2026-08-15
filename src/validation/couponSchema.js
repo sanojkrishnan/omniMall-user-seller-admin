@@ -3,8 +3,8 @@ import * as Yup from "yup";
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 export const couponSchema = Yup.object({
-  couponName: Yup.string().required("Provide the coupon name"),
-  couponCode: Yup.string()
+  name: Yup.string().required("Provide the coupon name"),
+  code: Yup.string()
     .min(5, "Minimum 5 letter is needed")
     .max(10, "maximum 10 letter is allowed")
     .required("Provide the coupon code"),

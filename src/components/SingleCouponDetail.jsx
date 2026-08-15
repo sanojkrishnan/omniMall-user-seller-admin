@@ -33,6 +33,7 @@ import { EditPanel } from "./ui/EditPanel";
 import { toast } from "react-toastify";
 import ErrorFallback from "../components/ui/ErrorFallback";
 import ConfirmProvider from "./ui/ConfirmProvider";
+import { couponSchema } from "../validation/couponSchema";
 
 //edit fields
 const COUPON_EDIT_FIELDS = [
@@ -324,6 +325,7 @@ function SingleCouponDetail() {
         title="Edit coupon"
         fields={COUPON_EDIT_FIELDS}
         initialValues={editableInitialValues}
+        validationSchema={couponSchema}
         onSubmit={handleEditSubmit}
         isSubmitting={isSaving}
       />
@@ -389,7 +391,7 @@ function SingleCouponDetail() {
             <P className={"text-white mr-4 pt-0 text-md"}>Activate coupon :</P>
             <ToggleSwitch
               checked={singleCoupon.status === "active"}
-              disabled={singleCoupon.status === " pending"}
+              disabled={singleCoupon.status === "pending"}
               onChange={handleSwitchChange}
             />
           </div>

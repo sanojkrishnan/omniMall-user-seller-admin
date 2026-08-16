@@ -34,6 +34,7 @@ import { toast } from "react-toastify";
 import ErrorFallback from "../components/ui/ErrorFallback";
 import ConfirmProvider from "./ui/ConfirmProvider";
 import { couponSchema } from "../validation/couponSchema";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 //edit fields
 const COUPON_EDIT_FIELDS = [
@@ -100,18 +101,6 @@ const COUPON_EDIT_FIELDS = [
     label: "End Date",
     type: "datetime-local",
     required: true,
-  },
-
-  {
-    name: "status",
-    label: "Status",
-    type: "select",
-    required: true,
-    options: [
-      { value: "pending", label: "Pending" },
-      { value: "active", label: "Active" },
-      { value: "inactive", label: "Inactive" },
-    ],
   },
 
   {
@@ -237,20 +226,32 @@ function SingleCouponDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
   const { singleCoupon, isCouponLoading, couponError } = useSelector(
     (state) => state.coupon,
   );
 
   //toggle switch
-  const handleSwitchChange = (status) => {
-    dispatch(
-      changeCouponStatus({
-        id: singleCoupon._id,
-        status: status ? "active" : "inactive",
-      }),
-    );
-  };
+  async function handleSwitchChange(status) {
+    setIsTogglingStatus(true);
+    try {
+      await dispatch(
+        changeCouponStatus({
+          id: singleCoupon._id,
+          status: status ? "active" : "inactive",
+        }),
+      ).unwrap();
+      toast.success(status ? "Coupon activated" : "Coupon deactivated");
+    } catch (err) {
+      // Same .unwrap() gotcha as handleEditSubmit below — the thrown value
+      // is action.payload directly, not an Error, so err?.message alone
+      // silently produced the generic fallback every time.
+      toast.error(getErrorMessage(err, "Failed to update coupon status"));
+    } finally {
+      setIsTogglingStatus(false);
+    }
+  }
 
   useEffect(() => {
     if (couponId) dispatch(fetchCouponById(couponId));
@@ -279,7 +280,12 @@ function SingleCouponDetail() {
       toast.success("Coupon updated");
       setEditOpen(false);
     } catch (err) {
-      toast.error(err?.message ?? "Failed to update coupon");
+      // .unwrap() throws action.payload directly (whatever extractError
+      // returned in the thunk's rejectWithValue) — not an Error instance —
+      // so err?.message was silently undefined whenever extractError
+      // returns a plain string, and the toast always fell back to the
+      // generic message instead of showing the real backend error.
+      toast.error(getErrorMessage(err, "Failed to update coupon"));
     } finally {
       setIsSaving(false);
     }
@@ -391,7 +397,7 @@ function SingleCouponDetail() {
             <P className={"text-white mr-4 pt-0 text-md"}>Activate coupon :</P>
             <ToggleSwitch
               checked={singleCoupon.status === "active"}
-              disabled={singleCoupon.status === "pending"}
+              disabled={singleCoupon.status === "pending" || isTogglingStatus}
               onChange={handleSwitchChange}
             />
           </div>

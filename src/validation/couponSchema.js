@@ -37,10 +37,6 @@ export const couponSchema = Yup.object({
     .min(Yup.ref("startDate"), "End date must be after start date")
     .required("When it ends"),
 
-  status: Yup.string()
-    .oneOf(["active", "inactive", "pending"], "Invalid status")
-    .required("Select the coupon status"),
-
   usageLimit: Yup.number()
     .integer()
     .min(1, "Usage limit must be at least 1")

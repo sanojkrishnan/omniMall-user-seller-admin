@@ -13,8 +13,9 @@ import SearchNotFound from "../../components/ui/SearchNotFound";
 import Loading from "../../components/ui/Loading";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { CreatePanel } from "../../components/ui/AddPanel";
+import { CreatePanel } from "../../components/ui/CreatePanel";
 import { couponSchema } from "../../validation/couponSchema";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 //fields for coupon adding
 const COUPON_FIELDS = [
@@ -81,18 +82,6 @@ const COUPON_FIELDS = [
     label: "End Date",
     type: "datetime-local",
     required: true,
-  },
-
-  {
-    name: "status",
-    label: "Status",
-    type: "select",
-    required: true,
-    options: [
-      { value: "pending", label: "Pending" },
-      { value: "active", label: "Active" },
-      { value: "inactive", label: "Inactive" },
-    ],
   },
 
   {
@@ -229,6 +218,7 @@ function Coupon() {
   const [isSearching, setIsSearching] = useState(false); //searching loading
   const [openCoupon, setOpenCoupon] = useState(false);
   const [createCoupon, setCreateCoupon] = useState(false);
+  const [createError, setCreateError] = useState(null);
   const [filterValues, setFilterValues] = useState({
     sort: "newest",
   });
@@ -269,9 +259,22 @@ function Coupon() {
 
   //handle add click
   async function handleCreateSubmit(values) {
-    await dispatch(addCoupon({ data: values })).unwrap();
-    toast.success("Coupon created");
-    setCreateCoupon(false); // or leave open to create several in a row
+    try {
+      setCreateError(null);
+      await dispatch(addCoupon({ data: values })).unwrap();
+      toast.success("Coupon created");
+      setCreateCoupon(false);
+    } catch (err) {
+      // .unwrap() throws action.payload directly (whatever extractError
+      // returned) — not an Error instance — so `err?.message` was silently
+      // undefined whenever extractError returns a plain string, and the
+      // toast always fell back to the generic message. getErrorMessage
+      // handles both string and object shapes.
+      const message = getErrorMessage(err, "Failed to create coupon");
+      setCreateError(message);
+      toast.error(message);
+      throw err;
+    }
   }
 
   const isFirstLoad = isCouponLoading && coupon.length === 0;
@@ -288,6 +291,7 @@ function Coupon() {
         fields={COUPON_FIELDS}
         validationSchema={couponSchema}
         onSubmit={handleCreateSubmit}
+        error={createError}
       />
       <SearchBar
         colorVariants="admin"
@@ -299,7 +303,10 @@ function Coupon() {
       />
       <Button
         className={"bg-[#5f0000] w-fit px-4 mb-8"}
-        onClick={() => setCreateCoupon(true)}
+        onClick={() => {
+          setCreateError(null);
+          setCreateCoupon(true);
+        }}
       >
         <Plus /> Add Coupon
       </Button>

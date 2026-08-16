@@ -152,6 +152,7 @@ const couponSlice = createSlice({
       .addCase(updateCoupon.fulfilled, (state, action) => {
         state.isCouponLoading = false;
         state.singleCoupon = action.payload?.data;
+        state.couponMessage = action.payload?.message;
       })
       .addCase(updateCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;

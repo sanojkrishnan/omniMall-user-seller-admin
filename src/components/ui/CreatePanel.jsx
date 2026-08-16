@@ -74,6 +74,8 @@ export function CreatePanel({
 
   const formik = useFormik({
     enableReinitialize: true,
+    validateOnChange: false,
+    validateOnBlur: false,
     initialValues: defaultValues,
     validationSchema: validationSchema ?? buildValidationSchema(fields),
     onSubmit: async (values, helpers) => {
@@ -158,16 +160,14 @@ export function CreatePanel({
                 <FieldLabel required={field.required}>{field.label}</FieldLabel>
                 {renderField(field, formik)}
                 {field.helperText &&
-                  !(
-                    formik.touched[field.name] && formik.errors[field.name]
-                  ) && (
+                  !(formik.submitCount > 0 && formik.errors[field.name]) && (
                     <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
                       {field.helperText}
                     </p>
                   )}
                 <FieldError
                   message={
-                    formik.touched[field.name]
+                    formik.submitCount > 0
                       ? formik.errors[field.name]
                       : undefined
                   }

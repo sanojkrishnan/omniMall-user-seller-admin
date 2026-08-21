@@ -67,16 +67,18 @@ export const SearchBar = ({
             className,
           )}
         />
-        <Button
-          ref={buttonRef}
-          className={` ${colorVariants === "admin" && "bg-[#60001A]"} w-fit px-6 m-0 ml-4`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setFilterOpen((prev) => !prev);
-          }}
-        >
-          <Filter className="size-4" /> Filter
-        </Button>
+        {filterOn !== "none" && (
+          <Button
+            ref={buttonRef}
+            className={` ${colorVariants === "admin" && "bg-[#60001A]"} w-fit px-6 m-0 ml-4`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setFilterOpen((prev) => !prev);
+            }}
+          >
+            <Filter className="size-4" /> Filter
+          </Button>
+        )}
 
         {/* Dropdown panel */}
         <div

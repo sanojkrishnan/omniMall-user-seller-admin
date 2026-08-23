@@ -15,8 +15,8 @@ import {
   CircleDot,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import { CreatePanel } from "../../components/ui/CreatePanel";
 import ToggleSwitch from "../../components/ui/ToggleSwitch";
+import { toast } from "react-toastify";
 
 // ---------------------------------------------------------------------------
 // Brand tokens — same palette as the app's existing bg-[#5f0000] usage,
@@ -241,23 +241,23 @@ function Categories() {
 
   //toggle switch
   async function handleSwitchChange(status) {
-    setIsTogglingStatus(true);
-    try {
-      await dispatch(
-        changeCouponStatus({
-          id: singleCoupon._id,
-          status: status ? "active" : "inactive",
-        }),
-      ).unwrap();
-      toast.success(status ? "Coupon activated" : "Coupon deactivated");
-    } catch (err) {
-      // Same .unwrap() gotcha as handleEditSubmit below — the thrown value
-      // is action.payload directly, not an Error, so err?.message alone
-      // silently produced the generic fallback every time.
-      toast.error(getErrorMessage(err, "Failed to update coupon status"));
-    } finally {
-      setIsTogglingStatus(false);
-    }
+    // setIsTogglingStatus(true);
+    // try {
+    //   await dispatch(
+    //     changeCouponStatus({
+    //       id: singleCoupon._id,
+    //       status: status ? "active" : "inactive",
+    //     }),
+    //   ).unwrap();
+    //   toast.success(status ? "Coupon activated" : "Coupon deactivated");
+    // } catch (err) {
+    //   // Same .unwrap() gotcha as handleEditSubmit below — the thrown value
+    //   // is action.payload directly, not an Error, so err?.message alone
+    //   // silently produced the generic fallback every time.
+    //   toast.error(getErrorMessage(err, "Failed to update coupon status"));
+    // } finally {
+    //   setIsTogglingStatus(false);
+    // }
   }
 
   // category fetch
@@ -390,8 +390,8 @@ function Categories() {
         <Button
           className={"bg-[#60001A] w-fit px-4 flex items-center gap-1.5"}
           onClick={() => {
-            setActiveCategory(null);
-            setPanelMode("add");
+            // setActiveCategory(null);
+            // setPanelMode("add");
           }}
         >
           <Plus size={16} /> Add Category
@@ -414,15 +414,15 @@ function Categories() {
           columns={columns}
           data={category}
           onRowClick={(item) => {
-            setActiveCategory(item);
-            setPanelMode("edit");
+            // setActiveCategory(item);
+            // setPanelMode("edit");
           }}
           footer={<div id={triggerId} className="h-10" />}
         />
       </div>
 
       {/* Add */}
-      <CreatePanel
+      {/* <CreatePanel
         variant="admin"
          open={createCategory}
         onClose={() => setCreateCategory(false)}
@@ -430,7 +430,7 @@ function Categories() {
          fields={CATEGORY_FIELDS}
          validationSchema={categorySchema}
          onSubmit={handleCreateSubmit}
-      />
+      /> */}
     </div>
   );
 }

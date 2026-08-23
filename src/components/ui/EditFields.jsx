@@ -3,12 +3,14 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
+  ImagePlus,
   TriangleAlert,
   X,
 } from "lucide-react";
 import { cn } from "../../utils/CN";
 import { inputBase } from "../../utils/inputBase";
 import { isTriggerVisible } from "../../utils/getScrollParent";
+import { handleImage } from "../../utils/imageCompressor"; // adjust path to wherever this actually lives
 import SelectionButton from "./SelectionButton";
 import MultiSelectField from "./MultiSelectField";
 import ToggleSwitch from "./ToggleSwitch";
@@ -371,27 +373,54 @@ export function AsyncSelectField({ field, formik }) {
   );
 }
 
+// field.type === "image" — single image, crop+compress on select, preview + remove.
 function ImageField({ field, value, onChange }) {
   const inputRef = useRef(null);
+  const [processing, setProcessing] = useState(false);
   const preview =
     typeof value === "string" ? value : (value?.previewUrl ?? null);
 
-  function handlePick(e) {
+  async function handlePick(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    onChange({ file, previewUrl: URL.createObjectURL(file) });
+    setProcessing(true);
+    try {
+      const processed = await handleImage(file, field.imageType ?? "product");
+      // swap out the old blob URL so we don't leak it
+      if (value?.previewUrl) URL.revokeObjectURL(value.previewUrl);
+      onChange({ file: processed, previewUrl: URL.createObjectURL(processed) });
+    } finally {
+      setProcessing(false);
+      e.target.value = ""; // allow re-picking the same file
+    }
+  }
+
+  function handleRemove(e) {
+    e.stopPropagation();
+    if (value?.previewUrl) URL.revokeObjectURL(value.previewUrl);
+    onChange(null);
   }
 
   return (
     <div className="flex items-center gap-3">
       <div
         className={cn(
-          "flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border",
+          "relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border",
           "border-[var(--edit-border)] bg-[var(--edit-soft)]",
         )}
       >
         {preview ? (
-          <img src={preview} alt="" className="h-full w-full object-cover" />
+          <>
+            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={handleRemove}
+              aria-label="Remove image"
+              className="absolute right-0.5 top-0.5 flex size-4 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+            >
+              <X className="size-2.5" />
+            </button>
+          </>
         ) : (
           <span className="text-[10px] text-[var(--edit-muted)]">No image</span>
         )}
@@ -399,15 +428,119 @@ function ImageField({ field, value, onChange }) {
       <Button
         type="button"
         variant="secondary"
+        disabled={processing}
         onClick={() => inputRef.current?.click()}
         className="border-[var(--edit-border)] text-[var(--edit-text)]"
       >
-        {preview ? "Replace" : "Upload"}
+        {processing ? "Processing..." : preview ? "Replace" : "Upload"}
       </Button>
       <input
         ref={inputRef}
         type="file"
         accept={field.accept ?? "image/*"}
+        className="hidden"
+        onChange={handlePick}
+      />
+    </div>
+  );
+}
+
+// field.type === "image-array" — multiple images, crop+compress each on select,
+// grid of previews with per-image removal.
+function MultiImageField({ field, value, onChange }) {
+  const inputRef = useRef(null);
+  const [processing, setProcessing] = useState(false);
+  const items = Array.isArray(value) ? value : [];
+  const max = field.max ?? 10;
+
+  function getPreview(item) {
+    return typeof item === "string" ? item : (item?.previewUrl ?? null);
+  }
+
+  async function handlePick(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const room = max - items.length;
+    if (room <= 0) {
+      e.target.value = "";
+      return;
+    }
+    setProcessing(true);
+    try {
+      const processed = await Promise.all(
+        files.slice(0, room).map(async (file) => {
+          const compressed = await handleImage(
+            file,
+            field.imageType ?? "product",
+          );
+          return {
+            file: compressed,
+            previewUrl: URL.createObjectURL(compressed),
+          };
+        }),
+      );
+      onChange([...items, ...processed]);
+    } finally {
+      setProcessing(false);
+      e.target.value = "";
+    }
+  }
+
+  function removeAt(index) {
+    const item = items[index];
+    if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    onChange(items.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--edit-border)] bg-[var(--edit-soft)]"
+          >
+            <img
+              src={getPreview(item)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => removeAt(i)}
+              aria-label="Remove image"
+              className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        ))}
+        {items.length < max && (
+          <button
+            type="button"
+            disabled={processing}
+            onClick={() => inputRef.current?.click()}
+            className={cn(
+              "flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-center transition-colors",
+              "border-[var(--edit-border)] bg-[var(--edit-soft)] hover:border-[var(--edit-accent)]",
+              processing && "cursor-not-allowed opacity-50",
+            )}
+          >
+            <ImagePlus className="size-5 text-[var(--edit-muted)]" />
+            <span className="px-2 text-[11px] leading-tight text-[var(--edit-muted)]">
+              {processing ? "Processing..." : "Add images"}
+            </span>
+          </button>
+        )}
+      </div>
+      <p className="mt-1 text-[11px] text-[var(--edit-muted)]">
+        {items.length}/{max} images
+      </p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={field.accept ?? "image/*"}
+        multiple
         className="hidden"
         onChange={handlePick}
       />
@@ -700,6 +833,11 @@ export function renderField(field, formik) {
 
     case "image":
       return <ImageField field={field} value={value} onChange={setValue} />;
+
+    case "image-array":
+      return (
+        <MultiImageField field={field} value={value} onChange={setValue} />
+      );
 
     case "file":
       return <FileField field={field} value={value} onChange={setValue} />;

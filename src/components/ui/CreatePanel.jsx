@@ -1,168 +1,211 @@
-// components/ui/ImageFields.jsx
-//
-// Two field renderers to plug into EditFields.jsx's `renderField` switch:
-//   case "image":       return <ImageField field={field} formik={formik} />;
-//   case "image-array": return <ImageArrayField field={field} formik={formik} />;
-//
-// Both read/write straight into Formik via field.name, and both use the
-// --edit-accent / --edit-border / --edit-soft / --edit-muted CSS variables
-// that CreatePanel.jsx already sets on its wrapper — so they theme correctly
-// for "admin" (#5f0000) and "user" (black) variants without any extra props.
-//
-// Values stored in Formik:
-//   image        -> File (newly picked) | string (existing URL, edit mode) | null
-//   image-array  -> Array<File | string>
+// components/ui/CreatePanel.jsx
+import { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import { cn } from "../../utils/CN";
+import { Button } from "./Button";
+import { FormCard } from "./FormCard";
+import { TriangleAlert } from "lucide-react";
+import buildValidationSchema from "../../validation/editValidayionSchema";
+import { FieldError, FieldLabel, renderField } from "./EditFields";
 
-import { useRef } from "react";
-import { ImageIcon, Plus, X } from "lucide-react";
+const THEMES = {
+  admin: {
+    text: "black",
+    muted: "black",
+    border: "#e8e1df",
+    soft: "#faf7f6",
+    accent: "#5f0000",
+    accentSoft: "#f3e9e8",
+    danger: "#b3261e",
+  },
+  user: {
+    text: "black",
+    muted: "black",
+    border: "#dde3ea",
+    soft: "#f4f6f9",
+    accent: "black",
+    accentSoft: "#e7edf3",
+    danger: "#b3261e",
+  },
+};
 
-function toPreviewSrc(value) {
-  if (!value) return null;
-  return typeof value === "string" ? value : URL.createObjectURL(value);
+// Builds a sensible empty value per field type when no initialValues are given.
+function buildDefaultValues(fields) {
+  return fields.reduce((acc, field) => {
+    switch (field.type) {
+      case "checkbox":
+        acc[field.name] = field.default ?? false;
+        break;
+      case "multiselect":
+      case "async-multiselect":
+        acc[field.name] = field.default ?? [];
+        break;
+      case "number":
+        acc[field.name] = field.default ?? "";
+        break;
+      default:
+        acc[field.name] = field.default ?? "";
+    }
+    return acc;
+  }, {});
 }
 
-export function ImageField({ field, formik }) {
-  const inputRef = useRef(null);
-  const value = formik.values[field.name];
-  const preview = toPreviewSrc(value);
+export function CreatePanel({
+  variant = "admin",
+  open,
+  onClose,
+  title,
+  subtitle,
+  fields = [],
+  initialValues, // optional — falls back to auto-generated empty defaults
+  onSubmit,
+  validationSchema,
+  submitLabel = "Create",
+  cancelLabel = "Cancel",
+  isSubmitting,
+  error,
+  resetOnSuccess = true, // keep panel open + blank after a successful create
+}) {
+  const theme = THEMES[variant] ?? THEMES.admin;
+  const [shouldRender, setShouldRender] = useState(open);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const handlePick = (e) => {
-    const file = e.target.files?.[0];
-    if (file) formik.setFieldValue(field.name, file);
-    e.target.value = ""; // allow re-picking the same file
-  };
+  const defaultValues = initialValues ?? buildDefaultValues(fields);
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: false,
+    validateOnBlur: false,
+    initialValues: defaultValues,
+    validationSchema: validationSchema ?? buildValidationSchema(fields),
+    onSubmit: async (values, helpers) => {
+      await onSubmit?.(values);
+      if (resetOnSuccess) {
+        helpers.resetForm({ values: defaultValues });
+      }
+    },
+  });
+
+  useEffect(() => {
+    let rafId;
+    let timeoutId;
+
+    if (open) {
+      setShouldRender(true);
+      formik.resetForm({ values: defaultValues });
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => setIsVisible(true));
+      });
+    } else {
+      setIsVisible(false);
+      timeoutId = setTimeout(() => setShouldRender(false), 300);
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  if (!shouldRender) return null;
+  const submitting = isSubmitting ?? formik.isSubmitting;
 
   return (
-    <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={field.accept ?? "image/*"}
-        className="hidden"
-        onChange={handlePick}
-      />
-
-      {preview ? (
-        <div className="relative w-24 h-24">
-          <img
-            src={preview}
-            alt=""
-            className="w-24 h-24 rounded-lg object-cover border"
-            style={{ borderColor: "var(--edit-border)" }}
-          />
+    <div
+      style={{
+        "--edit-text": theme.text,
+        "--edit-muted": theme.muted,
+        "--edit-border": theme.border,
+        "--edit-soft": theme.soft,
+        "--edit-accent": theme.accent,
+        "--edit-accent-soft": theme.accentSoft,
+        "--edit-danger": theme.danger,
+      }}
+      className={`${isVisible ? "opacity-100" : "opacity-0"} duration-300 transition-opacity fixed inset-0 z-50 flex items-center justify-center bg-black/10 p-4`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
+    >
+      <FormCard
+        className={`${isVisible ? "scale-100" : "scale-0"} duration-300 transition-transform`}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-black px-6 py-5">
+          <div>
+            <h2 className="font-sans text-[18px] font-semibold text-[var(--edit-text)]">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-1 text-[13px] text-[var(--edit-muted)]">
+                {subtitle}
+              </p>
+            )}
+          </div>
           <button
             type="button"
-            onClick={() => formik.setFieldValue(field.name, null)}
-            className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white border shadow-sm"
-            style={{ borderColor: "var(--edit-border)", color: "var(--edit-danger)" }}
+            onClick={onClose}
+            className="text-[13px] text-[var(--edit-muted)] hover:text-[var(--edit-text)]"
           >
-            <X size={12} />
-          </button>
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="absolute inset-0 rounded-lg bg-black/0 hover:bg-black/30 text-white text-[11px] font-medium opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
-          >
-            Replace
+            Close
           </button>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-[11px] font-medium"
-          style={{
-            borderColor: "var(--edit-accent)",
-            background: "var(--edit-accent-soft)",
-            color: "var(--edit-accent)",
-          }}
-        >
-          <ImageIcon size={18} />
-          Upload
-        </button>
-      )}
-    </div>
-  );
-}
 
-export function ImageArrayField({ field, formik }) {
-  const inputRef = useRef(null);
-  const values = formik.values[field.name] || [];
-  const max = field.maxItems;
-
-  const handlePick = (e) => {
-    const picked = Array.from(e.target.files || []);
-    if (!picked.length) return;
-    const next = max ? [...values, ...picked].slice(0, max) : [...values, ...picked];
-    formik.setFieldValue(field.name, next);
-    e.target.value = "";
-  };
-
-  const removeAt = (idx) => {
-    formik.setFieldValue(
-      field.name,
-      values.filter((_, i) => i !== idx),
-    );
-  };
-
-  const atLimit = max ? values.length >= max : false;
-
-  return (
-    <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={field.accept ?? "image/*"}
-        multiple
-        className="hidden"
-        onChange={handlePick}
-      />
-
-      <div className="flex flex-wrap gap-2">
-        {values.map((val, idx) => {
-          const preview = toPreviewSrc(val);
-          return (
-            <div key={idx} className="relative w-20 h-20">
-              <img
-                src={preview}
-                alt=""
-                className="w-20 h-20 rounded-lg object-cover border"
-                style={{ borderColor: "var(--edit-border)" }}
-              />
-              <button
-                type="button"
-                onClick={() => removeAt(idx)}
-                className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-white border shadow-sm"
-                style={{ borderColor: "var(--edit-border)", color: "var(--edit-danger)" }}
+        <form onSubmit={formik.handleSubmit}>
+          <div className="grid max-h-[40vh] overflow-y-auto custom-scrollbar grid-cols-2 gap-4 px-6 py-5">
+            {fields.map((field) => (
+              <div
+                key={field.name}
+                className={cn(field.span === "full" && "col-span-2")}
               >
-                <X size={11} />
-              </button>
+                <FieldLabel required={field.required}>{field.label}</FieldLabel>
+                {renderField(field, formik)}
+                {field.helperText &&
+                  !(formik.submitCount > 0 && formik.errors[field.name]) && (
+                    <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
+                      {field.helperText}
+                    </p>
+                  )}
+                <FieldError
+                  message={
+                    formik.submitCount > 0
+                      ? formik.errors[field.name]
+                      : undefined
+                  }
+                />
+              </div>
+            ))}
+          </div>
+
+          {error && (
+            <div className="mx-6 mb-4 flex items-center gap-2 rounded-lg bg-[var(--edit-danger)]/10 px-3 py-2 text-[13px] text-red-500">
+              <TriangleAlert className="size-3 text-red-500" />
+              {error}
             </div>
-          );
-        })}
+          )}
 
-        {!atLimit && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-[10px] font-medium"
-            style={{
-              borderColor: "var(--edit-accent)",
-              background: "var(--edit-accent-soft)",
-              color: "var(--edit-accent)",
-            }}
-          >
-            <Plus size={16} />
-            Add
-          </button>
-        )}
-      </div>
-
-      {max && (
-        <p className="mt-1.5 text-[11px]" style={{ color: "var(--edit-muted)" }}>
-          {values.length}/{max} images
-        </p>
-      )}
+          <div className="flex justify-end gap-2 border-t border-black px-6 py-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              className=" text-[var(--edit-text)]"
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className={cn(
+                "border text-white",
+                "border-[var(--edit-accent)] bg-[var(--edit-accent)]",
+                submitting && "opacity-60",
+              )}
+            >
+              {submitting ? "Creating..." : submitLabel}
+            </Button>
+          </div>
+        </form>
+      </FormCard>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { categoryAPI } from "../../services/categoryService";
 
 const initialState = {
   category: [],
-  singleCategory: {},
+  singleCategory: null,
   categoriesPage: 0,
   categoriesTotalPages: 0,
   totalCategories: 0,
@@ -92,7 +92,7 @@ const categorySlice = createSlice({
       .addCase(singleCategoryFetch.rejected, (state, action) => {
         state.isCategoryLoading = false;
         state.categoryError = action.payload?.error?.message;
-        state.singleCategory = {};
+        state.singleCategory = null;
       });
   },
 });

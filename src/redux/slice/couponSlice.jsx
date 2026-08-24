@@ -143,7 +143,7 @@ const couponSlice = createSlice({
         state.isCouponLoading = false;
         state.couponError = action.payload;
       });
-    //update a product
+    //update a coupon
     builder
       .addCase(updateCoupon.pending, (state) => {
         state.couponError = null;

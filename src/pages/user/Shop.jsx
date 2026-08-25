@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import ProductCard from "../../components/ui/ProductCard";
 import CartLoading from "../../components/ui/CartLoading";
-import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import Loading from "../../components/ui/Loading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";

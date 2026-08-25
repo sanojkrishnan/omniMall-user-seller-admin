@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
 import { useAsyncSelectField } from "../../hooks/useAsyncSelectField";
-import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 
 export function FieldLabel({ children, required }) {
   return (

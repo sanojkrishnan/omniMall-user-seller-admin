@@ -1,4 +1,3 @@
-
 import { SearchBar } from "../../components/ui/SearchBar";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -16,13 +15,14 @@ import CartLoading from "../../components/ui/CartLoading";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "../../components/ui/Loading";
-import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import { clearAuthError } from "../../redux/slice/authSlice";
 import DataTable from "../../components/ui/DataTable";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import { useNavigate } from "react-router-dom";
+import { TriangleAlert } from "lucide-react";
 
 function Products() {
   const dispatch = useDispatch();
@@ -38,6 +38,8 @@ function Products() {
     hasNextPage,
   } = useSelector((state) => state.product);
 
+  console.log("IDS FROM THE useSelector :", products);
+
   const { seller } = useSelector((state) => state.seller);
   const { category } = useSelector((state) => state.category);
 
@@ -47,7 +49,7 @@ function Products() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState(""); // raw input value
-  const [isSearching, setIsSearching] = useState(false); //searching loading
+  const [isSearching, setIsSearching] = useState(false); //search loading
   const [filterValues, setFilterValues] = useState({
     category: "",
     minPrice: "",
@@ -133,11 +135,12 @@ function Products() {
       const uniqueCategoryIds = [
         ...new Set(
           products
-            .map((item) =>
-              typeof item.categoryId === "object"
-                ? item.categoryId._id
-                : item.categoryId,
-            )
+            .map((item) => {
+              console.log("WHAT IS INSIDE CATEGORY ID", item);
+              return typeof item.categoryId === "object"
+                ? item.categoryId.id
+                : item.categoryId;
+            })
             .filter(Boolean),
         ),
       ];
@@ -193,7 +196,7 @@ function Products() {
     return () => {
       dispatch(clearAuthError());
     };
-  }, []);
+  }, [dispatch]);
 
   const getSellerName = (sellerId) => {
     const s = sellerMap[getId(sellerId)];
@@ -233,7 +236,11 @@ function Products() {
     },
     {
       header: "Seller",
-      render: (item) => <div>{getSellerName(item.sellerId)}</div>,
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]">
+          {getSellerName(item.sellerId)}
+        </div>
+      ),
     },
     {
       header: "Stock",
@@ -241,11 +248,15 @@ function Products() {
     },
     {
       header: "MRP",
-      render: (item) => `₹ ${item.mrp}`,
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]"> ₹{item.mrp} </div>
+      ),
     },
     {
       header: "Seller Price",
-      render: (item) => `₹ ${item.offerPrice}`,
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]"> ₹{item.offerPrice} </div>
+      ),
     },
   ];
 
@@ -256,7 +267,7 @@ function Products() {
       dispatch(clearProductState());
       dispatch(clearSellerState());
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <>

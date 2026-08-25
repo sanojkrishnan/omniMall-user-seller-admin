@@ -11,14 +11,5 @@ export const categoryValidation = Yup.object({
     url: Yup.string().url("Must be a valid URL").required(),
   }).required("Category image is required"),
 
-  description: Yup.string().trim().max(300, "Keep it under 300 characters"),
-
   isActive: Yup.boolean().default(true),
-
-  displaySection: Yup.string()
-    .oneOf(
-      ["featured", "trending", "new arrivals", "sale"],
-      "Invalid display section",
-    )
-    .default("featured"),
 });

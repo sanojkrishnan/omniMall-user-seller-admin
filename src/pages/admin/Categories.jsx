@@ -1,13 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
-import { SearchBar } from "../../components/ui/SearchBar";
 import DataTable from "../../components/ui/DataTable";
 import { useEffect, useMemo, useState } from "react";
-import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import { fetchAllCategories } from "../../redux/slice/categorySlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import { Plus, ImageIcon, Layers, Package, CircleDot } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import ToggleSwitch from "../../components/ui/ToggleSwitch";
 import { toast } from "react-toastify";
 import { StatCard } from "../../components/ui/StatCard";
 import CartLoading from "../../components/ui/CartLoading";
@@ -30,150 +28,22 @@ const SUCCESS_BG = "#E9F5EE";
 const OFF_BG = "#F6F1F2";
 const OFF_TEXT = "#8A7278";
 
-// const CATEGORY_FIELDS = [
-//   { name: "name", label: "Category Name", type: "text", required: true },
+const CATEGORY_FIELDS = [
+  { name: "name", label: "Category Name", type: "text", required: true },
 
-//   {
-//     name: "categoryImage",
-//     label: "Category Image",
-//     type: "text",
-//     required: true,
-//   },
-
-//   {
-//     name: "description",
-//     label: "Description",
-//     type: "textarea",
-//     span: "full",
-//     required: true,
-//   },
-
-//   {
-//     name: "discountType",
-//     label: "Discount Type",
-//     type: "select",
-//     required: true,
-//     options: [
-//       { value: "percentage", label: "Percentage" },
-//       { value: "flat", label: "Flat" },
-//     ],
-//   },
-
-//   {
-//     name: "discountValue",
-//     label: "Discount Value",
-//     type: "number",
-//     required: true,
-//     min: 0,
-//   },
-
-//   {
-//     name: "maxDiscount",
-//     label: "Maximum Discount",
-//     type: "number",
-//     min: 0,
-//   },
-
-//   {
-//     name: "minOrderAmount",
-//     label: "Minimum Order Amount",
-//     type: "number",
-//     required: true,
-//     min: 0,
-//   },
-
-//   {
-//     name: "startDate",
-//     label: "Start Date",
-//     type: "datetime-local",
-//     required: true,
-//   },
-
-//   {
-//     name: "endDate",
-//     label: "End Date",
-//     type: "datetime-local",
-//     required: true,
-//   },
-
-//   {
-//     name: "usageLimit",
-//     label: "Usage Limit",
-//     type: "number",
-//     required: true,
-//     min: 1,
-//   },
-
-//   {
-//     name: "usagePerUser",
-//     label: "Usage Per User",
-//     type: "number",
-//     required: true,
-//     min: 1,
-//   },
-
-//   {
-//     name: "eligibleUsers",
-//     label: "Eligible Users",
-//     type: "select",
-//     required: true,
-//     options: [
-//       { value: "all", label: "All Users" },
-//       { value: "new", label: "New Users" },
-//       { value: "existing", label: "Existing Users" },
-//     ],
-//   },
-
-//   {
-//     name: "paymentMethods",
-//     label: "Payment Methods",
-//     type: "multiselect",
-//     options: [
-//       { value: "COD", label: "Cash on Delivery" },
-//       { value: "CARD", label: "Card" },
-//       { value: "UPI", label: "UPI" },
-//     ],
-//   },
-//   {
-//     name: "applicableProducts",
-//     label: "Applicable Products",
-//     type: "async-multiselect",
-//     asyncEntity: "product",
-//     span: "full",
-//   },
-//   {
-//     name: "applicableCategories",
-//     label: "Applicable Categories",
-//     type: "async-multiselect",
-//     asyncEntity: "category",
-//     span: "full",
-//   },
-//   {
-//     name: "excludedProducts",
-//     label: "Excluded Products",
-//     type: "async-multiselect",
-//     asyncEntity: "product",
-//     span: "full",
-//   },
-//   {
-//     name: "sellerIds",
-//     label: "Applicable Sellers",
-//     type: "async-multiselect",
-//     asyncEntity: "seller",
-//     span: "full",
-//   },
-//   {
-//     name: "stackable",
-//     label: "Stackable",
-//     type: "checkbox",
-//   },
-
-//   {
-//     name: "autoApply",
-//     label: "Auto Apply",
-//     type: "checkbox",
-//   },
-// ];
+  {
+    name: "categoryImage",
+    label: "Category Image",
+    type: "image",
+    required: true,
+  },
+  {
+    name: "isActive",
+    label: "Active",
+    type: "checkbox",
+    required: true,
+  },
+];
 
 function StatusPill({ active }) {
   return (
@@ -203,27 +73,6 @@ function Categories() {
   const [createCategory, setCreateCategory] = useState(false);
   const [openCategory, setOpenCategory] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-
-  //toggle switch
-  async function handleSwitchChange(status) {
-    // setIsTogglingStatus(true);
-    // try {
-    //   await dispatch(
-    //     changeCouponStatus({
-    //       id: singleCoupon._id,
-    //       status: status ? "active" : "inactive",
-    //     }),
-    //   ).unwrap();
-    //   toast.success(status ? "Coupon activated" : "Coupon deactivated");
-    // } catch (err) {
-    //   // Same .unwrap() gotcha as handleEditSubmit below — the thrown value
-    //   // is action.payload directly, not an Error, so err?.message alone
-    //   // silently produced the generic fallback every time.
-    //   toast.error(getErrorMessage(err, "Failed to update coupon status"));
-    // } finally {
-    //   setIsTogglingStatus(false);
-    // }
-  }
 
   // category fetch
   useEffect(() => {
@@ -311,15 +160,6 @@ function Categories() {
             ? "N/A"
             : new Date(item.updatedAt).toLocaleDateString()}
         </span>
-      ),
-    },
-    {
-      header: "Action",
-      render: (item) => (
-        <ToggleSwitch
-          checked={item.status === "active"}
-          onChange={handleSwitchChange}
-        />
       ),
     },
   ];

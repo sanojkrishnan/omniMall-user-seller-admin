@@ -143,6 +143,7 @@ const productSlice = createSlice({
         state.isProductLoading = true;
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
+        console.log("PRODUCT FROM THE SLICE:", action.payload.data);
         state.isProductLoading = false;
 
         const newProducts = action.payload.data?.data ?? [];

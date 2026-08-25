@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import DataTable from "../../components/ui/DataTable";
 import { SearchBar } from "../../components/ui/SearchBar";
-import { useInfiniteScroll } from "../../hooks/useInfineiteScrolling";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { addCoupon, fetchCoupon } from "../../redux/slice/couponSlice";
@@ -183,19 +183,19 @@ const columns = [
   },
   {
     header: "Discount Type",
-    render: (item) => <div>{item?.discountType || "N/A"}</div>,
+    render: (item) => <div className="text-sm text-[#5B4650]">{item?.discountType || "N/A"}</div>,
   },
   {
     header: "Discount Value",
-    render: (item) => <div>{item?.discountValue || "N/A"}</div>,
+    render: (item) => <div className="text-sm text-[#5B4650]">{item?.discountValue || "N/A"}</div>,
   },
   {
     header: "Start Date",
-    render: (item) => <div>{formatDate(item?.startDate) || "N/A"}</div>,
+    render: (item) => <div className="text-sm text-[#5B4650]">{formatDate(item?.startDate) || "N/A"}</div>,
   },
   {
     header: "End Date",
-    render: (item) => <div>{formatDate(item?.endDate) || "N/A"}</div>,
+    render: (item) => <div className="text-sm text-[#5B4650]">{formatDate(item?.endDate) || "N/A"}</div>,
   },
 ];
 

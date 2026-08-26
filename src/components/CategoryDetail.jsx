@@ -183,7 +183,12 @@ function CategoryDetail() {
 
   return (
     <>
-      {singleCategory && !isCategoryLoading && !categoryError && (
+      {isBusy && !categoryError && (
+        <div className="w-full h-[65vh] flex items-center justify-center">
+          <CartLoading />
+        </div>
+      )}
+      {isFirstLoad && !categoryError && (
         <div className="w-full">
           {/* Back link */}
           <button
@@ -285,7 +290,7 @@ function CategoryDetail() {
           </div>
 
           {/* Products in this category */}
-          <div className="flex items-center justify-start gap-3 mb-1">
+          {/* <div className="flex items-center justify-start gap-3 mb-1">
             <h2 className="text-base font-semibold" style={{ color: INK }}>
               Products in this category
             </h2>
@@ -297,7 +302,7 @@ function CategoryDetail() {
             >
               <Plus size={16} /> Add
             </Button>
-          </div>
+          </div> */}
 
           {/* <SearchBar
         colorVariants="admin"

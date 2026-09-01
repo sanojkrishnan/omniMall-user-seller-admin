@@ -1,36 +1,21 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import DataTable from "../components/ui/DataTable";
+import { useEffect, useState } from "react";
 import P from "../components/ui/P";
 import { Button } from "../components/ui/Button";
-import { useInfiniteScroll } from "../hooks/useInfiniteScrolling";
-import { useSearchDebounce } from "../hooks/useSearchDebounce";
 // TODO: confirm these two actions exist on your categorySlice / productSlice —
 // named to match the pattern of fetchAllCategories in your Categories page.
-import { fetchAllProducts } from "../redux/slice/productSlice";
-import {
-  ArrowLeft,
-  Pencil,
-  Trash2,
-  ImageIcon,
-  Package,
-  CircleDot,
-  TriangleAlert,
-  Layers,
-  Plus,
-} from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, ImageIcon, CircleDot } from "lucide-react";
 import { singleCategoryFetch } from "../redux/slice/categorySlice";
-import { StatCard } from "./ui/StatCard";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
 import ToggleSwitch from "./ui/ToggleSwitch";
+import RelatedSuggestion from "./RelatedSuggestion";
 
 const PRIMARY = "#60001A";
 const PRIMARY_TINT = "#F8ECEE";
 const BORDER = "#ECE0E3";
 const BORDER_SOFT = "#F4EBED";
-const MUTED = "#96828A";
 const INK = "#241318";
 const INK_SOFT = "#5B4650";
 const SUCCESS = "#2E7D4F";
@@ -58,22 +43,12 @@ function CategoryDetail() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  console.log("ID OF CATEGORY : ", categoryId);
-
   // TODO: adjust these selector keys to match your actual categorySlice shape.
   const { singleCategory, isCategoryLoading, categoryError } = useSelector(
     (state) => state.category,
   );
 
-  // TODO: adjust these selector keys to match your actual productSlice shape.
-  const { products, isProductLoading, hasNextPage } = useSelector(
-    (state) => state.product,
-  );
-
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  console.log("Error in CategoryDetail.jsx:", categoryError);
 
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -83,123 +58,82 @@ function CategoryDetail() {
     dispatch(singleCategoryFetch({ id }));
   }, [categoryId, dispatch]);
 
-  useEffect(() => {
-    dispatch(
-      fetchAllProducts({
-        pagination: { page, limit: 15, search, category: categoryId },
-      }),
-    );
-  }, [page, search, categoryId, dispatch]);
+  //counts from the products currently loaded for this category
+  // const stats = useMemo(() => {
+  //   const list = products || [];
+  //   const active = list.filter((p) => p.isActive).length;
+  //   const outOfStock = list.filter((p) => Number(p.stock) === 0).length;
+  //   return { total: list.length, active, outOfStock };
+  // }, [products]);
 
-  const triggerId = useInfiniteScroll({
-    hasNextPage,
-    isLoading: isProductLoading,
-    onLoadMore: () => setPage((prev) => prev + 1),
-  });
-
-  useSearchDebounce({
-    setSearch,
-    setPage,
-    searchInput,
-    setIsSearching,
-    isLoading: isProductLoading,
-  });
-
-  // counts from the products currently loaded for this category
-  const stats = useMemo(() => {
-    const list = products || [];
-    const active = list.filter((p) => p.isActive).length;
-    const outOfStock = list.filter((p) => Number(p.stock) === 0).length;
-    return { total: list.length, active, outOfStock };
-  }, [products]);
-
-  const columns = [
-    {
-      header: "Product Image",
-      render: (item) =>
-        item.productImage?.url ? (
-          <img
-            src={item.productImage.url}
-            alt={item.name}
-            className="w-12 h-12 rounded-md object-cover"
-          />
-        ) : (
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-md"
-            style={{ background: PRIMARY_TINT, color: PRIMARY }}
-          >
-            <ImageIcon size={16} />
-          </div>
-        ),
-    },
-    {
-      header: "Product Name",
-      render: (item) => (
-        <div className="font-medium" style={{ color: INK }}>
-          {item.name || "N/A"}
-        </div>
-      ),
-    },
-    {
-      header: "Price",
-      render: (item) => (
-        <span className="text-sm tabular-nums" style={{ color: INK }}>
-          {item.price != null ? `₹${item.price}` : "N/A"}
-        </span>
-      ),
-    },
-    {
-      header: "Stock",
-      render: (item) => (
-        <span
-          className="text-sm tabular-nums"
-          style={{ color: Number(item.stock) === 0 ? PRIMARY : INK_SOFT }}
-        >
-          {item.stock ?? "N/A"}
-        </span>
-      ),
-    },
-    {
-      header: "Status",
-      render: (item) => <StatusPill active={!!item.isActive} />,
-    },
-  ];
-
-  {
-    isCategoryLoading && !singleCategory && (
-      <div className="w-full h-full flex justify-center text-center">
-        <CartLoading />
-      </div>
-    );
-  }
-
-  {
-    categoryError && <ErrorFallback />;
-  }
-
-  const isFirstLoad = isCategoryLoading && !singleCategory;
-  const isLoadingMore = isCategoryLoading && singleCategory && !isSearching;
-  const isBusy = isSearching || isFirstLoad;
-
+  // const columns = [
+  //   {
+  //     header: "Product Image",
+  //     render: (item) =>
+  //       item.productImage?.url ? (
+  //         <img
+  //           src={item.productImage.url}
+  //           alt={item.name}
+  //           className="w-12 h-12 rounded-md object-cover"
+  //         />
+  //       ) : (
+  //         <div
+  //           className="flex h-10 w-10 items-center justify-center rounded-md"
+  //           style={{ background: PRIMARY_TINT, color: PRIMARY }}
+  //         >
+  //           <ImageIcon size={16} />
+  //         </div>
+  //       ),
+  //   },
+  //   {
+  //     header: "Product Name",
+  //     render: (item) => (
+  //       <div className="font-medium" style={{ color: INK }}>
+  //         {item.name || "N/A"}
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     header: "Price",
+  //     render: (item) => (
+  //       <span className="text-sm tabular-nums" style={{ color: INK }}>
+  //         {item.price != null ? `₹${item.price}` : "N/A"}
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Stock",
+  //     render: (item) => (
+  //       <span
+  //         className="text-sm tabular-nums"
+  //         style={{ color: Number(item.stock) === 0 ? PRIMARY : INK_SOFT }}
+  //       >
+  //         {item.stock ?? "N/A"}
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Status",
+  //     render: (item) => <StatusPill active={!!item.isActive} />,
+  //   },
+  // ];
   return (
     <>
-      {isBusy && !categoryError && (
+      {isCategoryLoading && !singleCategory && !categoryError && (
         <div className="w-full h-[65vh] flex items-center justify-center">
           <CartLoading />
         </div>
       )}
-      {isFirstLoad && !categoryError && (
+      {!isCategoryLoading && singleCategory && !categoryError && (
         <div className="w-full">
           {/* Back link */}
           <button
-            onClick={() => navigate("/admin/categories")}
-            className="flex items-center gap-1.5 text-sm font-medium mb-4"
-            style={{ color: INK_SOFT }}
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#5f0000] mb-4 transition-colors"
           >
             <ArrowLeft size={15} />
-            Categories
+            All categories
           </button>
-
           {/* Category header card */}
           <div
             className="flex items-start justify-between gap-4 rounded-xl p-5 bg-white mb-5"
@@ -274,7 +208,7 @@ function CategoryDetail() {
             </div>
           </div>
 
-          {/* Stats for this category */}
+          {/* Stats for this category
           <div className="flex gap-3 mb-5">
             <StatCard
               label="Loaded products"
@@ -287,7 +221,7 @@ function CategoryDetail() {
               value={stats.outOfStock}
               icon={Package}
             />
-          </div>
+          </div> */}
 
           {/* Products in this category */}
           {/* <div className="flex items-center justify-start gap-3 mb-1">
@@ -311,7 +245,7 @@ function CategoryDetail() {
         filterOn={"products"}
       /> */}
 
-          <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
+          {/* <div className="flex flex-col shadow-lg col-span-2 rounded-lg w-full items-center border min-w-[400px] px-4 justify-between mt-6">
             <DataTable
               title={`Products${singleCategory?.name || ""}`}
               columns={columns}
@@ -319,7 +253,7 @@ function CategoryDetail() {
               onRowClick={(item) => navigate(`/admin/products/${item._id}`)}
               footer={<div id={triggerId} className="h-10" />}
             />
-          </div>
+          </div> */}
 
           {/* Edit slide-over
       {editOpen && (
@@ -333,7 +267,14 @@ function CategoryDetail() {
         />
       )} */}
         </div>
-      )}{" "}
+      )}
+      <div className="w-full h-[65vh] flex items-center justify-center">
+        <ErrorFallback
+          error={categoryError}
+          loading={isCategoryLoading}
+          message={categoryError}
+        />
+      </div>
     </>
   );
 }

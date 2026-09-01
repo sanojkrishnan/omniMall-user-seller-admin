@@ -304,7 +304,7 @@ function SingleCouponDetail() {
     : 0;
 
   return (
-    <div className="w-full max-w-5xl mx-auto pb-12">
+    <div className="w-full pb-12">
       {/* Back nav */}
       <button
         onClick={() => navigate(-1)}

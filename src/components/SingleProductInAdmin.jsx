@@ -18,7 +18,7 @@ import { singleSellerFetch } from "../redux/slice/sellerSlice";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
 import { toast } from "react-toastify";
-import { Copy, Flag, MonitorPause, Pen, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Flag, MonitorPause, Pen, Trash2 } from "lucide-react";
 
 export default function ProductAdminView() {
   const dispatch = useDispatch();
@@ -107,7 +107,15 @@ export default function ProductAdminView() {
   const isError = couponError || sellerError || categoryError || productError;
 
   if (isError) {
-    return <ErrorFallback loading={isBusy} error={isError} />;
+    return (
+      <div className="w-full h-[65vh] flex items-center justify-center">
+        <ErrorFallback
+          error={isError}
+          loading={isBusy}
+          message={`Error loading product details. Please try again later.`}
+        />
+      </div>
+    );
   }
 
   if (isBusy || !onLaunch) {
@@ -136,15 +144,13 @@ export default function ProductAdminView() {
       `}</style>
 
       <div className="flex justify-between items-start mb-7 flex-wrap gap-3">
-        <div className="text-[13px] text-[#8a7873] flex items-center gap-1.5">
-          <span>Products</span>
-          <span className="opacity-50">/</span>
-          <span>{singleCategory.name}</span>
-          <span className="opacity-50">/</span>
-          <span className="text-[#241a1a] font-medium">
-            {singleProduct.productName}
-          </span>
-        </div>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#5f0000] mb-4 transition-colors"
+        >
+          <ArrowLeft size={15} />
+          All products
+        </button>
 
         <div className="flex gap-2">
           <Button

@@ -91,7 +91,10 @@ const categorySlice = createSlice({
       })
       .addCase(singleCategoryFetch.rejected, (state, action) => {
         state.isCategoryLoading = false;
-        state.categoryError = action.payload?.error?.message;
+        state.categoryError = extractError(
+          action.payload,
+          "Failed to fetch category",
+        );
         state.singleCategory = null;
       });
   },

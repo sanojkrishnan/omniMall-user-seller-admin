@@ -493,12 +493,12 @@ function MultiImageField({ field, value, onChange }) {
   }
 
   return (
-    <div>
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+    <div className="col-span-4">
+      <div className="grid gap-2 grid-cols-2 border w-full h-100">
         {items.map((item, i) => (
           <div
             key={i}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--edit-border)] bg-[var(--edit-soft)]"
+            className="group relative aspect-square overflow-hidden rounded-lg border w-fit border-[var(--edit-border)] bg-[var(--edit-soft)]"
           >
             <img
               src={getPreview(item)}
@@ -511,7 +511,7 @@ function MultiImageField({ field, value, onChange }) {
               aria-label="Remove image"
               className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
             >
-              <X className="size-3" />
+              <X className="size-4" />
             </button>
           </div>
         ))}
@@ -521,13 +521,13 @@ function MultiImageField({ field, value, onChange }) {
             disabled={processing}
             onClick={() => inputRef.current?.click()}
             className={cn(
-              "flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-center transition-colors",
+              "flex aspect-square flex-col items-center justify-center gap-1 rounded-lg w-fit p-3 border border-dashed text-center transition-colors",
               "border-[var(--edit-border)] bg-[var(--edit-soft)] hover:border-[var(--edit-accent)]",
               processing && "cursor-not-allowed opacity-50",
             )}
           >
-            <ImagePlus className="size-5 text-[var(--edit-muted)]" />
-            <span className="px-2 text-[11px] leading-tight text-[var(--edit-muted)]">
+            <ImagePlus className="size-8 text-[var(--edit-muted)]" />
+            <span className=" text-[11px] leading-tight text-[var(--edit-muted)]">
               {processing ? "Processing..." : "Add images"}
             </span>
           </button>

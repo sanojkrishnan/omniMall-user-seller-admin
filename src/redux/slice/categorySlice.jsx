@@ -44,6 +44,18 @@ export const singleCategoryFetch = createAsyncThunk(
   },
 );
 
+export const updateCategory = createAsyncThunk(
+  "category/updateCategory",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await categoryAPI.updateCategory(id, data);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to update category"));
+    }
+  },
+);
+
 const categorySlice = createSlice({
   name: "category",
   initialState,

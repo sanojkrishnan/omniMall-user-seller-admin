@@ -6,11 +6,36 @@ import { Button } from "../components/ui/Button";
 // TODO: confirm these two actions exist on your categorySlice / productSlice —
 // named to match the pattern of fetchAllCategories in your Categories page.
 import { ArrowLeft, Pencil, Trash2, ImageIcon, CircleDot } from "lucide-react";
-import { singleCategoryFetch } from "../redux/slice/categorySlice";
+import {
+  singleCategoryFetch,
+  updateCategory,
+} from "../redux/slice/categorySlice";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
-import ToggleSwitch from "./ui/ToggleSwitch";
 import RelatedSuggestion from "./RelatedSuggestion";
+import { EditPanel } from "./ui/EditPanel";
+import { categorySchema } from "../validation/categorySchema";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/getErrorMessage";
+
+//edit fields
+const CATEGORY_EDIT_FIELDS = [
+  { name: "name", label: "Category Name", type: "text", required: true },
+
+  {
+    name: "categoryImage",
+    label: "Category Image",
+    type: "image-array",
+    required: true,
+  },
+
+  {
+    name: "isActive",
+    label: "Is Active",
+    type: "switch",
+    required: true,
+  },
+];
 
 const PRIMARY = "#60001A";
 const PRIMARY_TINT = "#F8ECEE";
@@ -43,15 +68,42 @@ function CategoryDetail() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [editOpen, setEditOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   // TODO: adjust these selector keys to match your actual categorySlice shape.
   const { singleCategory, isCategoryLoading, categoryError } = useSelector(
     (state) => state.category,
   );
 
+  async function handleEditSubmit(values) {
+    setIsSaving(true);
+    try {
+      await dispatch(
+        updateCategory({ id: singleCategory._id, data: values }),
+      ).unwrap();
+      toast.success("Category updated");
+      setEditOpen(false);
+    } catch (err) {
+      // .unwrap() throws action.payload directly (whatever extractError
+      // returned in the thunk's rejectWithValue) — not an Error instance —
+      // so err?.message was silently undefined whenever extractError
+      // returns a plain string, and the toast always fell back to the
+      // generic message instead of showing the real backend error.
+      toast.error(getErrorMessage(err, "Failed to update category"));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   console.log("Error in CategoryDetail.jsx:", categoryError);
 
-  const [editOpen, setEditOpen] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  //edit submission
+  const editableInitialValues = CATEGORY_EDIT_FIELDS.reduce((acc, field) => {
+    acc[field.name] = singleCategory?.[field.name];
+    return acc;
+  }, {});
 
   useEffect(() => {
     const id = categoryId;
@@ -164,7 +216,6 @@ function CategoryDetail() {
                   </h1>
                   <StatusPill active={!!singleCategory?.isActive} />
                 </div>
-                <ToggleSwitch className={"m-4"} />
                 <div className="flex items-center gap-4 mt-2 text-black/50">
                   <P className="text-xs">
                     Created &nbsp;&nbsp;
@@ -255,17 +306,20 @@ function CategoryDetail() {
             />
           </div> */}
 
-          {/* Edit slide-over
-      {editOpen && (
-        <EditCategoryPanel
-          category={cat}
-          onClose={() => setEditOpen(false)}
-          onSave={(data) => {
-            // TODO: dispatch(updateCategory({ id, ...data }))
-            setEditOpen(false);
-          }}
-        />
-      )} */}
+          {/* Edit slide-over */}
+          {editOpen && (
+            <EditPanel
+              variant="admin"
+              open={editOpen}
+              onClose={() => setEditOpen(false)}
+              title="Edit category"
+              fields={CATEGORY_EDIT_FIELDS}
+              initialValues={editableInitialValues}
+              validationSchema={categorySchema}
+              onSubmit={handleEditSubmit}
+              isSubmitting={isSaving}
+            />
+          )}
         </div>
       )}
       <div className="w-full h-[65vh] flex items-center justify-center">

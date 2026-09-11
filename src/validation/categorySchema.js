@@ -1,6 +1,6 @@
 import * as Yup from "yup";
 
-export const categoryValidation = Yup.object({
+export const categorySchema = Yup.object({
   name: Yup.string()
     .trim()
     .min(2, "Category name must be at least 2 characters")

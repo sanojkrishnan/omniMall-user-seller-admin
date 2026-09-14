@@ -16,6 +16,12 @@ export const handleImage = async (file, type = "product") => {
     } else {
       aspectRatio = 4 / 3; // landscape
     }
+    // else if (type === "product") {
+    //   aspectRatio = 4 / 3; // landscape
+    // }
+    //  else if (type === "category") {
+    //   aspectRatio = 3 / 4; // portrait
+    // }
 
     let cropWidth = image.width;
     let cropHeight = image.width / aspectRatio;

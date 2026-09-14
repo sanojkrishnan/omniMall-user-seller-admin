@@ -127,28 +127,36 @@ export function EditPanel({
 
         <form onSubmit={formik.handleSubmit}>
           <div className="grid max-h-[40vh] overflow-y-auto custom-scrollbar grid-cols-2 gap-4 px-6 py-5">
-            {fields.map((field) => (
-              <div
-                key={field.name}
-                className={cn(field.span === "full" && "col-span-2")}
-              >
-                <FieldLabel required={field.required}>{field.label}</FieldLabel>
-                {renderField(field, formik)}
-                {field.helperText &&
-                  !(formik.submitCount > 0 && formik.errors[field.name]) && (
-                    <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
-                      {field.helperText}
-                    </p>
+            {fields.map((field) => {
+              const isImageType =
+                field.type === "image" || field.type === "image-array";
+              return (
+                <div
+                  key={field.name}
+                  className={cn(
+                    (field.span === "full" || isImageType) && "col-span-2",
                   )}
-                <FieldError
-                  message={
-                    formik.submitCount > 0
-                      ? formik.errors[field.name]
-                      : undefined
-                  }
-                />
-              </div>
-            ))}
+                >
+                  <FieldLabel required={field.required}>
+                    {field.label}
+                  </FieldLabel>
+                  {renderField(field, formik)}
+                  {field.helperText &&
+                    !(formik.submitCount > 0 && formik.errors[field.name]) && (
+                      <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
+                        {field.helperText}
+                      </p>
+                    )}
+                  <FieldError
+                    message={
+                      formik.submitCount > 0
+                        ? formik.errors[field.name]
+                        : undefined
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {error && (

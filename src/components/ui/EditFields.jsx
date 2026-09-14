@@ -29,6 +29,14 @@ export function FieldLabel({ children, required }) {
   );
 }
 
+function extractPreviewUrl(item) {
+  if (!item) return null;
+  if (typeof item === "string") return item;
+  // covers: freshly-picked local file ({ previewUrl }),
+  // and typical API shapes for an existing image ({ url } / { src } / { path })
+  return item.previewUrl ?? item.url ?? item.src ?? item.path ?? null;
+}
+
 export function FieldError({ message }) {
   if (!message) return null;
   return (
@@ -377,8 +385,9 @@ export function AsyncSelectField({ field, formik }) {
 function ImageField({ field, value, onChange }) {
   const inputRef = useRef(null);
   const [processing, setProcessing] = useState(false);
-  const preview =
-    typeof value === "string" ? value : (value?.previewUrl ?? null);
+  const preview = extractPreviewUrl(value);
+
+  console.log("VALUE FROM THE IMAGE SELECTION: ", value)
 
   async function handlePick(e) {
     const file = e.target.files?.[0];
@@ -387,8 +396,8 @@ function ImageField({ field, value, onChange }) {
     try {
       const processed = await handleImage(file, field.imageType ?? "product");
       // swap out the old blob URL so we don't leak it
-      if (value?.previewUrl) URL.revokeObjectURL(value.previewUrl);
-      onChange({ file: processed, previewUrl: URL.createObjectURL(processed) });
+      if (value?.url) URL.revokeObjectURL(value.url);
+      onChange({ file: processed.name, url: URL.createObjectURL(processed) });
     } finally {
       setProcessing(false);
       e.target.value = ""; // allow re-picking the same file
@@ -397,43 +406,52 @@ function ImageField({ field, value, onChange }) {
 
   function handleRemove(e) {
     e.stopPropagation();
-    if (value?.previewUrl) URL.revokeObjectURL(value.previewUrl);
+    if (value?.url) URL.revokeObjectURL(value.url);
     onChange(null);
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="grid grid-cols-4 items-center gap-2">
       <div
         className={cn(
-          "relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border",
+          "relative flex shrink-0 items-center h-[100px] w-[100px] p-2 justify-center overflow-hidden rounded-lg border",
           "border-[var(--edit-border)] bg-[var(--edit-soft)]",
         )}
       >
         {preview ? (
           <>
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <img
+              src={preview}
+              alt=""
+              className="w-full h-full rounded-lg object-cover"
+            />
             <button
               type="button"
               onClick={handleRemove}
               aria-label="Remove image"
-              className="absolute right-0.5 top-0.5 flex size-4 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              className="absolute right-3 top-3 flex size-4 items-center justify-center rounded-full bg-black/40 text-white/80 hover:bg-black/80 hover:text-white"
             >
               <X className="size-2.5" />
             </button>
           </>
         ) : (
-          <span className="text-[10px] text-[var(--edit-muted)]">No image</span>
+          <button
+            type="button"
+            disabled={processing}
+            onClick={() => inputRef.current?.click()}
+            className={cn(
+              "flex aspect-square flex-col items-center justify-center gap-1 rounded-lg w-fit p-2 border border-dashed text-center transition-colors",
+              "border-[var(--edit-border)] bg-[var(--edit-soft)] hover:border-[var(--edit-accent)]",
+              processing && "cursor-not-allowed opacity-50",
+            )}
+          >
+            <ImagePlus className="size-8 text-[var(--edit-muted)]" />
+            <span className=" text-[11px] leading-tight text-[var(--edit-muted)]">
+              {processing ? "Processing..." : "Add images"}
+            </span>
+          </button>
         )}
       </div>
-      <Button
-        type="button"
-        variant="secondary"
-        disabled={processing}
-        onClick={() => inputRef.current?.click()}
-        className="border-[var(--edit-border)] text-[var(--edit-text)]"
-      >
-        {processing ? "Processing..." : preview ? "Replace" : "Upload"}
-      </Button>
       <input
         ref={inputRef}
         type="file"
@@ -454,9 +472,8 @@ function MultiImageField({ field, value, onChange }) {
   const max = field.max ?? 10;
 
   function getPreview(item) {
-    return typeof item === "string" ? item : (item?.previewUrl ?? null);
+    return extractPreviewUrl(item);
   }
-
   async function handlePick(e) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -493,8 +510,8 @@ function MultiImageField({ field, value, onChange }) {
   }
 
   return (
-    <div className="col-span-4">
-      <div className="grid gap-2 grid-cols-2 border w-full h-100">
+    <div className="">
+      <div className="grid gap-2 grid-cols-4 bg-white rounded-lg p-2 w-full max-h-[200px] overflow-auto custom-scrollbar">
         {items.map((item, i) => (
           <div
             key={i}
@@ -509,9 +526,9 @@ function MultiImageField({ field, value, onChange }) {
               type="button"
               onClick={() => removeAt(i)}
               aria-label="Remove image"
-              className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-black/40 text-white/80 hover:bg-black/80 hover:text-white"
             >
-              <X className="size-4" />
+              <X className="size-2.5" />
             </button>
           </div>
         ))}
@@ -533,7 +550,7 @@ function MultiImageField({ field, value, onChange }) {
           </button>
         )}
       </div>
-      <p className="mt-1 text-[11px] text-[var(--edit-muted)]">
+      <p className="mt-1 text-right text-[11px] text-[var(--edit-muted)]">
         {items.length}/{max} images
       </p>
       <input

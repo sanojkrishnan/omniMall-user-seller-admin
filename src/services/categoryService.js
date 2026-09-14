@@ -18,4 +18,8 @@ export const categoryAPI = {
   fetchOneCategory: async (id) => {
     return api.get(`category/fetch-single/${id}`);
   },
+  //update category
+  updateCategory: async (id,data) => {
+    return api.patch(`category/update/${id}`, { data });
+  }
 };

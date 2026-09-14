@@ -23,16 +23,17 @@ const CATEGORY_EDIT_FIELDS = [
   { name: "name", label: "Category Name", type: "text", required: true },
 
   {
-    name: "categoryImage",
-    label: "Category Image",
-    type: "image-array",
-    required: true,
-  },
-
-  {
     name: "isActive",
     label: "Is Active",
-    type: "switch",
+    type: "toggle",
+    required: true,
+  },
+  {
+    name: "categoryImage",
+    label: "Category Image",
+    type: "image",
+    imageType: "category",
+    max: 2,
     required: true,
   },
 ];
@@ -82,8 +83,14 @@ function CategoryDetail() {
     try {
       await dispatch(
         updateCategory({ id: singleCategory._id, data: values }),
+
+        console.log(
+          "SINGLE CATEGORY EDIT DETAILS :",
+          singleCategory._id,
+          "VALUES :",
+          values,
+        ),
       ).unwrap();
-      toast.success("Category updated");
       setEditOpen(false);
     } catch (err) {
       // .unwrap() throws action.payload directly (whatever extractError

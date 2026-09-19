@@ -48,6 +48,7 @@ export const updateCategory = createAsyncThunk(
   "category/updateCategory",
   async ({ id, data }, { rejectWithValue }) => {
     try {
+      console.log("DATA FROM UPDATE CATEGORY:", data);
       const response = await categoryAPI.updateCategory(id, data);
       return response.data;
     } catch (err) {

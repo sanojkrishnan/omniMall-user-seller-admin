@@ -314,19 +314,18 @@ function CategoryDetail() {
           </div> */}
 
           {/* Edit slide-over */}
-          {editOpen && (
-            <EditPanel
-              variant="admin"
-              open={editOpen}
-              onClose={() => setEditOpen(false)}
-              title="Edit category"
-              fields={CATEGORY_EDIT_FIELDS}
-              initialValues={editableInitialValues}
-              validationSchema={categorySchema}
-              onSubmit={handleEditSubmit}
-              isSubmitting={isSaving}
-            />
-          )}
+
+          <EditPanel
+            variant="admin"
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            title="Edit category"
+            fields={CATEGORY_EDIT_FIELDS}
+            initialValues={editableInitialValues}
+            validationSchema={categorySchema}
+            onSubmit={handleEditSubmit}
+            isSubmitting={isSaving}
+          />
         </div>
       )}
       <div className="w-full h-[65vh] flex items-center justify-center">

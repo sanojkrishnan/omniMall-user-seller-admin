@@ -12,11 +12,11 @@ export const categorySchema = Yup.object({
     .required("Upload a category image")
     .test("fileSize", "File too large", (value) => {
       console.log(value.size, "value.size");
-      if (!value) return true; // ← no file selected = ok
+       if (!(value instanceof Blob)) return true; // ← no file selected = ok
       return value.size <= 2 * 1024 * 1024;
     })
     .test("fileType", "Unsupported format", (value) => {
-      if (!value) return true; // ← no file selected = ok
+      if (!(value instanceof Blob)) return true; // ← no file selected = ok
       return ["image/jpeg", "image/png", "image/webp"].includes(value.type);
     }),
   isActive: Yup.boolean().default(true),

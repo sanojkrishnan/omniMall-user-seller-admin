@@ -36,6 +36,15 @@ function extractPreviewUrl(item) {
   // and typical API shapes for an existing image ({ url } / { src } / { path })
   return item.previewUrl ?? item.url ?? item.src ?? item.path ?? null;
 }
+// handleImage may return a plain Blob (browser-image-compression does this).
+// Wrap it in a real File here so previews, Yup and FormData all get a proper file name/type.
+function ensureFile(result, original) {
+  if (result instanceof File) return result;
+  return new File([result], result?.name || original.name, {
+    type: result?.type || original.type || "image/jpeg",
+    lastModified: result?.lastModified ?? Date.now(),
+  });
+}
 
 export function FieldError({ message }) {
   if (!message) return null;
@@ -382,12 +391,22 @@ export function AsyncSelectField({ field, formik }) {
 }
 
 // field.type === "image" — single image, crop+compress on select, preview + remove.
+// field.type === "image" — stores the File itself (or null) in Formik.
 function ImageField({ field, value, onChange }) {
   const inputRef = useRef(null);
   const [processing, setProcessing] = useState(false);
-  const preview = extractPreviewUrl(value);
+  const [preview, setPreview] = useState(null);
 
-  console.log("VALUE FROM THE IMAGE SELECTION: ", value)
+  // Derive the preview from the value. Blob URLs are created and revoked
+  // here, so nothing has to be stored in Formik or cleaned up manually.
+  useEffect(() => {
+    if (value instanceof Blob) {
+      const url = URL.createObjectURL(value);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreview(extractPreviewUrl(value));
+  }, [value]);
 
   async function handlePick(e) {
     const file = e.target.files?.[0];
@@ -395,18 +414,15 @@ function ImageField({ field, value, onChange }) {
     setProcessing(true);
     try {
       const processed = await handleImage(file, field.imageType ?? "product");
-      // swap out the old blob URL so we don't leak it
-      if (value?.url) URL.revokeObjectURL(value.url);
-      onChange({ file: processed.name, url: URL.createObjectURL(processed) });
+      onChange(ensureFile(processed, file));
     } finally {
       setProcessing(false);
-      e.target.value = ""; // allow re-picking the same file
+      e.target.value = "";
     }
   }
 
   function handleRemove(e) {
     e.stopPropagation();
-    if (value?.url) URL.revokeObjectURL(value.url);
     onChange(null);
   }
 
@@ -465,15 +481,37 @@ function ImageField({ field, value, onChange }) {
 
 // field.type === "image-array" — multiple images, crop+compress each on select,
 // grid of previews with per-image removal.
+// field.type === "image-array" — Formik holds an array where each item is either
+// a raw File (newly picked) or an existing image from the API ({ url } / string).
 function MultiImageField({ field, value, onChange }) {
   const inputRef = useRef(null);
   const [processing, setProcessing] = useState(false);
+  const urlCache = useRef(new Map()); // File -> blob URL, so previews stay stable across renders
   const items = Array.isArray(value) ? value : [];
   const max = field.max ?? 10;
 
   function getPreview(item) {
+    if (item instanceof File) {
+      let url = urlCache.current.get(item);
+      if (!url) {
+        url = URL.createObjectURL(item);
+        urlCache.current.set(item, url);
+      }
+      return url;
+    }
     return extractPreviewUrl(item);
   }
+
+  // Revoke blob URLs for files that were removed from the value.
+  useEffect(() => {
+    for (const [file, url] of urlCache.current) {
+      if (!items.includes(file)) {
+        URL.revokeObjectURL(url);
+        urlCache.current.delete(file);
+      }
+    }
+  }, [value]);
+
   async function handlePick(e) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -485,18 +523,12 @@ function MultiImageField({ field, value, onChange }) {
     setProcessing(true);
     try {
       const processed = await Promise.all(
-        files.slice(0, room).map(async (file) => {
-          const compressed = await handleImage(
-            file,
-            field.imageType ?? "product",
-          );
-          return {
-            file: compressed,
-            previewUrl: URL.createObjectURL(compressed),
-          };
-        }),
-      );
-      onChange([...items, ...processed]);
+  files.slice(0, room).map(async (file) => {
+    const result = await handleImage(file, field.imageType ?? "product");
+    return ensureFile(result, file);
+  }),
+);
+onChange([...items, ...processed]);
     } finally {
       setProcessing(false);
       e.target.value = "";
@@ -504,8 +536,6 @@ function MultiImageField({ field, value, onChange }) {
   }
 
   function removeAt(index) {
-    const item = items[index];
-    if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
     onChange(items.filter((_, i) => i !== index));
   }
 

@@ -5,7 +5,11 @@ import { SearchBar } from "../../components/ui/SearchBar";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { addCoupon, fetchCoupon } from "../../redux/slice/couponSlice";
+import {
+  addCoupon,
+  clearCouponError,
+  fetchCoupon,
+} from "../../redux/slice/couponSlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
@@ -183,19 +187,35 @@ const columns = [
   },
   {
     header: "Discount Type",
-    render: (item) => <div className="text-sm text-[#5B4650]">{item?.discountType || "N/A"}</div>,
+    render: (item) => (
+      <div className="text-sm text-[#5B4650]">
+        {item?.discountType || "N/A"}
+      </div>
+    ),
   },
   {
     header: "Discount Value",
-    render: (item) => <div className="text-sm text-[#5B4650]">{item?.discountValue || "N/A"}</div>,
+    render: (item) => (
+      <div className="text-sm text-[#5B4650]">
+        {item?.discountValue || "N/A"}
+      </div>
+    ),
   },
   {
     header: "Start Date",
-    render: (item) => <div className="text-sm text-[#5B4650]">{formatDate(item?.startDate) || "N/A"}</div>,
+    render: (item) => (
+      <div className="text-sm text-[#5B4650]">
+        {formatDate(item?.startDate) || "N/A"}
+      </div>
+    ),
   },
   {
     header: "End Date",
-    render: (item) => <div className="text-sm text-[#5B4650]">{formatDate(item?.endDate) || "N/A"}</div>,
+    render: (item) => (
+      <div className="text-sm text-[#5B4650]">
+        {formatDate(item?.endDate) || "N/A"}
+      </div>
+    ),
   },
 ];
 
@@ -256,6 +276,13 @@ function Coupon() {
     setIsSearching,
     isLoading: isCouponLoading,
   });
+
+  // error toast
+  useEffect(() => {
+    if (couponError) toast.error(couponError, { toastId: "coupon-error" });
+  }, [couponError]);
+
+  useEffect(() => () => dispatch(clearCouponError()), [dispatch]);
 
   //handle add click
   async function handleCreateSubmit(values) {

@@ -2,7 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import DataTable from "../../components/ui/DataTable";
 import { useEffect, useMemo, useState } from "react";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
-import { fetchAllCategories } from "../../redux/slice/categorySlice";
+import {
+  clearCategoryError,
+  fetchAllCategories,
+} from "../../redux/slice/categorySlice";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import { Plus, ImageIcon, Layers, Package, CircleDot } from "lucide-react";
 import { Button } from "../../components/ui/Button";
@@ -165,11 +168,19 @@ function Categories() {
   ];
 
   // infinite scrolling
-  const triggerId = useInfiniteScroll({
-    hasNextPage,
-    isLoading: isCategoryLoading,
-    onLoadMore: () => setPage((prev) => prev + 1),
-  });
+  const triggerRef = useInfiniteScroll({
+  hasNextPage,
+  isLoading: isCategoryLoading || !!categoryError, // don't keep retrying after a failure
+  onLoadMore: () => setPage((p) => p + 1),
+});
+
+  // error toast
+  useEffect(() => {
+    if (categoryError)
+      toast.error(categoryError, { toastId: "category-error" });
+  }, [categoryError]);
+
+  useEffect(() => () => dispatch(clearCategoryError()), [dispatch]);
 
   useSearchDebounce({
     setSearch,
@@ -230,7 +241,7 @@ function Categories() {
                   setOpenCategory(true);
                   setCreateCategory(false);
                 }}
-                footer={<div id={triggerId} className="h-5" />}
+                footer={<div id={triggerRef} className="h-5" />}
               />
             </>
           )}
@@ -247,8 +258,6 @@ function Categories() {
               <Loading className={"size-6"} />
             </div>
           )}
-
-          <div id={triggerId} className="h-5" />
         </div>
       </div>
 

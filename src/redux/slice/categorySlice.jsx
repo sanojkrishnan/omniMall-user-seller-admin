@@ -67,7 +67,7 @@ const categorySlice = createSlice({
     clearCategoryState(state) {
       state.message = null;
       state.categoryError = null;
-      state.category = null;
+      state.category = [];
     },
   },
   extraReducers: (builder) => {
@@ -90,7 +90,6 @@ const categorySlice = createSlice({
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.isCategoryLoading = false;
         state.categoryError = action.payload || "Failed to fetch categories";
-        state.category = [];
       });
     //fetch single category
     builder

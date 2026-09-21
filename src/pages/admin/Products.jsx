@@ -38,6 +38,8 @@ function Products() {
     hasNextPage,
   } = useSelector((state) => state.product);
 
+  console.log("PRODUCT ERROR", productError);
+
   console.log("IDS FROM THE useSelector :", products);
 
   const { seller } = useSelector((state) => state.seller);
@@ -93,11 +95,10 @@ function Products() {
 
   // error toast
   useEffect(() => {
-    if (productError) {
-      toast.error(productError);
-      dispatch(clearProductError());
-    }
-  }, [productError, dispatch]);
+    if (productError) toast.error(productError, { toastId: "product-error" });
+  }, [productError]);
+
+  useEffect(() => () => dispatch(clearProductError()), [dispatch]);
 
   const lastFetchedSellerIdsRef = useRef("");
   const lastFetchedCategoryIdsRef = useRef("");

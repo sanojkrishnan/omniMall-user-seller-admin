@@ -23,10 +23,14 @@ import DataTable from "../../components/ui/DataTable";
 import { useSearchDebounce } from "../../hooks/useSearchDebounce";
 import { useNavigate } from "react-router-dom";
 import { TriangleAlert } from "lucide-react";
+import { useCurrency } from "../../hooks/useCurrency";
+import { useDateFormatter } from "../../hooks/useDateFormatter";
 
 function Products() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const currency = useCurrency(); //digit to currency
+  const formatDate = useDateFormatter(); // formats dates into readable date values
 
   const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
@@ -250,13 +254,16 @@ function Products() {
     {
       header: "MRP",
       render: (item) => (
-        <div className="text-sm text-[#5B4650]"> ₹{item.mrp} </div>
+        <div className="text-sm text-[#5B4650]">{currency(item.mrp)}</div>
       ),
     },
     {
       header: "Seller Price",
       render: (item) => (
-        <div className="text-sm text-[#5B4650]"> ₹{item.offerPrice} </div>
+        <div className="text-sm text-[#5B4650]">
+          {" "}
+          {currency(item.offerPrice)}{" "}
+        </div>
       ),
     },
   ];

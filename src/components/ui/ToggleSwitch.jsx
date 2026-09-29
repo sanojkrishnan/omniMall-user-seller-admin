@@ -18,15 +18,15 @@ export default function ToggleSwitch({
       disabled={disabled}
       onClick={handleClick}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-300",
-        checked ? "bg-[#fbdfdc]" : "bg-gray-200",
+        "relative inline-flex h-[26px] w-11 shrink-0 border border-gray-400 items-center rounded-full transition-all duration-300",
+        checked ? "bg-gray-300" : "bg-white",
         disabled ? "cursor-not-allowed" : "cursor-pointer",
       )}
     >
       <span
         className={cn(
           "absolute top-[2px] left-[2px] h-5 w-5 rounded-full transition-all duration-300 transform",
-          checked ? "translate-x-full" : "",
+          checked ? "translate-x-[18px]" : "",
           disabled ? "bg-[#757575]" : "bg-[#5f0000]",
         )}
       />

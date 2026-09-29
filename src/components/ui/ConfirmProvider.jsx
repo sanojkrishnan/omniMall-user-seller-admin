@@ -33,13 +33,13 @@ function ConfirmProvider({
     <div
       className={`${
         open ? "opacity-100" : "opacity-0 pointer-events-none"
-      } transition-all duration-300 flex items-center justify-center bg-black/20 absolute inset-0 z-50`}
+      } transition-all duration-300 flex items-center justify-center bg-black/20 backdrop-blur-md absolute inset-0 z-50`}
     >
       <FormCard
         ref={confirmCardRef}
         className={`${
           open ? "scale-100" : "scale-0"
-        } transition-all duration-300  border-[0.5px] border-black/5 `}
+        } transition-all duration-300`}
       >
         <P>{children}</P>
         <div className="flex items-center justify-between mt-4">

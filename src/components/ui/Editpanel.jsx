@@ -97,7 +97,7 @@ export function EditPanel({
         "--edit-accent-soft": theme.accentSoft,
         "--edit-danger": theme.danger,
       }}
-      className={`${isVisible ? "opacity-100" : "opacity-0"} duration-300 transition-opacity fixed inset-0 z-50 flex items-center justify-center bg-black/10 p-4`}
+      className={`${isVisible ? "opacity-100" : "opacity-0"} duration-300 transition-opacity fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md p-4`}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}

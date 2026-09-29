@@ -16,6 +16,7 @@ import ErrorFallback from "../../components/ui/ErrorFallback";
 import SearchNotFound from "../../components/ui/SearchNotFound";
 import Loading from "../../components/ui/Loading";
 import { useNavigate } from "react-router-dom";
+import { useDateFormatter } from "../../hooks/useDateFormatter";
 
 // ---------------------------------------------------------------------------
 // Brand tokens — same palette as the app's existing bg-[#5f0000] usage,
@@ -66,6 +67,7 @@ function StatusPill({ active }) {
 function Categories() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const formatDate = useDateFormatter(); // formats dates into readable date values
   const { category, isCategoryLoading, categoryError, hasNextPage } =
     useSelector((state) => state.category);
 
@@ -149,7 +151,7 @@ function Categories() {
       render: (item) =>
         item.createdAt && (
           <span className="text-sm" style={{ color: INK_SOFT }}>
-            {new Date(item.createdAt).toLocaleDateString()}
+            {formatDate(item.createdAt)}
           </span>
         ),
     },
@@ -158,10 +160,9 @@ function Categories() {
       render: (item) => (
         <span className="text-sm" style={{ color: MUTED }}>
           {item.updatedAt &&
-          new Date(item.updatedAt).toLocaleDateString() ===
-            new Date(item.createdAt).toLocaleDateString()
+          formatDate(item.updatedAt) === formatDate(item.createdAt)
             ? "N/A"
-            : new Date(item.updatedAt).toLocaleDateString()}
+            : formatDate(item.updatedAt)}
         </span>
       ),
     },
@@ -169,10 +170,10 @@ function Categories() {
 
   // infinite scrolling
   const triggerRef = useInfiniteScroll({
-  hasNextPage,
-  isLoading: isCategoryLoading || !!categoryError, // don't keep retrying after a failure
-  onLoadMore: () => setPage((p) => p + 1),
-});
+    hasNextPage,
+    isLoading: isCategoryLoading || !!categoryError, // don't keep retrying after a failure
+    onLoadMore: () => setPage((p) => p + 1),
+  });
 
   // error toast
   useEffect(() => {

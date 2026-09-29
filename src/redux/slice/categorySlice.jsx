@@ -5,6 +5,9 @@ import { categoryAPI } from "../../services/categoryService";
 const initialState = {
   category: [],
   singleCategory: null,
+  categoryMessage: null,
+  categoryDeleteMessage: null,
+  categoryUpdateMessage: null,
   categoriesPage: 0,
   categoriesTotalPages: 0,
   totalCategories: 0,
@@ -66,6 +69,7 @@ const categorySlice = createSlice({
     },
     clearCategoryState(state) {
       state.message = null;
+      state.singleCategory = null;
       state.categoryError = null;
       state.category = [];
     },
@@ -107,6 +111,22 @@ const categorySlice = createSlice({
           action.payload,
           "Failed to fetch category",
         );
+        state.singleCategory = null;
+      });
+    //update category
+    builder
+      .addCase(updateCategory.pending, (state) => {
+        state.isCategoryLoading = true;
+        state.categoryError = null;
+      })
+      .addCase(updateCategory.fulfilled, (state, action) => {
+        state.isCategoryLoading = false;
+        state.singleCategory = action.payload?.data;
+        state.categoryMessage = action.payload?.message;
+      })
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.isCategoryLoading = false;
+        state.categoryError = action.payload;
         state.singleCategory = null;
       });
   },

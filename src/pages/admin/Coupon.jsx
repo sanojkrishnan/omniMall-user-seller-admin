@@ -20,6 +20,8 @@ import { toast } from "react-toastify";
 import { CreatePanel } from "../../components/ui/CreatePanel";
 import { couponSchema } from "../../validation/couponSchema";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { useDateFormatter } from "../../hooks/useDateFormatter";
+import { useCurrency } from "../../hooks/useCurrency";
 
 //fields for coupon adding
 const COUPON_FIELDS = [
@@ -167,58 +169,6 @@ const COUPON_FIELDS = [
   },
 ];
 
-function formatDate(value) {
-  if (!value) return "N/A";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-const columns = [
-  {
-    header: "Coupon Name",
-    render: (item) => <div>{item.name || "N/A"}</div>,
-  },
-  {
-    header: "Coupon Code",
-    render: (item) => <div>{item?.code || "N/A"}</div>,
-  },
-  {
-    header: "Discount Type",
-    render: (item) => (
-      <div className="text-sm text-[#5B4650]">
-        {item?.discountType || "N/A"}
-      </div>
-    ),
-  },
-  {
-    header: "Discount Value",
-    render: (item) => (
-      <div className="text-sm text-[#5B4650]">
-        {item?.discountValue || "N/A"}
-      </div>
-    ),
-  },
-  {
-    header: "Start Date",
-    render: (item) => (
-      <div className="text-sm text-[#5B4650]">
-        {formatDate(item?.startDate) || "N/A"}
-      </div>
-    ),
-  },
-  {
-    header: "End Date",
-    render: (item) => (
-      <div className="text-sm text-[#5B4650]">
-        {formatDate(item?.endDate) || "N/A"}
-      </div>
-    ),
-  },
-];
-
 function Coupon() {
   const {
     coupon = [],
@@ -226,6 +176,51 @@ function Coupon() {
     couponError,
     hasNextPage,
   } = useSelector((state) => state.coupon);
+  const formatDate = useDateFormatter(); // formats dates into readable date values
+  const currency = useCurrency(); // formats numbers into readable currency values
+
+  const columns = [
+    {
+      header: "Coupon Name",
+      render: (item) => <div>{item.name || "N/A"}</div>,
+    },
+    {
+      header: "Coupon Code",
+      render: (item) => <div>{item?.code || "N/A"}</div>,
+    },
+    {
+      header: "Discount Type",
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]">
+          {item?.discountType || "N/A"}
+        </div>
+      ),
+    },
+    {
+      header: "Discount Value",
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]">
+          {currency(item?.discountValue) || "N/A"}
+        </div>
+      ),
+    },
+    {
+      header: "Start Date",
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]">
+          {formatDate(item?.startDate) || "N/A"}
+        </div>
+      ),
+    },
+    {
+      header: "End Date",
+      render: (item) => (
+        <div className="text-sm text-[#5B4650]">
+          {formatDate(item?.endDate) || "N/A"}
+        </div>
+      ),
+    },
+  ];
 
   const navigate = useNavigate();
 

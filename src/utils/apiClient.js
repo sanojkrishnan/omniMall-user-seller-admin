@@ -115,19 +115,15 @@ const TOKEN_GETTERS = {
 
 apiClient.interceptors.request.use(
   (config) => {
-    // Explicit role decides which token to attach — do NOT infer this from
-    // the URL shape, since protected routes in this app live under normal
-    // resource paths like "/coupon/add", "/product/add", etc. and are not
-    // prefixed by role. Pass `authRole: "admin" | "seller" | "user"` in the
-    // request config for any call that hits a protected endpoint.
-    // Defaults to "user" when not specified.
+    // let the browser set multipart/form-data + boundary itself
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     const role = config.authRole ?? "user";
     const getToken = TOKEN_GETTERS[role] ?? getAuthToken;
     const token = getToken();
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
 
     return config;
   },

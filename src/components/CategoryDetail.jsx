@@ -7,8 +7,12 @@ import { Button } from "../components/ui/Button";
 // named to match the pattern of fetchAllCategories in your Categories page.
 import { ArrowLeft, Pencil, Trash2, ImageIcon, CircleDot } from "lucide-react";
 import {
+  deleteSingleCategory,
   singleCategoryFetch,
   updateCategory,
+  clearCategoryUpdateError,
+  clearCategoryDeleteError,
+  clearCategoryState,
 } from "../redux/slice/categorySlice";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
@@ -16,6 +20,7 @@ import RelatedSuggestion from "./RelatedSuggestion";
 import { EditPanel } from "./ui/EditPanel";
 import { categorySchema } from "../validation/categorySchema";
 import { toast } from "react-toastify";
+import ConfirmProvider from "./ui/ConfirmProvider";
 import { getErrorMessage } from "../utils/getErrorMessage";
 
 //edit fields
@@ -74,23 +79,25 @@ function CategoryDetail() {
   const [isSaving, setIsSaving] = useState(false);
 
   // TODO: adjust these selector keys to match your actual categorySlice shape.
-  const { singleCategory, isCategoryLoading, categoryError } = useSelector(
-    (state) => state.category,
-  );
+  const {
+    singleCategory,
+    isCategoryLoading,
+    categoryError,
+    isCategoryUpdating,
+    isCategoryDeleting,
+    categoryUpdateError,
+    categoryDeleteError,
+    categoryDeleteMessage,
+    categoryUpdateMessage,
+  } = useSelector((state) => state.category);
 
   async function handleEditSubmit(values) {
     setIsSaving(true);
     try {
       await dispatch(
         updateCategory({ id: singleCategory._id, data: values }),
-
-        console.log(
-          "SINGLE CATEGORY EDIT DETAILS :",
-          singleCategory._id,
-          "VALUES :",
-          values,
-        ),
       ).unwrap();
+      toast.success(categoryUpdateMessage || "update success");
       setEditOpen(false);
     } catch (err) {
       // .unwrap() throws action.payload directly (whatever extractError
@@ -98,7 +105,7 @@ function CategoryDetail() {
       // so err?.message was silently undefined whenever extractError
       // returns a plain string, and the toast always fell back to the
       // generic message instead of showing the real backend error.
-      toast.error(getErrorMessage(err, "Failed to update category"));
+      toast.error(getErrorMessage(err, "Failed to update coupon"));
     } finally {
       setIsSaving(false);
     }
@@ -112,73 +119,34 @@ function CategoryDetail() {
     return acc;
   }, {});
 
+  // CategoryDetail.jsx
+  function handleDeleteResult(confirmed) {
+    setConfirmDelete(false);
+    if (confirmed) {
+      dispatch(deleteSingleCategory({ id: singleCategory._id }));
+      dispatch(clearCategoryState());
+      toast.success(categoryDeleteMessage || "Category deleted successfully");
+      navigate(-1);
+    }
+  }
+
   useEffect(() => {
     const id = categoryId;
     dispatch(singleCategoryFetch({ id }));
   }, [categoryId, dispatch]);
 
-  //counts from the products currently loaded for this category
-  // const stats = useMemo(() => {
-  //   const list = products || [];
-  //   const active = list.filter((p) => p.isActive).length;
-  //   const outOfStock = list.filter((p) => Number(p.stock) === 0).length;
-  //   return { total: list.length, active, outOfStock };
-  // }, [products]);
+  useEffect(() => {
+    if (!categoryDeleteError) return;
+    toast.error(categoryDeleteError);
+    dispatch(clearCategoryDeleteError());
+  }, [categoryDeleteError, dispatch]);
 
-  // const columns = [
-  //   {
-  //     header: "Product Image",
-  //     render: (item) =>
-  //       item.productImage?.url ? (
-  //         <img
-  //           src={item.productImage.url}
-  //           alt={item.name}
-  //           className="w-12 h-12 rounded-md object-cover"
-  //         />
-  //       ) : (
-  //         <div
-  //           className="flex h-10 w-10 items-center justify-center rounded-md"
-  //           style={{ background: PRIMARY_TINT, color: PRIMARY }}
-  //         >
-  //           <ImageIcon size={16} />
-  //         </div>
-  //       ),
-  //   },
-  //   {
-  //     header: "Product Name",
-  //     render: (item) => (
-  //       <div className="font-medium" style={{ color: INK }}>
-  //         {item.name || "N/A"}
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     header: "Price",
-  //     render: (item) => (
-  //       <span className="text-sm tabular-nums" style={{ color: INK }}>
-  //         {item.price != null ? `₹${item.price}` : "N/A"}
-  //       </span>
-  //     ),
-  //   },
-  //   {
-  //     header: "Stock",
-  //     render: (item) => (
-  //       <span
-  //         className="text-sm tabular-nums"
-  //         style={{ color: Number(item.stock) === 0 ? PRIMARY : INK_SOFT }}
-  //       >
-  //         {item.stock ?? "N/A"}
-  //       </span>
-  //     ),
-  //   },
-  //   {
-  //     header: "Status",
-  //     render: (item) => <StatusPill active={!!item.isActive} />,
-  //   },
-  // ];
+  const isBusy =
+    isCategoryLoading || isCategoryUpdating || isCategoryDeleting || isSaving;
+
   return (
     <>
-      {isCategoryLoading && !singleCategory && !categoryError && (
+      {isBusy && !singleCategory && !categoryError && (
         <div className="w-full h-[65vh] flex items-center justify-center">
           <CartLoading />
         </div>
@@ -318,14 +286,28 @@ function CategoryDetail() {
           <EditPanel
             variant="admin"
             open={editOpen}
-            onClose={() => setEditOpen(false)}
+            onClose={() => {
+              setEditOpen(false);
+              dispatch(clearCategoryUpdateError());
+            }}
             title="Edit category"
             fields={CATEGORY_EDIT_FIELDS}
             initialValues={editableInitialValues}
             validationSchema={categorySchema}
             onSubmit={handleEditSubmit}
-            isSubmitting={isSaving}
+            isSubmitting={isCategoryUpdating}
+            error={categoryUpdateError}
           />
+
+          <ConfirmProvider
+            variant="admin"
+            open={confirmDelete}
+            onResult={handleDeleteResult}
+            setOpen={setConfirmDelete}
+          >
+            {" "}
+            Are you sure, you want to delete?
+          </ConfirmProvider>
         </div>
       )}
       <div className="w-full h-[65vh] flex items-center justify-center">

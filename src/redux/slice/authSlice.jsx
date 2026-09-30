@@ -242,7 +242,6 @@ const authSlice = createSlice({
       });
 
     //resend OTP
-    //resend OTP
     builder
       .addCase(resendOTP.pending, (state) => {
         state.isLoading = true;

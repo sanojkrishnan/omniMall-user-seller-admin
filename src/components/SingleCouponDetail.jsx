@@ -222,7 +222,6 @@ function SingleCouponDetail() {
 
   const formatDate = useDateFormatter(); // formats dates into readable date values
 
-  //edit panel
   const [editOpen, setEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [open, setOpen] = useState(false);

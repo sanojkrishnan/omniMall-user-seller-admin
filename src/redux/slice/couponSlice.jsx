@@ -160,7 +160,7 @@ const couponSlice = createSlice({
         state.singleCoupon = null;
       });
 
-    //delete products
+    //delete coupon
     builder
       .addCase(deleteSingleCoupon.pending, (state) => {
         state.couponError = null;

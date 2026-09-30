@@ -11,8 +11,7 @@ export const categorySchema = Yup.object({
     .nullable()
     .required("Upload a category image")
     .test("fileSize", "File too large", (value) => {
-      console.log(value.size, "value.size");
-       if (!(value instanceof Blob)) return true; // no file selected = ok
+      if (!(value instanceof Blob)) return true;
       return value.size <= 2 * 1024 * 1024;
     })
     .test("fileType", "Unsupported format", (value) => {

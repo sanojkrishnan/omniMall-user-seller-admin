@@ -17,6 +17,9 @@ import SearchNotFound from "../../components/ui/SearchNotFound";
 import Loading from "../../components/ui/Loading";
 import { useNavigate } from "react-router-dom";
 import { useDateFormatter } from "../../hooks/useDateFormatter";
+import { CreatePanel } from "../../components/ui/CreatePanel";
+import { categorySchema } from "../../validation/categorySchema";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 // ---------------------------------------------------------------------------
 // Brand tokens — same palette as the app's existing bg-[#5f0000] usage,
@@ -36,15 +39,15 @@ const CATEGORY_FIELDS = [
   { name: "name", label: "Category Name", type: "text", required: true },
 
   {
-    name: "categoryImage",
-    label: "Category Image",
-    type: "image",
-    required: true,
-  },
-  {
     name: "isActive",
     label: "Active",
     type: "checkbox",
+    required: true,
+  },
+  {
+    name: "categoryImage",
+    label: "Category Image",
+    type: "image",
     required: true,
   },
 ];
@@ -78,6 +81,7 @@ function Categories() {
   const [createCategory, setCreateCategory] = useState(false);
   const [openCategory, setOpenCategory] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [createError, setCreateError] = useState(null);
 
   // category fetch
   useEffect(() => {
@@ -168,6 +172,25 @@ function Categories() {
     },
   ];
 
+  async function handleCreateSubmit(values) {
+    try {
+      setCreateError(null);
+      await dispatch(addCategory({ data: values })).unwrap();
+      toast.success("Coupon created");
+      setCreateCategory(false);
+    } catch (err) {
+      // .unwrap() throws action.payload directly (whatever extractError
+      // returned) — not an Error instance — so `err?.message` was silently
+      // undefined whenever extractError returns a plain string, and the
+      // toast always fell back to the generic message. getErrorMessage
+      // handles both string and object shapes.
+      const message = getErrorMessage(err, "Failed to create coupon");
+      setCreateError(message);
+      toast.error(message);
+      throw err;
+    }
+  }
+
   // infinite scrolling
   const triggerRef = useInfiniteScroll({
     hasNextPage,
@@ -215,8 +238,8 @@ function Categories() {
         <Button
           className={"bg-[#60001A] w-fit px-4 flex items-center gap-1.5"}
           onClick={() => {
-            // setActiveCategory(null);
-            // setPanelMode("add");
+            setCreateError(null);
+            setCreateCategory(true);
           }}
         >
           <Plus size={16} /> Add Category
@@ -234,7 +257,7 @@ function Categories() {
           {!isBusy && !categoryError && category.length !== 0 && (
             <>
               <DataTable
-                title="All Coupons"
+                title="All Categories"
                 columns={columns}
                 data={category}
                 onRowClick={(item) => {
@@ -263,15 +286,16 @@ function Categories() {
       </div>
 
       {/* Add */}
-      {/* <CreatePanel
+      <CreatePanel
         variant="admin"
-         open={createCategory}
+        open={createCategory}
         onClose={() => setCreateCategory(false)}
-         title="Create category"
-         fields={CATEGORY_FIELDS}
-         validationSchema={categorySchema}
-         onSubmit={handleCreateSubmit}
-      /> */}
+        title="Create category"
+        fields={CATEGORY_FIELDS}
+        validationSchema={categorySchema}
+        onSubmit={handleCreateSubmit}
+        error={createError}
+      />
     </div>
   );
 }

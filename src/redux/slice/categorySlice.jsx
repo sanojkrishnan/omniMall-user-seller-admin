@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { extractError } from "../../utils/ErrorExtractor";
 import { categoryAPI } from "../../services/categoryService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const initialState = {
   category: [],
@@ -13,6 +14,10 @@ const initialState = {
   totalCategories: 0,
   categoryError: null,
   isCategoryLoading: false,
+  isCategoryUpdating: false,
+  isCategoryDeleting: false,
+  categoryUpdateError: null,
+  categoryDeleteError: null,
 };
 
 export const fetchAllCategories = createAsyncThunk(
@@ -35,6 +40,18 @@ export const fetchAllCategories = createAsyncThunk(
   },
 );
 
+export const addCategory = createAsyncThunk(
+  "product/addCategory",
+  async ({ formData }, { rejectWithValue }) => {
+    try {
+      const data = await categoryAPI.addCategory(formData);
+      return { ...data };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Add product failed"));
+    }
+  },
+);
+
 export const singleCategoryFetch = createAsyncThunk(
   "category/fetchSingleCategory",
   async ({ id }, { rejectWithValue }) => {
@@ -51,11 +68,21 @@ export const updateCategory = createAsyncThunk(
   "category/updateCategory",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      console.log("DATA FROM UPDATE CATEGORY:", data);
-      const response = await categoryAPI.updateCategory(id, data);
-      return response.data;
+      return await categoryAPI.updateCategory(id, data);
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to update category"));
+    }
+  },
+);
+
+export const deleteSingleCategory = createAsyncThunk(
+  "category/deleteSingleCategory",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const res = await categoryAPI.deleteCategory(id);
+      return { ...res, id }; // keep the server message and the id
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Deletion failed"));
     }
   },
 );
@@ -68,10 +95,18 @@ const categorySlice = createSlice({
       state.categoryError = null;
     },
     clearCategoryState(state) {
-      state.message = null;
+      state.categoryMessage = null;
+      state.categoryDeleteMessage = null;
+      state.categoryUpdateMessage = null;
       state.singleCategory = null;
       state.categoryError = null;
       state.category = [];
+    },
+    clearCategoryUpdateError(state) {
+      state.categoryUpdateError = null;
+    },
+    clearCategoryDeleteError(state) {
+      state.categoryDeleteError = null;
     },
   },
   extraReducers: (builder) => {
@@ -116,21 +151,50 @@ const categorySlice = createSlice({
     //update category
     builder
       .addCase(updateCategory.pending, (state) => {
-        state.isCategoryLoading = true;
-        state.categoryError = null;
+        state.isCategoryUpdating = true;
+        state.categoryUpdateError = null;
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
-        state.isCategoryLoading = false;
+        state.isCategoryUpdating = false;
         state.singleCategory = action.payload?.data;
-        state.categoryMessage = action.payload?.message;
+        console.log("PAYLOAD FROM UPDATE CATEGORY :", action.payload);
+        state.categoryUpdateMessage = action.payload?.message;
       })
       .addCase(updateCategory.rejected, (state, action) => {
-        state.isCategoryLoading = false;
-        state.categoryError = action.payload;
+        state.isCategoryUpdating = false;
+        state.categoryUpdateError = getErrorMessage(
+          action.payload,
+          "Failed to update category",
+        );
+      });
+    //delete coupon
+    builder
+      .addCase(deleteSingleCategory.pending, (state) => {
+        state.isCategoryDeleting = true;
+        state.categoryDeleteError = null;
+      })
+      .addCase(deleteSingleCategory.fulfilled, (state, action) => {
+        state.isCategoryDeleting = false;
+        const id = action.payload.id;
+        state.category = (state.category ?? []).filter((c) => c._id !== id);
+        state.totalCategories = Math.max(0, state.totalCategories - 1);
         state.singleCategory = null;
+        state.categoryDeleteMessage = action.payload?.message;
+      })
+      .addCase(deleteSingleCategory.rejected, (state, action) => {
+        state.isCategoryDeleting = false;
+        state.categoryDeleteError = getErrorMessage(
+          action.payload,
+          "Failed to delete category",
+        );
       });
   },
 });
 
-export const { clearCategoryError, clearCategoryState } = categorySlice.actions;
+export const {
+  clearCategoryError,
+  clearCategoryState,
+  clearCategoryUpdateError,
+  clearCategoryDeleteError,
+} = categorySlice.actions;
 export default categorySlice.reducer;

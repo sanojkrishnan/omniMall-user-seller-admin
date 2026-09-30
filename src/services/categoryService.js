@@ -19,7 +19,17 @@ export const categoryAPI = {
     return api.get(`category/fetch-single/${id}`);
   },
   //update category
-  updateCategory: async (id,data) => {
-    return api.patch(`category/update/${id}`, { data });
-  }
+  updateCategory: async (id, values) => {
+    const { categoryImage, ...fields } = values; // name, isActive
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(fields));
+    if (categoryImage instanceof File) {
+      fd.append("categoryImage", categoryImage); // only a newly picked file
+    }
+    return api.patch(`category/update/${id}`, fd);
+  },
+
+  deleteCategory: async (id) => {
+    return api.delete(`category/delete/${id}`);
+  },
 };

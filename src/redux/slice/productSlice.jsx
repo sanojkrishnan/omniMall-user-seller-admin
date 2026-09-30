@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { extractError } from "../../utils/ErrorExtractor";
 import { productAPI } from "../../services/productService";
-import { data } from "react-router-dom";
 
 const initialState = {
   products: [],

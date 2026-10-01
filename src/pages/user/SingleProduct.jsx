@@ -98,7 +98,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
     (state) => state.seller,
   );
   //category selector
-  const { singleCategory } = useSelector((state) => state.category);
+  const { singleCategory, isCategoryLoading } = useSelector((state) => state.category);
 
   console.log("SINGLE SELLER :", singleSeller);
   console.log("SINGLE CATEGORY :", singleCategory);
@@ -116,21 +116,46 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
   }, [id]);
   useEffect(() => {
     if (singleProduct?.sellerId) {
-      dispatch(singleSellerFetch({ id: singleProduct.sellerId }));
+      dispatch(
+        singleSellerFetch({
+          id: singleProduct.sellerId,
+        }),
+      )
+        .unwrap()
+        .then((res) => {
+          console.log("SELLER FETCH SUCCESS:", res);
+        })
+        .catch((err) => {
+          console.log("SELLER FETCH FAILED:", err);
+        });
     }
   }, [singleProduct?.sellerId]);
 
   useEffect(() => {
     if (singleProduct?.categoryId) {
-      dispatch(singleCategoryFetch({ id: singleProduct.categoryId }));
+      dispatch(
+        singleCategoryFetch({
+          id: singleProduct.categoryId,
+        }),
+      )
+        .unwrap()
+        .then((res) => {
+          console.log("CATEGORY FETCH SUCCESS:", res);
+        })
+        .catch((err) => {
+          console.log("CATEGORY FETCH FAILED:", err);
+        });
     }
   }, [singleProduct?.categoryId]);
+
 
   //toastify error
   useToastError({
     errorMessage: productError,
     fallbackErrorMessage: "Failed to load products",
   });
+
+
   useEffect(() => {
     return () => {
       dispatch(clearProductError());
@@ -198,9 +223,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
           <div className="mx-auto max-w-6xl px-6 pt-6">
             <nav className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-neutral-500">
               <ChevronRight className="size-3" />
-              <span>{singleCategory.name}</span>
+              <span>{singleCategory?.name}</span>
               <ChevronRight className="size-3" />
-              <span className="text-black">{singleCategory.subcategory}</span>
+              <span className="text-black">Sub Category Here</span>
             </nav>
           </div>
 
@@ -327,7 +352,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-neutral-400">Category</p>
-                    <p className="mt-0.5">{singleCategory.name}</p>
+                    <p className="mt-0.5">{singleCategory?.name}</p>
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-neutral-400">In Stock</p>
@@ -337,7 +362,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               </div>
 
               {/* Seller card */}
-              {singleSeller && !isSellerLoading && (
+              {singleSeller && !isSellerLoading && !isCategoryLoading && (
                 <div className="mt-6 flex items-center justify-between border-y border-neutral-200 py-4">
                   <div className="flex items-center gap-2">
                     <div className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold overflow-hidden">

@@ -538,7 +538,10 @@ function SingleCouponDetail() {
         Created {formatDate(coupon.createdAt)}
         {coupon.updatedAt && coupon.updatedAt !== coupon.createdAt
           ? ` · Last updated ${formatDate(coupon.updatedAt)}`
-          : ""}
+          : ""}{" "}
+        <br />
+        <br />
+        By {coupon.createdBy || "Unknown"}.
       </p>
     </div>
   );

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { extractError } from "../../utils/ErrorExtractor";
 import { couponAPI } from "../../services/couponService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const initialState = {
   coupon: [],
@@ -13,6 +14,7 @@ const initialState = {
   totalCoupons: 0,
   couponError: null,
   isCouponLoading: false,
+  couponCreateMessage: null,
 };
 
 // Fetch the cart for a specific user from backend
@@ -192,6 +194,27 @@ const couponSlice = createSlice({
       .addCase(changeCouponStatus.rejected, (state, action) => {
         state.isCouponLoading = false;
         state.couponError = action.payload;
+      });
+
+    builder
+      .addCase(addCoupon.pending, (state) => {
+        state.isCouponLoading = true;
+        state.couponCreateError = null;
+      })
+      .addCase(addCoupon.fulfilled, (state, action) => {
+        state.isCouponLoading = false;
+        state.couponCreateMessage = action.payload?.message;
+        const created = action.payload?.data;
+        if (created?._id) {
+          state.coupon = [created, ...(state.coupon ?? [])];
+        }
+      })
+      .addCase(addCoupon.rejected, (state, action) => {
+        state.isCouponLoading = false;
+        state.couponCreateError = getErrorMessage(
+          action.payload,
+          "Failed to update category",
+        );
       });
   },
 });

@@ -120,13 +120,17 @@ function CategoryDetail() {
   }, {});
 
   // CategoryDetail.jsx
-  function handleDeleteResult(confirmed) {
+  async function handleDeleteResult(confirmed) {
     setConfirmDelete(false);
-    if (confirmed) {
-      dispatch(deleteSingleCategory({ id: singleCategory._id }));
+    if (!confirmed) return;
+
+    try {
+      await dispatch(deleteSingleCategory({ id: singleCategory._id })).unwrap();
+      toast.success(categoryDeleteMessage || "Category deleted");
       dispatch(clearCategoryState());
-      toast.success(categoryDeleteMessage || "Category deleted successfully");
       navigate(-1);
+    } catch {
+      // failure is already in the slice; the categoryDeleteError useEffect shows the toast
     }
   }
 
@@ -141,17 +145,22 @@ function CategoryDetail() {
     dispatch(clearCategoryDeleteError());
   }, [categoryDeleteError, dispatch]);
 
-  const isBusy =
-    isCategoryLoading || isCategoryUpdating || isCategoryDeleting || isSaving;
+  const showLoader =
+    !categoryError && (isCategoryLoading || isCategoryDeleting);
+  const showPage =
+    singleCategory &&
+    !isCategoryLoading &&
+    !isCategoryDeleting &&
+    !categoryError;
 
   return (
     <>
-      {isBusy && !singleCategory && !categoryError && (
-        <div className="w-full h-[65vh] flex items-center justify-center">
+      {showLoader && (
+        <div className="w-full h-[80vh] flex items-center justify-center">
           <CartLoading />
         </div>
       )}
-      {!isCategoryLoading && singleCategory && !categoryError && (
+      {showPage && (
         <div className="w-full">
           {/* Back link */}
           <button

@@ -32,4 +32,9 @@ export const categoryAPI = {
   deleteCategory: async (id) => {
     return api.delete(`category/delete/${id}`);
   },
+  //add category
+  addCategory: async (data) => {
+    console.log("DATA FROM THE ADD CATEGORY SERVICE :", data);
+    return api.upload("category/add", data);
+  },
 };

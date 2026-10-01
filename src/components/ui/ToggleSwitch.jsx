@@ -18,7 +18,7 @@ export default function ToggleSwitch({
       disabled={disabled}
       onClick={handleClick}
       className={cn(
-        "relative inline-flex h-[26px] w-11 shrink-0 bg-gradient-to-b from-gray-500/30 via-white to-gray-500/30 border border-gray-300 items-center rounded-full transition-all duration-300",
+        "relative inline-flex h-[26px] w-11 shrink-0 bg-gradient-to-b from-gray-500/30 via-white/60 to-gray-500/30 border border-gray-300 items-center rounded-full transition-all duration-300",
         // checked ? "" : "",
         disabled ? "cursor-not-allowed" : "cursor-pointer",
       )}

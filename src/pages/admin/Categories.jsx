@@ -3,6 +3,7 @@ import DataTable from "../../components/ui/DataTable";
 import { useEffect, useMemo, useState } from "react";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import {
+  addCategory,
   clearCategoryError,
   fetchAllCategories,
 } from "../../redux/slice/categorySlice";
@@ -21,11 +22,6 @@ import { CreatePanel } from "../../components/ui/CreatePanel";
 import { categorySchema } from "../../validation/categorySchema";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 
-// ---------------------------------------------------------------------------
-// Brand tokens — same palette as the app's existing bg-[#5f0000] usage,
-// just centralised so every shade of the accent stays in one place.
-// Swap PRIMARY to your exact brand hex if #60001A / #5f0000 should differ.
-// ---------------------------------------------------------------------------
 const PRIMARY = "#60001A";
 const PRIMARY_TINT = "#F8ECEE";
 const MUTED = "#96828A";
@@ -71,8 +67,14 @@ function Categories() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formatDate = useDateFormatter(); // formats dates into readable date values
-  const { category, isCategoryLoading, categoryError, hasNextPage } =
-    useSelector((state) => state.category);
+  const {
+    category,
+    isCategoryLoading,
+    categoryError,
+    hasNextPage,
+    categoryCreateMessage,
+    categoryCreateError,
+  } = useSelector((state) => state.category);
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -175,19 +177,12 @@ function Categories() {
   async function handleCreateSubmit(values) {
     try {
       setCreateError(null);
+      console.log("VALUES FROM CATEGORY : ", values);
       await dispatch(addCategory({ data: values })).unwrap();
-      toast.success("Coupon created");
+      toast.success(categoryCreateMessage || "Category created");
       setCreateCategory(false);
-    } catch (err) {
-      // .unwrap() throws action.payload directly (whatever extractError
-      // returned) — not an Error instance — so `err?.message` was silently
-      // undefined whenever extractError returns a plain string, and the
-      // toast always fell back to the generic message. getErrorMessage
-      // handles both string and object shapes.
-      const message = getErrorMessage(err, "Failed to create coupon");
-      setCreateError(message);
-      toast.error(message);
-      throw err;
+    } catch {
+      //the error is already handled in the slice, so we just read it from the state and display it in the form
     }
   }
 
@@ -201,7 +196,12 @@ function Categories() {
   // error toast
   useEffect(() => {
     if (categoryError)
-      toast.error(categoryError, { toastId: "category-error" });
+      toast.error(
+        categoryError || categoryCreateError || "Failed to create category",
+        {
+          toastId: "category-error",
+        },
+      );
   }, [categoryError]);
 
   useEffect(() => () => dispatch(clearCategoryError()), [dispatch]);

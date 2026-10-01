@@ -19,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CreatePanel } from "../../components/ui/CreatePanel";
 import { couponSchema } from "../../validation/couponSchema";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 import { useDateFormatter } from "../../hooks/useDateFormatter";
 import { useCurrency } from "../../hooks/useCurrency";
 
@@ -175,6 +174,7 @@ function Coupon() {
     isCouponLoading,
     couponError,
     hasNextPage,
+    couponCreateMessage,
   } = useSelector((state) => state.coupon);
   const formatDate = useDateFormatter(); // formats dates into readable date values
   const currency = useCurrency(); // formats numbers into readable currency values
@@ -280,22 +280,16 @@ function Coupon() {
   useEffect(() => () => dispatch(clearCouponError()), [dispatch]);
 
   //handle add click
+
   async function handleCreateSubmit(values) {
     try {
       setCreateError(null);
+      console.log("VALUES FROM COUPON : ", values);
       await dispatch(addCoupon({ data: values })).unwrap();
-      toast.success("Coupon created");
+      toast.success(couponCreateMessage || "Coupon created");
       setCreateCoupon(false);
-    } catch (err) {
-      // .unwrap() throws action.payload directly (whatever extractError
-      // returned) — not an Error instance — so `err?.message` was silently
-      // undefined whenever extractError returns a plain string, and the
-      // toast always fell back to the generic message. getErrorMessage
-      // handles both string and object shapes.
-      const message = getErrorMessage(err, "Failed to create coupon");
-      setCreateError(message);
-      toast.error(message);
-      throw err;
+    } catch {
+      //the error is already handled in the slice, so we just read it from the state and display it in the form
     }
   }
 

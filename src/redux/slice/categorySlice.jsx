@@ -9,6 +9,7 @@ const initialState = {
   categoryMessage: null,
   categoryDeleteMessage: null,
   categoryUpdateMessage: null,
+  categoryCreateMessage: null,
   categoriesPage: 0,
   categoriesTotalPages: 0,
   totalCategories: 0,
@@ -18,6 +19,7 @@ const initialState = {
   isCategoryDeleting: false,
   categoryUpdateError: null,
   categoryDeleteError: null,
+  categoryCreateError: null,
 };
 
 export const fetchAllCategories = createAsyncThunk(
@@ -41,13 +43,14 @@ export const fetchAllCategories = createAsyncThunk(
 );
 
 export const addCategory = createAsyncThunk(
-  "product/addCategory",
-  async ({ formData }, { rejectWithValue }) => {
+  "category/addCategory",
+  async ({ data }, { rejectWithValue }) => {
     try {
-      const data = await categoryAPI.addCategory(formData);
-      return { ...data };
+      console.log("FORM DATA FROM THE ADD CATEGORY THUNK :", data);
+      const formData = await categoryAPI.addCategory(data);
+      return { ...formData };
     } catch (err) {
-      return rejectWithValue(extractError(err, "Add product failed"));
+      return rejectWithValue(extractError(err, "Add category failed"));
     }
   },
 );
@@ -56,6 +59,7 @@ export const singleCategoryFetch = createAsyncThunk(
   "category/fetchSingleCategory",
   async ({ id }, { rejectWithValue }) => {
     try {
+      console.log("SINGLE CATEGORY FROM THUNK :", id);
       const data = await categoryAPI.fetchOneCategory(id);
       return data;
     } catch (err) {
@@ -119,7 +123,8 @@ const categorySlice = createSlice({
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.isCategoryLoading = false;
         console.log(action.payload, "action.payload");
-        state.category = action.payload?.data?.data;
+        const list = action.payload?.data?.data;
+        state.category = Array.isArray(list) ? list : [];
         state.hasNextPage =
           action.payload?.data?.pagination?.hasNextPage ?? false;
         state.totalPages = action.payload?.data?.pagination?.totalPages ?? 0;
@@ -138,6 +143,7 @@ const categorySlice = createSlice({
       })
       .addCase(singleCategoryFetch.fulfilled, (state, action) => {
         state.isCategoryLoading = false;
+        console.log("SINGLE CATEGORY FROM SLICE :", action.payload);
         state.singleCategory = action.payload.data;
       })
       .addCase(singleCategoryFetch.rejected, (state, action) => {
@@ -167,7 +173,7 @@ const categorySlice = createSlice({
           "Failed to update category",
         );
       });
-    //delete coupon
+    //delete category
     builder
       .addCase(deleteSingleCategory.pending, (state) => {
         state.isCategoryDeleting = true;
@@ -176,9 +182,9 @@ const categorySlice = createSlice({
       .addCase(deleteSingleCategory.fulfilled, (state, action) => {
         state.isCategoryDeleting = false;
         const id = action.payload.id;
+        state.singleCategory = null;
         state.category = (state.category ?? []).filter((c) => c._id !== id);
         state.totalCategories = Math.max(0, state.totalCategories - 1);
-        state.singleCategory = null;
         state.categoryDeleteMessage = action.payload?.message;
       })
       .addCase(deleteSingleCategory.rejected, (state, action) => {
@@ -186,6 +192,27 @@ const categorySlice = createSlice({
         state.categoryDeleteError = getErrorMessage(
           action.payload,
           "Failed to delete category",
+        );
+      });
+    //add category
+    builder
+      .addCase(addCategory.pending, (state) => {
+        state.isCategoryLoading = true;
+        state.categoryCreateError = null;
+      })
+      .addCase(addCategory.fulfilled, (state, action) => {
+        state.isCategoryLoading = false;
+        state.categoryCreateMessage = action.payload?.message;
+        const created = action.payload?.data;
+        if (created?._id) {
+          state.category = [created, ...(state.category ?? [])];
+        }
+      })
+      .addCase(addCategory.rejected, (state, action) => {
+        state.isCategoryLoading = false;
+        state.categoryCreateError = getErrorMessage(
+          action.payload,
+          "Failed to update category",
         );
       });
   },

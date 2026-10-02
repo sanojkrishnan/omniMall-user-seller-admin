@@ -18,7 +18,7 @@ export const productAPI = {
 
   //delete product
   deleteProduct: async (id) => {
-    return api.delete(`product/delete/${id}`);
+    return api.delete(`admin/product/delete/${id}`);
   },
   //update product
   updateProduct: async (data, id) => {

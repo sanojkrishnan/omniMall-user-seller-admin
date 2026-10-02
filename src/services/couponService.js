@@ -20,12 +20,12 @@ export const couponAPI = {
   },
   //delete product
   deleteCoupon: async (id) => {
-    return api.delete(`coupon/delete/${id}`);
+    return api.delete(`admin/coupon/delete/${id}`);
   },
   changeCouponStatus: async (id, status) => {
-    return api.patch(`coupon/updateStatus/${id}`, { status });
+    return api.patch(`admin/coupon/updateStatus/${id}`, { status });
   },
   createCoupon: async (data) => {
-    return api.post("coupon/add", data, { authRole: "admin" });
+    return api.post("admin/coupon/add", data, { authRole: "admin" });
   },
 };

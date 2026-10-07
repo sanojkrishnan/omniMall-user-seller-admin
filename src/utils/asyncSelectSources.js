@@ -2,7 +2,7 @@ import { productAPI } from "../services/productService";
 import { categoryAPI } from "../services/categoryService";
 import { sellerAPI } from "../services/sellerService";
 
-export const ASYNC_SELECT_SOURCES = {
+export const ASYNC_SELECT_SOURCES = {  //this is used in the async select component to fetch data from the server 
   product: {
     fetchPage: async ({ page, search }) => {
       const res = await productAPI.fetchAllProduct({

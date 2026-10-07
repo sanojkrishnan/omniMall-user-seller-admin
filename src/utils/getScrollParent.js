@@ -1,7 +1,7 @@
 // Walks up the DOM from `el` to find the nearest ancestor that actually
 // scrolls (overflow-y auto/scroll AND has overflow content). Returns null
 // if none found (falls back to just using the viewport).
-export function getScrollParent(el) {
+export function getScrollParent(el) {  //this function is used to find the scrollable parent of an element. It checks the overflow-y property of each parent element and returns the first one that is scrollable. If no scrollable parent is found, it returns null.
   let node = el?.parentElement;
   while (node) {
     const style = window.getComputedStyle(node);

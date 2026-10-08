@@ -1,5 +1,4 @@
-// useActiveSegment.js
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom"; 
 
 export function useActiveSegment(afterSegment) {
   const location = useLocation();

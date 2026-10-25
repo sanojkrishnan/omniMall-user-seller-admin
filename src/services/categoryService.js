@@ -26,15 +26,21 @@ export const categoryAPI = {
     if (categoryImage instanceof File) {
       fd.append("categoryImage", categoryImage); // only a newly picked file
     }
-    return api.patch(`admin/category/update/${id}`, fd);
+    return api.patch(`admin/category/update/${id}`, fd, {
+      authRole: "admin",
+    });
   },
 
   deleteCategory: async (id) => {
-    return api.delete(`admin/category/delete/${id}`);
+    return api.delete(`admin/category/delete/${id}`, {
+      authRole: "admin",
+    });
   },
   //add category
   addCategory: async (data) => {
     console.log("DATA FROM THE ADD CATEGORY SERVICE :", data);
-    return api.upload("admin/category/add", data);
+    return api.upload("admin/category/add", data, {
+      authRole: "admin",
+    });
   },
 };

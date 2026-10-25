@@ -18,10 +18,14 @@ export const productAPI = {
 
   //delete product
   deleteProduct: async (id) => {
-    return api.delete(`admin/product/delete/${id}`);
+    return api.delete(`admin/product/delete/${id}`, {
+      authRole: "admin",
+    });
   },
   //update product
   updateProduct: async (data, id) => {
-    return api.patch(`product/update/${id}`, data);
+    return api.patch(`product/update/${id}`, data, {
+      authRole: "admin",
+    });
   },
 };

@@ -37,7 +37,7 @@ function Shop() {
     hasNextPage,
     totalProducts,
   } = useSelector((state) => state.product);
-  const triggerId = useInfiniteScroll({
+  const triggerRef = useInfiniteScroll({
     hasNextPage,
     isLoading: isProductLoading,
     onLoadMore: () => setPage((prev) => prev + 1),
@@ -157,7 +157,7 @@ function Shop() {
           </div>
         )}
 
-        <div id={triggerId} className="h-10" />
+        <div ref={triggerRef} className="h-10" />
       </div>
     </div>
   );

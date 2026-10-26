@@ -5,8 +5,8 @@ const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 export const couponSchema = Yup.object({
   name: Yup.string().required("Provide the coupon name"),
   code: Yup.string()
-    .min(5, "Minimum 5 letter is needed")
-    .max(10, "maximum 10 letter is allowed")
+    .min(3, "Minimum 3 letter is needed")
+    .max(6, "maximum 6 letter is allowed")
     .required("Provide the coupon code"),
   description: Yup.string().required("Provide a description"),
 

@@ -9,6 +9,13 @@
   transform-origin: center;
 }
 
+.font-orbitron {
+  font-family: "Orbitron", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
+
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px; /* w-1 */
@@ -108,10 +115,18 @@
   border-left: 3px solid #3b82f6;
 }
 
-.Toastify__progress-bar--success { background: #22c55e !important; }
-.Toastify__progress-bar--error   { background: #ef4444 !important; }
-.Toastify__progress-bar--warning { background: #f59e0b !important; }
-.Toastify__progress-bar--info    { background: #3b82f6 !important; }
+.Toastify__progress-bar--success {
+  background: #22c55e !important;
+}
+.Toastify__progress-bar--error {
+  background: #ef4444 !important;
+}
+.Toastify__progress-bar--warning {
+  background: #f59e0b !important;
+}
+.Toastify__progress-bar--info {
+  background: #3b82f6 !important;
+}
 
 /* close button */
 .Toastify__close-button {

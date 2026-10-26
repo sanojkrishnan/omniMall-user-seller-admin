@@ -6,19 +6,14 @@ export const couponAPI = {
     limit = 15,
     search = "",
     sort = "newest",
+    isFeatured = false,
   }) => {
     return api.get("coupon/fetch", {
-      params: { page, limit, search, sort },
+      params: { page, limit, search, sort, isFeatured },
     });
   },
   updateCoupon: async (id, data) => {
-    console.log("COUPON EDIT DATA :", data);
-    return (
-      api.patch(`coupon/update/${id}`, { data }),
-      {
-        authRole: "admin",
-      }
-    );
+    return api.patch(`coupon/update/${id}`, data, { authRole: "admin" });
   },
   fetchCouponById: async (id) => {
     return api.get(`coupon/singleFetch/${id}`);

@@ -7,7 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchAllProducts } from "../../redux/slice/productSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
-import Footer from "../../components/Footer";
+import { CouponList } from "../../components/CouponList";
+import { fetchCoupon } from "../../redux/slice/couponSlice";
 
 const carouselImages = [
   { image: "/src/assets/carausal/clothes.jfif", alt: "Clothes" },
@@ -27,6 +28,14 @@ function Home() {
     productError,
   } = useSelector((state) => state.product);
 
+  const {
+    coupon = [],
+    isCouponLoading,
+    couponError,
+  } = useSelector((state) => state.coupon);
+
+  console.log("COUPON IN THE HOME :", coupon);
+
   // Fetch
   useEffect(() => {
     dispatch(
@@ -34,6 +43,19 @@ function Home() {
         page: 1,
         limit: 15,
         isFeatured: true,
+      }),
+    );
+  }, [dispatch]);
+
+  // Fetch all coupons
+  useEffect(() => {
+    dispatch(
+      fetchCoupon({
+        pagination: {
+          page: 1,
+          limit: 15,
+          isFeatured: true,
+        },
       }),
     );
   }, [dispatch]);
@@ -136,11 +158,18 @@ function Home() {
             </h1>
             <p>Save more with our exclusive deals</p>
           </div>
-          <div className="text-center w-full text-4xl font-bold py-10">
-            COMING SOON
-            <span className="animate-ping [animation-delay:150ms]">•</span>
-            <span className="animate-ping [animation-delay:300ms]">•</span>
-            <span className="animate-ping [animation-delay:500ms]">•</span>
+          <div className="py-10">
+            {coupon.length === 0 && <span>No offers for today.</span>}
+            <CouponList
+              coupons={coupon}
+              loading={isCouponLoading}
+              error={couponError}
+            />
+          </div>
+          <div className="flex justify-center items-center">
+            <Button className={"w-fit"} variant={"secondary"}>
+              Show More
+            </Button>
           </div>
         </div>
       </div>

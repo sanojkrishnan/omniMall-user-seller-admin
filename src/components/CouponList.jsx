@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "./ui/Button";
 import { useCurrency } from "../hooks/useCurrency";
+import { useNavigate } from "react-router-dom";
 
 /* ---------- theme rules ----------
    Payment method  -> colour family (UPI violet, CARD blue, COD orange; 2 methods blend, all 3 = black)
@@ -192,6 +193,7 @@ export default function CouponCard({ coupon, onApply }) {
 }
 
 export function CouponList({ coupons = [], loading, error, onApply, feature }) {
+  const navigate = useNavigate();
   const list = feature
     ? coupons
         .filter((c) => {
@@ -228,7 +230,12 @@ export function CouponList({ coupons = [], loading, error, onApply, feature }) {
         Array.from({ length: 3 }).map((_, i) => <CouponSkeleton key={i} />)}
 
       {list.map((c) => (
-        <CouponCard key={c._id || c.code} coupon={c} onApply={onApply} />
+        <CouponCard
+          key={c._id || c.code}
+          coupon={c}
+          onApply={onApply}
+          onClick={() => navigate(`/user/profile/coupon/${c._id}`)}
+        />
       ))}
       {wrong && <span className="text-center">Something Went Wrong !</span>}
     </div>

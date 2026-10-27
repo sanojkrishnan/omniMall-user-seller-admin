@@ -167,7 +167,11 @@ function Home() {
             />
           </div>
           <div className="flex justify-center items-center">
-            <Button className={"w-fit"} variant={"secondary"}>
+            <Button
+              className={"w-fit"}
+              variant={"secondary"}
+              onClick={() => navigate("/user/profile/coupons")}
+            >
               Show More
             </Button>
           </div>

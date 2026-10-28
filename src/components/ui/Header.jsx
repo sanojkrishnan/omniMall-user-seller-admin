@@ -27,7 +27,7 @@ const getNavPath = (item, user) => {
     case "Cart":
       return user ? "/user/cart" : "/login";
     case "Profile":
-      return user ? "/profile" : "/login";
+      return user ? "/user/profile" : "/login";
     default:
       return "/";
   }

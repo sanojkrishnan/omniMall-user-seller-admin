@@ -2,14 +2,15 @@ import P from "./P";
 
 const PRIMARY = "#60001A";
 const PRIMARY_TINT = "#F8ECEE";
-const BORDER = "#ECE0E3";
+const ADMIN_BORDER = "#ECE0E3";
+const USER_BORDER = "#000000";
 const MUTED = "#96828A";
 
-export function StatCard({ label, value, icon: Icon }) {
+export function StatCard({ label, value, icon: Icon, admin }) {
   return (
     <div
       className="flex-1 rounded-xl p-4 flex items-center gap-3 bg-white"
-      style={{ border: `1px solid ${BORDER}` }}
+      style={{ border: `1px solid ${admin ? ADMIN_BORDER : USER_BORDER}` }}
     >
       <div
         className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0"

@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { FormCard } from "../../components/ui/FormCard";
 import { StatCard } from "../../components/ui/StatCard";
+import { Button } from "../../components/ui/Button";
+import { GoSignOut } from "react-icons/go";
 
 const tiles = [
   {
@@ -66,7 +68,6 @@ const tiles = [
 const stats = [
   { label: "Orders", value: 12, icon: PackageCheck },
   { label: "Coupons", value: 5, icon: Ticket },
-  { label: "Likes", value: 28, icon: Heart },
 ];
 
 export default function UserProfile({
@@ -77,35 +78,43 @@ export default function UserProfile({
       {/* spacer for the fixed navbar */}
       <div className="h-24 w-full" />
 
-      <main className="mx-auto max-w-7xl px-5 pb-16 pt-9 ">
+      <main className="mx-auto max-w-7xl px-5 sm:pb-16 pb-9 pt-0 sm:pt-9 ">
         {/* Hero */}
-        <section className="mb-9 flex flex-wrap  items-center gap-5">
-          <div className="grid h-20 w-20 place-items-center rounded-full border-2 border-black text-3xl font-bold">
-            {user.name.charAt(0).toUpperCase()}
+        <section className="mb-9 flex flex-wrap justify-evenly items-center border-b pb-6 gap-5">
+          <div className="sm:flex flex-wrap items-center gap-5">
+            <div className="grid sm:h-20 sm:mx-0 mx-auto sm:w-20 w-10 h-10 place-items-center rounded-full border-2 border-black sm:text-3xl text-xl font-bold">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="text-center sm:text-left">
+              <h1 className="sm:text-3xl text-xl font-bold tracking-tight">
+                Hello, {user.name}
+              </h1>
+              <p className="mt-1 text-sm text-neutral-500">{user.email}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Hello, {user.name}
-            </h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              {user.email} · Member since {user.since}
-            </p>
-            <span className="mt-2 inline-block border-[1.5px] border-black px-2.5 py-0.5 text-[11px] uppercase tracking-widest">
-              Omni Plus Member
-            </span>
-          </div>
-        </section>
 
-        {/* Stats */}
-        <section className="mb-9 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-          {stats.map((s) => (
-            <StatCard
-              key={s.label}
-              label={s.label}
-              value={s.value}
-              icon={s.icon}
-            />
-          ))}
+          {/* Stats */}
+          <section className=" grid grid-cols-2 sm:grid-cols-2">
+            {stats.map((s) => (
+              <StatCard
+                className={"rounded-none"}
+                admin={false}
+                key={s.label}
+                label={s.label}
+                value={s.value}
+                icon={s.icon}
+              />
+            ))}
+          </section>
+          <section className="flex flex-col items-center">
+            <Button className="w-fit shadow-none">Be A Seller</Button>
+            <Button
+              className={"text-red-500 shadow-none w-fit"}
+              variant={"secondary"}
+            >
+              <GoSignOut size={12} /> LogOut
+            </Button>
+          </section>
         </section>
 
         {/* Tiles */}
@@ -116,14 +125,14 @@ export default function UserProfile({
           {tiles.map(({ title, desc, icon: Icon, href }) => (
             <FormCard
               key={title}
-              className="flex-col min-w-[280px] max-w-full justify-between border p-4 transition-all duration-150 hover:-translate-x-[3px] hover:-translate-y-[3px] hover:shadow-md sm:min-h-[190px] sm:p-5"
+              className="group relative flex-col min-w-[280px] max-w-full justify-between border p-4 transition-all duration-150 hover:-translate-x-[3px] hover:-translate-y-[3px] hover:shadow-md sm:min-h-[190px] sm:p-5"
             >
               {/* the after: layer makes the whole card clickable */}
               <a
                 href={href}
-                className="flex h-full flex-col justify-between outline-none after:absolute after:inset-0"
+                className="group relative flex h-full flex-col justify-between outline-none after:absolute after:inset-0"
               >
-                <ArrowUpRight className="absolute right-4 top-4 h-5 w-5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                <ArrowUpRight className="absolute right-0 top-0 h-5 w-5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                 <Icon className="h-8 w-8" strokeWidth={1.6} />
                 <div>
                   <h2 className="mb-1.5 mt-4 text-[15px] font-bold sm:text-lg">

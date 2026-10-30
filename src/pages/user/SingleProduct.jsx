@@ -38,6 +38,7 @@ import P from "../../components/ui/P";
 import Loading from "../../components/ui/Loading";
 import { useHandleCartClick } from "../../hooks/useHandleCartClick";
 import { toast } from "react-toastify";
+import BackButtonUser from "../../components/ui/BackButtonUser";
 
 const defaultProduct = {
   subcategory: "Coats",
@@ -98,7 +99,9 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
     (state) => state.seller,
   );
   //category selector
-  const { singleCategory, isCategoryLoading } = useSelector((state) => state.category);
+  const { singleCategory, isCategoryLoading } = useSelector(
+    (state) => state.category,
+  );
 
   console.log("SINGLE SELLER :", singleSeller);
   console.log("SINGLE CATEGORY :", singleCategory);
@@ -148,13 +151,11 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
     }
   }, [singleProduct?.categoryId]);
 
-
   //toastify error
   useToastError({
     errorMessage: productError,
     fallbackErrorMessage: "Failed to load products",
   });
-
 
   useEffect(() => {
     return () => {
@@ -210,6 +211,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
   return (
     <>
+      <BackButtonUser />
       <div className="w-full h-16"></div>
       {isProductLoading && (
         <div className="flex w-full h-screen items-center justify-center">

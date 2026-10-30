@@ -2,6 +2,7 @@ import {
   HomeIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,
+  User,
   UserCog,
 } from "lucide-react";
 import OmniMall from "./OmniMall";
@@ -33,9 +34,44 @@ const getNavPath = (item, user) => {
   }
 };
 
+/**
+ * Profile avatar for the menu:
+ *  - user + profile image  -> the image
+ *  - user, no image        -> first letter of the user's name
+ *  - no user               -> user icon
+ */
+function ProfileAvatar({ user, FallbackIcon, iconClass = "" }) {
+  const imageUrl = user?.profileImage?.url;
+  const initial = user?.firstName?.trim().charAt(0).toUpperCase();
+
+  if (user && imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt="Profile"
+        referrerPolicy="no-referrer"
+        className="size-6 rounded-full object-cover"
+      />
+    );
+  }
+
+  if (user && initial) {
+    return (
+      <div className="grid size-6 place-items-center rounded-full bg-white text-sm font-bold leading-none text-black">
+        {initial}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-fit h-fit rounded-full bg-white p-1 text-black">
+      <FallbackIcon className={iconClass} />
+    </div>
+  );
+}
+
 function Header({ hideMenu, borderLine, selection }) {
   const { user } = useSelector((state) => state.auth);
-  console.log("Header user:", user);
   const navigate = useNavigate();
 
   return (
@@ -67,20 +103,7 @@ function Header({ hideMenu, borderLine, selection }) {
                   }
                 >
                   {item === "Profile" ? (
-                    <div
-                      className={`w-fit h-fit ${!user?.profileImage?.url && "p-1"} bg-white rounded-full text-black`}
-                    >
-                      {user?.profileImage?.url ? (
-                        <img
-                          src={user.profileImage.url}
-                          alt="Profile"
-                          referrerPolicy="no-referrer"
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      ) : (
-                        <UserCog className="size-6" />
-                      )}
-                    </div>
+                    <ProfileAvatar user={user} FallbackIcon={User} />
                   ) : (
                     <Icon className="size-6" />
                   )}
@@ -117,20 +140,11 @@ function Header({ hideMenu, borderLine, selection }) {
                   onClick={() => path && navigate(path, { replace: true })}
                 >
                   {item === "Profile" ? (
-                    <div
-                      className={`w-fit h-fit ${!user?.profileImage?.url && "p-1"} bg-white rounded-full text-black`}
-                    >
-                      {user?.profileImage?.url ? (
-                        <img
-                          src={user.profileImage.url}
-                          alt="Profile"
-                          referrerPolicy="no-referrer"
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      ) : (
-                        <UserCog className="size-4" />
-                      )}
-                    </div>
+                    <ProfileAvatar
+                      user={user}
+                      FallbackIcon={UserCog}
+                      iconClass="size-4"
+                    />
                   ) : (
                     <Icon className="size-4" />
                   )}

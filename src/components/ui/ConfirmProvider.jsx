@@ -29,6 +29,17 @@ function ConfirmProvider({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   return (
     <div
       className={`${
@@ -65,3 +76,28 @@ function ConfirmProvider({
 }
 
 export default ConfirmProvider;
+
+//jsx
+// <ConfirmProvider
+//         variant="admin"
+//         open={open}
+//         onResult={handleResult}
+//         setOpen={setOpen}
+//       >
+//         {" "}
+//         Are you sure, you want to delete?
+//       </ConfirmProvider>
+
+//function
+// function handleResult(confirmed) {
+//     setOpen(false);
+//     if (confirmed) {
+//       dispatch(deleteSingleCoupon({ id: singleCoupon._id }));
+//       dispatch(clearCouponState());
+//       toast.success("Coupon deleted successfully");
+//       navigate("/admin/coupon");
+//     }
+//   }
+
+//state
+// const [open, setOpen] = useState(false);

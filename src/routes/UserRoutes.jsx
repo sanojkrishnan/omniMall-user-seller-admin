@@ -8,6 +8,7 @@ import SingleProduct from "../pages/user/SingleProduct";
 import Cart from "../pages/user/Cart";
 import CouponsInUser from "../components/CouponsInUser";
 import UserProfile from "../pages/user/UserProfile";
+import PersonalInfo from "../components/PersonalInfo";
 
 const userRoutes = (
   <>
@@ -34,6 +35,7 @@ const userRoutes = (
       <Route path="profile" element={<UserProfile />} />
       <Route path={`shop/product/:id`} element={<SingleProduct />} />
       <Route path={`profile/coupons`} element={<CouponsInUser />} />
+      <Route path={`profile/personal-info`} element={<PersonalInfo />} />
     </Route>
   </>
 );

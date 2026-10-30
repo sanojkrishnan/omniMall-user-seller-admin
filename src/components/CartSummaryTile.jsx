@@ -1,9 +1,10 @@
 import { Button } from "./ui/Button";
+import { FormCard } from "./ui/FormCard";
 import P from "./ui/P";
 
 function CartSummaryTile({ subtotal, shipping, total }) {
   return (
-    <div className="mt-10 lg:mt-0 lg:sticky lg:top-24 rounded-lg border shadow-lg border-neutral-200 p-5 space-y-3">
+    <FormCard className="mt-10 lg:mt-0 lg:sticky lg:top-24 rounded-lg border shadow-lg border-neutral-200 p-5 space-y-3">
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs text-neutral-500">
           <span>Subtotal</span>
@@ -30,7 +31,7 @@ function CartSummaryTile({ subtotal, shipping, total }) {
       </div>
 
       <Button>Checkout · ${total.toFixed(2)}</Button>
-    </div>
+    </FormCard>
   );
 }
 

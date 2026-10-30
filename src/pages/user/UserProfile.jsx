@@ -10,111 +10,94 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { FormCard } from "../../components/ui/FormCard";
-import { StatCard } from "../../components/ui/StatCard";
-import { Button } from "../../components/ui/Button";
-import { GoSignOut } from "react-icons/go";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const tiles = [
   {
     title: "Personal Info",
     desc: "Name, email, phone and date of birth",
     icon: User,
-    href: "/profile/personal-info",
+    path: "/user/profile/personal-info",
   },
   {
     title: "Address Book",
     desc: "Manage delivery and billing addresses",
     icon: MapPin,
-    href: "/profile/addresses",
+    path: "/user/profile/addresses",
   },
   {
     title: "Orders & Returns",
     desc: "Track orders, return or exchange items",
     icon: PackageCheck,
-    href: "/profile/orders",
+    path: "/user/profile/orders",
   },
   {
     title: "Coupons & Offers",
     desc: "Your active coupons and exclusive deals",
     icon: Ticket,
-    href: "/profile/coupons",
+    path: "/user/profile/coupons",
   },
   {
     title: "Payment Methods",
     desc: "Saved cards, UPI and wallets",
     icon: CreditCard,
-    href: "/profile/payments",
+    path: "/user/profile/payments",
   },
   {
     title: "Login & Security",
     desc: "Password, 2-step verification, devices",
     icon: ShieldCheck,
-    href: "/profile/security",
+    path: "/user/profile/security",
   },
   {
     title: "Shopping Preferences",
     desc: "Sizes, brands, language and notifications",
     icon: SlidersHorizontal,
-    href: "/profile/preferences",
+    path: "/user/profile/preferences",
   },
   {
     title: "Likes & Reviews",
     desc: "Wishlist items and reviews you've written",
     icon: Heart,
-    href: "/profile/likes-reviews",
+    path: "/user/profile/likes-reviews",
   },
 ];
 
-const stats = [
-  { label: "Orders", value: 12, icon: PackageCheck },
-  { label: "Coupons", value: 5, icon: Ticket },
-];
-
-export default function UserProfile({
-  user = { name: "Aarav", email: "aarav@example.com", since: 2024 },
-}) {
+export default function UserProfile() {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   return (
     <>
       {/* spacer for the fixed navbar */}
-      <div className="h-24 w-full" />
+      <div className="h-20 w-full" />
 
       <main className="mx-auto max-w-7xl px-5 sm:pb-16 pb-9 pt-0 sm:pt-9 ">
         {/* Hero */}
         <section className="mb-9 flex flex-wrap justify-evenly items-center border-b pb-6 gap-5">
           <div className="sm:flex flex-wrap items-center gap-5">
-            <div className="grid sm:h-20 sm:mx-0 mx-auto sm:w-20 w-10 h-10 place-items-center rounded-full border-2 border-black sm:text-3xl text-xl font-bold">
-              {user.name.charAt(0).toUpperCase()}
+            <div className="grid sm:h-20 sm:mx-0 mx-auto sm:w-20 w-10 h-10 place-items-center rounded-full border-2 sm:text-3xl text-xl font-bold p-1">
+              {user?.profileImage?.url ? (
+                <img
+                  src={user.profileImage.url}
+                  alt="Profile"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                user.firstName.charAt(0).toUpperCase()
+              )}
             </div>
             <div className="text-center sm:text-left">
               <h1 className="sm:text-3xl text-xl font-bold tracking-tight">
-                Hello, {user.name}
+                {user.firstName.charAt(0).toUpperCase() +
+                  user.firstName.slice(1) +
+                  " " +
+                  user.lastName}
               </h1>
               <p className="mt-1 text-sm text-neutral-500">{user.email}</p>
             </div>
           </div>
-
-          {/* Stats */}
-          <section className=" grid grid-cols-2 sm:grid-cols-2">
-            {stats.map((s) => (
-              <StatCard
-                className={"rounded-none"}
-                admin={false}
-                key={s.label}
-                label={s.label}
-                value={s.value}
-                icon={s.icon}
-              />
-            ))}
-          </section>
-          <section className="flex flex-col items-center">
-            <Button className="w-fit shadow-none">Be A Seller</Button>
-            <Button
-              className={"text-red-500 shadow-none w-fit"}
-              variant={"secondary"}
-            >
-              <GoSignOut size={12} /> LogOut
-            </Button>
-          </section>
         </section>
 
         {/* Tiles */}
@@ -122,14 +105,13 @@ export default function UserProfile({
           aria-label="Account sections"
           className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
-          {tiles.map(({ title, desc, icon: Icon, href }) => (
+          {tiles.map(({ title, desc, icon: Icon, path }) => (
             <FormCard
               key={title}
               className="group relative flex-col min-w-[280px] max-w-full justify-between border p-4 transition-all duration-150 hover:-translate-x-[3px] hover:-translate-y-[3px] hover:shadow-md sm:min-h-[190px] sm:p-5"
             >
-              {/* the after: layer makes the whole card clickable */}
-              <a
-                href={href}
+              <div
+                onClick={() => navigate(path)}
                 className="group relative flex h-full flex-col justify-between outline-none after:absolute after:inset-0"
               >
                 <ArrowUpRight className="absolute right-0 top-0 h-5 w-5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
@@ -142,7 +124,7 @@ export default function UserProfile({
                     {desc}
                   </p>
                 </div>
-              </a>
+              </div>
             </FormCard>
           ))}
         </nav>

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCoupon } from "../redux/slice/couponSlice";
 import CouponCard from "./CouponList";
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import BackButtonUser from "./ui/BackButtonUser";
 
 /* ---------- helpers ---------- */
 const getPhase = (c) => {
@@ -112,6 +115,7 @@ function Tile({ entry, onApply }) {
 
 /* ---------- page ---------- */
 export default function CouponsInUser({ userType, onApply }) {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     coupon: coupons = [],
@@ -169,135 +173,142 @@ export default function CouponsInUser({ userType, onApply }) {
   ).length;
 
   return (
-    <section className="w-full bg-gray-100">
-      {/* hero */}
-      <div
-        className="px-4 py-14 text-center text-white sm:px-8 sm:py-20"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
-        }}
-      >
-        <h1 className="text-3xl font-semibold sm:text-4xl">Coupons & Offers</h1>
-        <p className="mt-2 text-white/70">
-          Copy a code and apply it at checkout
-        </p>
-        <div className="mt-8 flex justify-center gap-4">
-          {[
-            [liveCount, "live offers"],
-            [forYouCount, "just for you"],
-          ].map(([n, t]) => (
-            <div
-              key={t}
-              className="min-w-[120px] rounded-2xl border border-white/15 bg-white/5 px-6 py-3"
-            >
-              <div className="text-3xl font-bold">{n}</div>
-              <div className="text-xs text-white/60">{t}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8">
-        {/* status tabs */}
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-full bg-gray-200 p-1">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
-                  tab === t.id
-                    ? "bg-black text-white shadow"
-                    : "text-gray-600 hover:text-black"
-                }`}
+    <>
+      <div className="sm:h-16 h-10 w-full" />
+      <section className="w-full relative">
+        {/* back */}
+        <BackButtonUser />
+        {/* hero */}
+        <div
+          className="px-4 py-14 text-center text-white sm:px-8 sm:py-20"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 0%, #2a2a3a 0%, #111118 50%, #0a0a0f 100%)",
+          }}
+        >
+          <h1 className="text-3xl font-semibold sm:text-4xl">
+            Coupons & Offers
+          </h1>
+          <p className="mt-2 text-white/70">
+            Copy a code and apply it at checkout
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            {[
+              [liveCount, "live offers"],
+              [forYouCount, "just for you"],
+            ].map(([n, t]) => (
+              <div
+                key={t}
+                className="min-w-[120px] rounded-2xl border border-white/15 bg-white/5 px-6 py-3"
               >
-                {t.text}{" "}
-                <span className="ml-1 opacity-60">{tabCount(t.id)}</span>
-              </button>
+                <div className="text-3xl font-bold">{n}</div>
+                <div className="text-xs text-white/60">{t}</div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* filters */}
-        <div className="mt-8 space-y-3">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {AUDIENCE.map((a) => (
-              <Chip
-                key={a.id}
-                active={audience === a.id}
-                onClick={() => setAudience(a.id)}
-                count={inTab.filter((e) => matchAudience(e, a.id)).length}
-              >
-                {a.text}
-              </Chip>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {SCOPE.map((s) => (
-              <Chip
-                key={s.id}
-                active={scope === s.id}
-                onClick={() => setScope(s.id)}
-                count={inTab.filter((e) => matchScope(e, s.id)).length}
-              >
-                {s.text}
-              </Chip>
-            ))}
-          </div>
-        </div>
-
-        {/* content */}
-        <div className="mt-10">
-          {error && !loading && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
-              {typeof error === "string"
-                ? error
-                : "Could not load coupons. Please try again."}
-            </div>
-          )}
-
-          {loading && (
-            <div
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              }}
-            >
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-[200px] animate-pulse rounded-2xl bg-gray-300"
-                />
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8">
+          {/* status tabs */}
+          <div className="flex justify-center">
+            <div className="inline-flex rounded-full bg-gray-200 p-1">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                    tab === t.id
+                      ? "bg-black text-white shadow"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  {t.text}{" "}
+                  <span className="ml-1 opacity-60">{tabCount(t.id)}</span>
+                </button>
               ))}
             </div>
-          )}
+          </div>
 
-          {!loading && !error && visible.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-gray-300 p-14 text-center text-gray-500">
-              No {tab} coupons match these filters.
-            </div>
-          )}
-
-          {!loading && visible.length > 0 && (
-            <div
-              className="grid gap-6"
-              style={{
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              }}
-            >
-              {visible.map((e) => (
-                <Tile
-                  key={e.coupon._id || e.coupon.code}
-                  entry={e}
-                  onApply={onApply}
-                />
+          {/* filters */}
+          <div className="mt-8 space-y-3">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {AUDIENCE.map((a) => (
+                <Chip
+                  key={a.id}
+                  active={audience === a.id}
+                  onClick={() => setAudience(a.id)}
+                  count={inTab.filter((e) => matchAudience(e, a.id)).length}
+                >
+                  {a.text}
+                </Chip>
               ))}
             </div>
-          )}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {SCOPE.map((s) => (
+                <Chip
+                  key={s.id}
+                  active={scope === s.id}
+                  onClick={() => setScope(s.id)}
+                  count={inTab.filter((e) => matchScope(e, s.id)).length}
+                >
+                  {s.text}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          {/* content */}
+          <div className="mt-10">
+            {error && !loading && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-700">
+                {typeof error === "string"
+                  ? error
+                  : "Could not load coupons. Please try again."}
+              </div>
+            )}
+
+            {loading && (
+              <div
+                className="grid gap-4"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                }}
+              >
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-[200px] animate-pulse rounded-2xl bg-gray-300"
+                  />
+                ))}
+              </div>
+            )}
+
+            {!loading && !error && visible.length === 0 && (
+              <div className="rounded-2xl border-2 border-dashed border-gray-300 p-14 text-center text-gray-500">
+                No {tab} coupons match these filters.
+              </div>
+            )}
+
+            {!loading && visible.length > 0 && (
+              <div
+                className="grid gap-6"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                }}
+              >
+                {visible.map((e) => (
+                  <Tile
+                    key={e.coupon._id || e.coupon.code}
+                    entry={e}
+                    onApply={onApply}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

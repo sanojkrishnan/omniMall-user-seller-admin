@@ -16,7 +16,6 @@ import {
 } from "../redux/slice/categorySlice";
 import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
-import RelatedSuggestion from "./RelatedSuggestion";
 import { EditPanel } from "./ui/EditPanel";
 import { categorySchema } from "../validation/categorySchema";
 import { toast } from "react-toastify";

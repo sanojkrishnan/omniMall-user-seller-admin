@@ -7,6 +7,7 @@ import { GoSignOut } from "react-icons/go";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slice/authSlice";
 import ConfirmProvider from "./ui/ConfirmProvider";
+import BackButtonUser from "./ui/BackButtonUser";
 
 /* ---------- small pieces ---------- */
 const inputCls =
@@ -136,14 +137,17 @@ export default function PersonalInfo() {
     <div className="min-h-screen bg-white text-black">
       {/* spacer for the fixed navbar */}
       <div className="h-20 w-full" />
-
-      <div className="mx-auto max-w-6xl px-5 pb-20 pt-4 sm:pt-8">
+      <div className="mx-auto max-w-6xl pb-20 pt-4">
         {/* breadcrumb */}
+        <div className="grid gap-12 lg:grid-cols-[280px_1fr] relative">
+          <div className="absolute top-1 left-0 w-fit">
+            {/* back */}
+            <BackButtonUser variant="secondary" />
+          </div>
 
-        <div className="grid gap-12 lg:grid-cols-[280px_1fr]">
           {/* ---------- sidebar ---------- */}
           {/* <BackButtonUser onClick={() => navigate(-1)} /> */}
-          <aside className="lg:sticky lg:top-24 lg:self-start mt-10 flex items-center justify-center">
+          <aside className="lg:sticky lg:top-24 lg:self-start mt-16 flex items-center justify-center">
             <FormCard className="flex items-center justify-center gap-4 border lg:flex-col w-fit lg:text-center">
               <div className="relative h-20 w-20 shrink-0 lg:h-28 lg:w-28">
                 <div className="grid h-full w-full p-1 place-items-center rounded-full border-2 text-3xl font-bold lg:text-5xl">
@@ -192,7 +196,7 @@ export default function PersonalInfo() {
           </aside>
 
           {/* ---------- content ---------- */}
-          <main className="space-y-6">
+          <main className="space-y-6 mt-6">
             <header>
               <h1 className="text-3xl font-bold tracking-tight">
                 Personal Info
@@ -234,15 +238,12 @@ export default function PersonalInfo() {
             <Group title="Account">
               <Row label="Account type">{user.role}</Row>
             </Group>
+            <Button>Save Changes</Button>
           </main>
         </div>
       </div>
 
-      <ConfirmProvider
-        open={open}
-        onResult={handleResult}
-        setOpen={setOpen}
-      >
+      <ConfirmProvider open={open} onResult={handleResult} setOpen={setOpen}>
         {" "}
         Are you sure, you want to log out from Omnimall?
       </ConfirmProvider>

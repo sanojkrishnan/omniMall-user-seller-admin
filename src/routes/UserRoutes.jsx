@@ -9,6 +9,12 @@ import Cart from "../pages/user/Cart";
 import CouponsInUser from "../components/CouponsInUser";
 import UserProfile from "../pages/user/UserProfile";
 import PersonalInfo from "../components/PersonalInfo";
+import AddressBook from "../components/AddressBook";
+import OrdersReturns from "../components/OrderAndReturn";
+import PaymentMethods from "../components/PaymentMethords";
+import LoginSecurity from "../components/LoginSecurity";
+import LikesReviews from "../components/LikesReviews";
+import ShoppingPreferences from "../components/ShoppingPreferences";
 
 const userRoutes = (
   <>
@@ -36,6 +42,12 @@ const userRoutes = (
       <Route path={`shop/product/:id`} element={<SingleProduct />} />
       <Route path={`profile/coupons`} element={<CouponsInUser />} />
       <Route path={`profile/personal-info`} element={<PersonalInfo />} />
+      <Route path={`profile/addresses`} element={<AddressBook />} />
+      <Route path={`profile/orders`} element={<OrdersReturns />} />
+      <Route path={`profile/payments`} element={<PaymentMethods />} />
+      <Route path={`profile/security`} element={<LoginSecurity />} />
+      <Route path={`profile/preferences`} element={<ShoppingPreferences />} />
+      <Route path={`profile/likes-reviews`} element={<LikesReviews />} />
     </Route>
   </>
 );

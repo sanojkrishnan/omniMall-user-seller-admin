@@ -38,7 +38,6 @@ import P from "../../components/ui/P";
 import Loading from "../../components/ui/Loading";
 import { useHandleCartClick } from "../../hooks/useHandleCartClick";
 import { toast } from "react-toastify";
-import BackButtonUser from "../../components/ui/BackButtonUser";
 
 const defaultProduct = {
   subcategory: "Coats",
@@ -211,7 +210,6 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
 
   return (
     <>
-      <BackButtonUser />
       <div className="w-full h-16"></div>
       {isProductLoading && (
         <div className="flex w-full h-screen items-center justify-center">

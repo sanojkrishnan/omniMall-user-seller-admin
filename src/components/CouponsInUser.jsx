@@ -174,10 +174,12 @@ export default function CouponsInUser({ userType, onApply }) {
 
   return (
     <>
-      <div className="sm:h-16 h-10 w-full" />
+      <div className="h-10 sm:h-16 w-full" />
       <section className="w-full relative">
-        {/* back */}
-        <BackButtonUser />
+        <div className="absolute top-1 left-0 w-fit ">
+          {/* back */}
+          <BackButtonUser />
+        </div>
         {/* hero */}
         <div
           className="px-4 py-14 text-center text-white sm:px-8 sm:py-20"

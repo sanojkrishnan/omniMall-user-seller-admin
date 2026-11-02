@@ -140,7 +140,7 @@ export function EditPanel({
                   <FieldLabel required={field.required}>
                     {field.label}
                   </FieldLabel>
-                  {renderField(field, formik)}
+                  {renderField(field, formik , variant)}
                   {field.helperText &&
                     !(formik.submitCount > 0 && formik.errors[field.name]) && (
                       <p className="mt-1 text-[12px] text-[var(--edit-muted)]">

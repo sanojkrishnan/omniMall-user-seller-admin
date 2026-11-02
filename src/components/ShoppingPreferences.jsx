@@ -272,6 +272,7 @@ export default function ShoppingPreferences() {
                     <p className="text-xs text-neutral-500">{desc}</p>
                   </div>
                   <ToggleSwitch
+                    variant="user"
                     checked={prefs.notify[key]}
                     onChange={(c) =>
                       set("notify", { ...prefs.notify, [key]: c })

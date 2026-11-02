@@ -5,43 +5,20 @@ import {
   KeyRound,
   ShieldCheck,
   Bell,
-  Laptop,
-  Smartphone,
-  LogOut,
   Trash2,
+  LogOutIcon,
 } from "lucide-react";
 import BackButtonUser from "./ui/BackButtonUser";
 import { EditPanel } from "./ui/EditPanel";
 import ConfirmProvider from "./ui/ConfirmProvider";
 import ToggleSwitch from "./ui/ToggleSwitch";
+import { Button } from "./ui/Button";
+import { logout } from "../redux/slice/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 /* ---------- static data ---------- */
 const email = "aarav.menon@example.com";
-
-const initialDevices = [
-  {
-    id: 1,
-    name: "Chrome on Windows",
-    kind: "laptop",
-    location: "Kochi, India",
-    last: "Active now",
-    current: true,
-  },
-  {
-    id: 2,
-    name: "OmniMall app on Android",
-    kind: "phone",
-    location: "Palakkad, India",
-    last: "2 hours ago",
-  },
-  {
-    id: 3,
-    name: "Firefox on Linux",
-    kind: "laptop",
-    location: "Bengaluru, India",
-    last: "5 days ago",
-  },
-];
 
 /* ---------- change password panel config ---------- */
 const PASSWORD_FIELDS = [
@@ -115,31 +92,31 @@ function Row({ icon: Icon, title, desc, children }) {
   );
 }
 
-const pillBtn =
-  "flex items-center gap-1.5 rounded-full border border-black px-4 py-1.5 text-xs font-semibold transition hover:bg-black hover:text-white";
-
 /* ---------- page ---------- */
 export default function LoginSecurity() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [twoStep, setTwoStep] = useState(true);
   const [loginAlerts, setLoginAlerts] = useState(true);
-  const [devices, setDevices] = useState(initialDevices);
   const [passwordChanged, setPasswordChanged] = useState("3 months ago");
   const [passwordOpen, setPasswordOpen] = useState(false);
-
-  // one confirmation dialog shared by every risky action on this page
   const [confirm, setConfirm] = useState({
     open: false,
     message: "",
     run: null,
   });
+  function handleLogout() {
+    dispatch(logout());
+    navigate("/", { replace: true });
+  }
+
   const askConfirm = (message, run) => setConfirm({ open: true, message, run });
+
   const handleConfirmResult = (confirmed) => {
-    setConfirm((c) => ({ ...c, open: false }));
-    if (confirmed) confirm.run?.();
+    const action = confirm.run;
+    setConfirm({ open: false, message: "", run: null });
+    if (confirmed) action?.(); // just run the stored action
   };
-
-  const otherDevices = devices.filter((d) => !d.current);
-
   return (
     <div className="relative min-h-screen bg-white text-black">
       {/* spacer for the fixed navbar */}
@@ -165,9 +142,13 @@ export default function LoginSecurity() {
               title="Password"
               desc={`Last changed ${passwordChanged}`}
             >
-              <button onClick={() => setPasswordOpen(true)} className={pillBtn}>
+              <Button
+                onClick={() => setPasswordOpen(true)}
+                variant="secondary"
+                className="shadow-none"
+              >
                 Change
-              </button>
+              </Button>
             </Row>
           </Section>
 
@@ -178,6 +159,7 @@ export default function LoginSecurity() {
               desc="Ask for a one-time code when you sign in on a new device."
             >
               <ToggleSwitch
+                variant="user"
                 checked={twoStep}
                 onChange={(checked) =>
                   checked
@@ -195,88 +177,56 @@ export default function LoginSecurity() {
               desc="Email me when someone signs in from a new device."
             >
               <ToggleSwitch
+                variant="user"
                 checked={loginAlerts}
                 onChange={(c) => setLoginAlerts(c)}
               />
             </Row>
           </Section>
 
-          <Section
-            title="Where you're signed in"
-            hint="If you don't recognise a device, log it out and change your password."
-          >
-            {devices.map((d) => {
-              const Icon = d.kind === "phone" ? Smartphone : Laptop;
-              return (
-                <Row
-                  key={d.id}
-                  icon={Icon}
-                  title={
-                    d.current ? (
-                      <span className="flex flex-wrap items-center gap-2">
-                        {d.name}
-                        <span className="rounded-full bg-black px-2.5 py-0.5 text-[11px] font-semibold text-white">
-                          This device
-                        </span>
-                      </span>
-                    ) : (
-                      d.name
-                    )
-                  }
-                  desc={`${d.location} · ${d.last}`}
-                >
-                  {!d.current && (
-                    <button
-                      onClick={() =>
-                        askConfirm(`Log out of ${d.name}?`, () =>
-                          setDevices((list) =>
-                            list.filter((x) => x.id !== d.id),
-                          ),
-                        )
-                      }
-                      className={pillBtn}
-                    >
-                      <LogOut className="h-3 w-3" /> Log out
-                    </button>
-                  )}
-                </Row>
-              );
-            })}
-            {otherDevices.length > 0 && (
-              <div className="p-5 sm:px-6">
-                <button
-                  onClick={() =>
-                    askConfirm("Log out of all other devices?", () =>
-                      setDevices((list) => list.filter((d) => d.current)),
-                    )
-                  }
-                  className="text-xs font-semibold underline underline-offset-4 hover:opacity-60"
-                >
-                  Log out of all other devices
-                </button>
-              </div>
-            )}
-          </Section>
-
-          <Section title="Danger zone">
+          <Section title="Account Actions">
+            <Row
+              icon={LogOutIcon}
+              title="Logout account"
+              desc="Permanently remove your account, orders history and saved details."
+            >
+              <Button
+                variant="secondary"
+                className="shadow-none"
+                onClick={() =>
+                  askConfirm(
+                    "Are you sure you want to logout from this device?",
+                    handleLogout,
+                  )
+                }
+              >
+                Logout
+              </Button>
+            </Row>
             <Row
               icon={Trash2}
               title="Delete account"
               desc="Permanently remove your account, orders history and saved details."
             >
-              <button
+              <Button
+                className="shadow-none text-red-500"
+                variant="secondary"
                 onClick={() =>
                   askConfirm(
                     "Delete your account permanently? This can't be undone.",
-                    () => {
-                      /* TODO: call your delete-account API */
+                    async () => {
+                      try {
+                        // await api.deleteAccount();
+                        handleLogout();
+                      } catch (err) {
+                        // show error toast
+                      }
                     },
                   )
                 }
-                className={pillBtn}
               >
                 Delete
-              </button>
+              </Button>
             </Row>
           </Section>
         </div>

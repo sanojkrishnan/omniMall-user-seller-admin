@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Camera, Pencil, HandCoins } from "lucide-react";
 import { FormCard } from "./ui/FormCard";
 import { Button } from "./ui/Button";
-import { GoSignOut } from "react-icons/go";
-import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/slice/authSlice";
-import ConfirmProvider from "./ui/ConfirmProvider";
 import BackButtonUser from "./ui/BackButtonUser";
+import { useSelector } from "react-redux";
 
 /* ---------- small pieces ---------- */
 const inputCls =
-  "w-full border border-black bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10";
+  "w-full border border-black bg-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10";
 
 function Group({ title, hint, children }) {
   return (
@@ -96,18 +92,16 @@ function EditableRow({ label, value, type = "text", options }) {
             />
           )}
           <div className="flex gap-2">
-            <button
-              onClick={save}
-              className="bg-black px-4 py-2 text-xs font-semibold text-white transition hover:bg-neutral-800"
-            >
+            <Button onClick={save} className="Shadow-none py-1 w-fit">
               Save
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={cancel}
-              className="border border-black px-4 py-2 text-xs font-semibold transition hover:bg-neutral-100"
+              className="Shadow-none py-1 w-fit"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -119,19 +113,8 @@ function EditableRow({ label, value, type = "text", options }) {
 
 /* ---------- page ---------- */
 export default function PersonalInfo() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const initial = user.firstName.charAt(0).toUpperCase();
-
-  function handleResult(confirmed) {
-    setOpen(false);
-    if (confirmed) {
-      dispatch(logout());
-      navigate("/", { replace: true });
-    }
-  }
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -181,15 +164,6 @@ export default function PersonalInfo() {
                 <Button className="">
                   <HandCoins />{" "}
                   <span className="lg:block hidden">Become a seller</span>
-                </Button>
-                <Button
-                  variant="secondary"
-                  className={"text-red-500"}
-                  onClick={() => {
-                    setOpen((prev) => !prev);
-                  }}
-                >
-                  <GoSignOut /> <span className="lg:block hidden">LogOut</span>
                 </Button>
               </div>
             </FormCard>
@@ -242,11 +216,6 @@ export default function PersonalInfo() {
           </main>
         </div>
       </div>
-
-      <ConfirmProvider open={open} onResult={handleResult} setOpen={setOpen}>
-        {" "}
-        Are you sure, you want to log out from Omnimall?
-      </ConfirmProvider>
     </div>
   );
 }

@@ -523,12 +523,12 @@ function MultiImageField({ field, value, onChange }) {
     setProcessing(true);
     try {
       const processed = await Promise.all(
-  files.slice(0, room).map(async (file) => {
-    const result = await handleImage(file, field.imageType ?? "product");
-    return ensureFile(result, file);
-  }),
-);
-onChange([...items, ...processed]);
+        files.slice(0, room).map(async (file) => {
+          const result = await handleImage(file, field.imageType ?? "product");
+          return ensureFile(result, file);
+        }),
+      );
+      onChange([...items, ...processed]);
     } finally {
       setProcessing(false);
       e.target.value = "";
@@ -690,7 +690,7 @@ function RadioGroupField({ field, value, onChange }) {
   );
 }
 
-function CheckboxGroupField({ field, value, onChange }) {
+function CheckboxGroupField({ field, value, onChange, variant }) {
   const selected = Array.isArray(value) ? value : [];
 
   function toggle(optValue) {
@@ -708,6 +708,7 @@ function CheckboxGroupField({ field, value, onChange }) {
           className="flex cursor-pointer items-center gap-2 text-[13px] text-[var(--edit-text)]"
         >
           <ToggleSwitch
+            variant={variant}
             disabled={field.disabled}
             checked={selected.includes(opt.value)}
             onChange={() => toggle(opt.value)}
@@ -779,7 +780,7 @@ function TagsField({ field, value, onChange }) {
   );
 }
 
-export function renderField(field, formik) {
+export function renderField(field, formik, variant = "admin") {
   const value = formik.values[field.name];
 
   function setValue(v) {
@@ -836,7 +837,12 @@ export function renderField(field, formik) {
 
     case "checkbox-group":
       return (
-        <CheckboxGroupField field={field} value={value} onChange={setValue} />
+        <CheckboxGroupField
+          field={field}
+          value={value}
+          onChange={setValue}
+          variant={variant}
+        />
       );
 
     case "radio":
@@ -857,6 +863,7 @@ export function renderField(field, formik) {
       return (
         <label className="flex cursor-pointer items-center gap-2 py-1">
           <ToggleSwitch
+            variant={variant}
             disabled={field.disabled}
             checked={!!value}
             onChange={(checked) => setValue(checked)}
@@ -872,6 +879,7 @@ export function renderField(field, formik) {
     case "toggle":
       return (
         <ToggleSwitch
+          variant={variant}
           disabled={field.disabled}
           checked={!!value}
           onChange={(checked) => setValue(checked)}

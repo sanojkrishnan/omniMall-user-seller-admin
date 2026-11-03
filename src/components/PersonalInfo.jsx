@@ -3,7 +3,43 @@ import { Camera, Pencil, HandCoins } from "lucide-react";
 import { FormCard } from "./ui/FormCard";
 import { Button } from "./ui/Button";
 import BackButtonUser from "./ui/BackButtonUser";
+import { FieldLabel } from "./ui/EditFields";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+// CSS variables FieldLabel reads (same ones CreatePanel sets on its wrapper).
+const THEME_VARS = {
+  "--edit-text": "black",
+  "--edit-muted": "#525252",
+  "--edit-border": "#E5E5E5",
+  "--edit-soft": "#FAFAFA",
+  "--edit-accent": "black",
+  "--edit-accent-soft": "#F5F5F5",
+  "--edit-danger": "#b3261e",
+};
+
+const COUNTRY_CODES = [
+  { code: "+91", label: "IN +91" },
+  { code: "+971", label: "AE +971" },
+  { code: "+966", label: "SA +966" },
+  { code: "+974", label: "QA +974" },
+  { code: "+968", label: "OM +968" },
+  { code: "+965", label: "KW +965" },
+  { code: "+973", label: "BH +973" },
+  { code: "+44", label: "UK +44" },
+  { code: "+1", label: "US +1" },
+];
+
+// "+919876543210", "+91 9876543210" or "9876543210" -> { code, number }
+function parsePhone(value) {
+  if (!value || value === "Not Assigned") return { code: "+91", number: "" };
+  const digitsOnly = String(value).replace(/[\s-]/g, "");
+  const match = COUNTRY_CODES.map((c) => c.code)
+    .sort((a, b) => b.length - a.length)
+    .find((code) => digitsOnly.startsWith(code));
+  if (match) return { code: match, number: digitsOnly.slice(match.length) };
+  return { code: "+91", number: digitsOnly.replace(/\D/g, "") };
+}
 
 /* ---------- small pieces ---------- */
 const inputCls =
@@ -24,9 +60,9 @@ function Group({ title, hint, children }) {
 function Row({ label, children, action }) {
   return (
     <div className="grid grid-cols-[1fr_auto] items-start gap-x-4 gap-y-1 py-4 sm:grid-cols-[180px_1fr_auto] sm:items-center">
-      <p className="col-span-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 sm:col-span-1">
-        {label}
-      </p>
+      <div className="col-span-2 sm:col-span-1">
+        <FieldLabel>{label}</FieldLabel>
+      </div>
       <div className="min-w-0 text-sm font-medium">{children}</div>
       <div className="justify-self-end">{action}</div>
     </div>
@@ -111,13 +147,94 @@ function EditableRow({ label, value, type = "text", options }) {
   );
 }
 
+// Phone row with a country code select + number input.
+function PhoneRow({ label, value }) {
+  const [editing, setEditing] = useState(false);
+  const [current, setCurrent] = useState(parsePhone(value));
+  const [draft, setDraft] = useState(current);
+
+  const save = () => {
+    setCurrent(draft);
+    setEditing(false);
+  };
+  const cancel = () => {
+    setDraft(current);
+    setEditing(false);
+  };
+
+  return (
+    <Row
+      label={label}
+      action={
+        !editing && (
+          <Button
+            variant="secondary"
+            onClick={() => setEditing(true)}
+            className={"w-fit p-2 py-1 shadow-none"}
+          >
+            <Pencil className="h-3 w-3" /> Edit
+          </Button>
+        )
+      }
+    >
+      {editing ? (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex w-full gap-2">
+            <select
+              value={draft.code}
+              onChange={(e) => setDraft({ ...draft, code: e.target.value })}
+              className={`${inputCls} !w-28 shrink-0`}
+            >
+              {COUNTRY_CODES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={draft.number}
+              placeholder="10-digit number"
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  number: e.target.value.replace(/\D/g, "").slice(0, 10),
+                })
+              }
+              className={inputCls}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={save} className="Shadow-none py-1 w-fit">
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={cancel}
+              className="Shadow-none py-1 w-fit"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : current.number ? (
+        `${current.code} ${current.number}`
+      ) : (
+        "Not Assigned"
+      )}
+    </Row>
+  );
+}
+
 /* ---------- page ---------- */
 export default function PersonalInfo() {
   const { user } = useSelector((state) => state.auth);
   const initial = user.firstName.charAt(0).toUpperCase();
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div style={THEME_VARS} className="min-h-screen bg-white text-black">
       {/* spacer for the fixed navbar */}
       <div className="h-20 w-full" />
       <div className="mx-auto max-w-6xl pb-20 pt-4">
@@ -129,7 +246,6 @@ export default function PersonalInfo() {
           </div>
 
           {/* ---------- sidebar ---------- */}
-          {/* <BackButtonUser onClick={() => navigate(-1)} /> */}
           <aside className="lg:sticky lg:top-24 lg:self-start mt-16 flex items-center justify-center">
             <FormCard className="flex items-center justify-center gap-4 border lg:flex-col w-fit lg:text-center">
               <div className="relative h-20 w-20 shrink-0 lg:h-28 lg:w-28">
@@ -161,7 +277,10 @@ export default function PersonalInfo() {
                 </p>
               </div>
               <div className="w-fit lg:w-full">
-                <Button className="">
+                <Button
+                  className=""
+                  onClick={() => navigate("/user/profile/seller-register")}
+                >
                   <HandCoins />{" "}
                   <span className="lg:block hidden">Become a seller</span>
                 </Button>
@@ -197,16 +316,8 @@ export default function PersonalInfo() {
             </Group>
 
             <Group title="Contact" hint="We use these to send order updates.">
-              <EditableRow
-                label="Email"
-                value={user.email}
-                type="email"
-              ></EditableRow>
-              <EditableRow
-                label="Phone"
-                value={user?.phone || "Not Assigned"}
-                type="tel"
-              />
+              <EditableRow label="Email" value={user.email} type="email" />
+              <PhoneRow label="Phone" value={user?.phone} />
             </Group>
 
             <Group title="Account">

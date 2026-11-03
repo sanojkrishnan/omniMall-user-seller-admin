@@ -14,6 +14,7 @@ import BackButtonUser from "./ui/BackButtonUser";
 import { CreatePanel } from "./ui/CreatePanel";
 import { EditPanel } from "./ui/EditPanel";
 import ConfirmProvider from "./ui/ConfirmProvider";
+import { Button } from "./ui/Button";
 
 /* ---------- static data ---------- */
 // Note: only the last 4 digits are ever kept. Never store full card numbers or CVV.
@@ -388,18 +389,16 @@ function MethodCard({ method, onEdit, onRemove, onSetDefault }) {
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 sm:pl-[60px]">
-        <button
-          onClick={onEdit}
-          className="flex items-center gap-1.5 rounded-full border border-black px-4 py-1.5 text-xs font-semibold transition hover:bg-black hover:text-white"
-        >
+        <Button onClick={onEdit} className="w-fit shadow-none">
           <Pencil className="h-3 w-3" /> Edit
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onRemove}
-          className="flex items-center gap-1.5 rounded-full border border-black px-4 py-1.5 text-xs font-semibold transition hover:bg-black hover:text-white"
+          className="w-fit text-red-500 shadow-none"
+          variant="secondary"
         >
           <Trash2 className="h-3 w-3" /> Remove
-        </button>
+        </Button>
         {!method.isDefault && !expired && (
           <button
             onClick={onSetDefault}
@@ -495,15 +494,15 @@ export default function PaymentMethods() {
                   <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
                     <Icon className="h-4 w-4" /> {title}
                   </h2>
-                  <button
+                  <Button
                     onClick={() => {
                       setCreateKind(type);
                       setCreateOpen(true);
                     }}
-                    className="flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition hover:bg-neutral-800"
+                    className="w-fit"
                   >
                     <Plus className="h-3.5 w-3.5" /> {addLabel}
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="space-y-4">

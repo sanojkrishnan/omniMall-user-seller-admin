@@ -19,10 +19,6 @@ export const userSchema = Yup.object({
   gender: Yup.string()
     .oneOf(["male", "female"], "Invalid gender")
     .required("Select your gender"),
-  role: Yup.string()
-    .oneOf(["user","seller"], "Invalid position")
-    .optional()
-    .default("user"),
   conditionCheck: Yup.boolean()
     .oneOf([true], "You must agree to the terms and conditions")
     .required(),

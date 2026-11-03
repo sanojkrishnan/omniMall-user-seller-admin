@@ -261,9 +261,6 @@ function Tracker({ steps, stage }) {
   );
 }
 
-const pillBtn =
-  "flex items-center gap-1.5 rounded-full border border-black px-4 py-1.5 text-xs font-semibold transition hover:bg-black hover:text-white";
-
 /* ---------- order card ---------- */
 function OrderCard({ order, onCancel, onReturn }) {
   const hasReturnable = order.items.some((i) => !i.returned);
@@ -337,26 +334,26 @@ function OrderCard({ order, onCancel, onReturn }) {
       </div>
 
       {/* actions */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-black/10 px-5 py-4 sm:px-6">
+      <div className="flex flex-wrap items-center gap-2 border-t border-black/10 px-5 py-4 sm:px-6 ">
         {order.status === "Processing" && (
-          <button onClick={onCancel} className={pillBtn}>
+          <Button className="w-fit shadow-none">
             <X className="h-3 w-3" /> Cancel order
-          </button>
+          </Button>
         )}
         {order.status === "Delivered" && order.canReturn && hasReturnable && (
-          <button onClick={onReturn} className={pillBtn}>
+          <Button className="w-fit shadow-none" onClick={onReturn}>
             <RotateCcw className="h-3 w-3" /> Return items
-          </button>
+          </Button>
         )}
         {(order.status === "Delivered" || order.status === "Cancelled") && (
-          <button className={pillBtn}>
+          <Button className="w-fit shadow-none" variant="secondary">
             <Repeat className="h-3 w-3" /> Buy again
-          </button>
+          </Button>
         )}
         {order.status !== "Cancelled" && (
-          <button className="ml-auto flex items-center gap-1.5 text-xs font-semibold underline underline-offset-4 hover:opacity-60">
+          <Button className="w-fit shadow-none" variant="secondary">
             <Download className="h-3 w-3" /> Invoice
-          </button>
+          </Button>
         )}
       </div>
     </article>
@@ -475,16 +472,14 @@ export default function OrdersReturns() {
   };
 
   const tabBtn = (key, label, count) => (
-    <button
+    <Button
       onClick={() => setTab(key)}
-      className={`flex-1 rounded-full border px-5 py-2.5 text-sm font-semibold transition sm:flex-none ${
-        tab === key
-          ? "border-black bg-black text-white"
-          : "border-black/25 hover:border-black"
+      className={`w-fit shadow-none
       }`}
+      variant={"secondary"}
     >
       {label} ({count})
-    </button>
+    </Button>
   );
 
   return (

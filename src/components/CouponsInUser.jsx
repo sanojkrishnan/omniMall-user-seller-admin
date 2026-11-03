@@ -176,7 +176,7 @@ export default function CouponsInUser({ userType, onApply }) {
     <>
       <div className="h-10 sm:h-16 w-full" />
       <section className="w-full relative">
-        <div className="absolute top-1 left-0 w-fit ">
+        <div className="absolute top-3 left-0 w-fit ">
           {/* back */}
           <BackButtonUser />
         </div>

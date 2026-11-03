@@ -15,6 +15,7 @@ import PaymentMethods from "../components/PaymentMethords";
 import LoginSecurity from "../components/LoginSecurity";
 import LikesReviews from "../components/LikesReviews";
 import ShoppingPreferences from "../components/ShoppingPreferences";
+import SellerRegistration from "../components/SellerRegister";
 
 const userRoutes = (
   <>
@@ -48,6 +49,10 @@ const userRoutes = (
       <Route path={`profile/security`} element={<LoginSecurity />} />
       <Route path={`profile/preferences`} element={<ShoppingPreferences />} />
       <Route path={`profile/likes-reviews`} element={<LikesReviews />} />
+      <Route
+        path={`profile/seller-register`}
+        element={<SellerRegistration />}
+      />
     </Route>
   </>
 );

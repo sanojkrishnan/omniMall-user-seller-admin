@@ -216,13 +216,9 @@ export default function ShoppingPreferences() {
                 placeholder="Add a brand"
                 className="min-w-0 flex-1 rounded-xl border border-black/25 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-black"
               />
-              <button
-                type="button"
-                onClick={addBrand}
-                className="flex items-center gap-1.5 rounded-full border border-black px-5 text-xs font-semibold transition hover:bg-black hover:text-white"
-              >
+              <Button type="button" onClick={addBrand} className="w-fit">
                 <Plus className="h-3.5 w-3.5" /> Add
-              </button>
+              </Button>
             </div>
           </Section>
 

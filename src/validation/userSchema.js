@@ -27,11 +27,13 @@ export const userSchema = Yup.object({
     .nullable()
     .optional()
     .test("fileSize", "File too large", (value) => {
-      if (!value) return true; // ← no file selected = ok
+      if (!value || !(value instanceof File)) return true;
+
       return value.size <= 2 * 1024 * 1024;
     })
     .test("fileType", "Unsupported format", (value) => {
-      if (!value) return true; // ← no file selected = ok
+      if (!value || !(value instanceof File)) return true;
+
       return ["image/jpeg", "image/png", "image/webp"].includes(value.type);
     }),
 });

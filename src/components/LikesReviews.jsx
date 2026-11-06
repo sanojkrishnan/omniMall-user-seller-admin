@@ -6,15 +6,60 @@ import BackButtonUser from "./ui/BackButtonUser";
 import { CreatePanel } from "./ui/CreatePanel";
 import { EditPanel } from "./ui/EditPanel";
 import ConfirmProvider from "./ui/ConfirmProvider";
+import { Rating } from "./ui/Rating";
 
 /* ---------- static data ---------- */
 const initialLiked = [
-  { id: 1, name: "Wireless Earbuds – Black", price: 5999, was: 6999, rating: 4.4, reviews: 1280, inStock: true },
-  { id: 2, name: "Cotton Kurta – Navy", price: 1299, rating: 4.2, reviews: 312, inStock: true },
-  { id: 3, name: "Stainless Steel Bottle 1L", price: 450, rating: 4.6, reviews: 2210, inStock: true },
-  { id: 4, name: "Running Shoes – White", price: 3799, was: 4299, rating: 4.1, reviews: 640, inStock: false },
-  { id: 5, name: "Desk Lamp – Matte Black", price: 1499, rating: 4.5, reviews: 455, inStock: true },
-  { id: 6, name: "Leather Wallet – Tan", price: 2199, rating: 4.3, reviews: 198, inStock: true },
+  {
+    id: 1,
+    name: "Wireless Earbuds – Black",
+    price: 5999,
+    was: 6999,
+    rating: 4.4,
+    reviews: 1280,
+    inStock: true,
+  },
+  {
+    id: 2,
+    name: "Cotton Kurta – Navy",
+    price: 1299,
+    rating: 4.2,
+    reviews: 312,
+    inStock: true,
+  },
+  {
+    id: 3,
+    name: "Stainless Steel Bottle 1L",
+    price: 450,
+    rating: 4.6,
+    reviews: 2210,
+    inStock: true,
+  },
+  {
+    id: 4,
+    name: "Running Shoes – White",
+    price: 3799,
+    was: 4299,
+    rating: 4.1,
+    reviews: 640,
+    inStock: false,
+  },
+  {
+    id: 5,
+    name: "Desk Lamp – Matte Black",
+    price: 1499,
+    rating: 4.5,
+    reviews: 455,
+    inStock: true,
+  },
+  {
+    id: 6,
+    name: "Leather Wallet – Tan",
+    price: 2199,
+    rating: 4.3,
+    reviews: 198,
+    inStock: true,
+  },
 ];
 
 const initialReviews = [
@@ -23,7 +68,8 @@ const initialReviews = [
     product: "Wireless Earbuds – Black",
     rating: 5,
     title: "Great sound for the price",
-    comment: "Battery easily lasts a full day and the bass is punchy. Pairing is quick and the fit is comfortable.",
+    comment:
+      "Battery easily lasts a full day and the bass is punchy. Pairing is quick and the fit is comfortable.",
     date: "20 Oct 2026",
     helpful: 12,
   },
@@ -32,7 +78,8 @@ const initialReviews = [
     product: "Cotton Kurta – Navy (M)",
     rating: 4,
     title: "Comfortable, runs slightly large",
-    comment: "Soft fabric and the colour matches the photos. Consider sizing down if you're between sizes.",
+    comment:
+      "Soft fabric and the colour matches the photos. Consider sizing down if you're between sizes.",
     date: "2 Oct 2026",
     helpful: 5,
   },
@@ -41,7 +88,8 @@ const initialReviews = [
     product: "Desk Lamp – Matte Black",
     rating: 3,
     title: "Good lamp, flimsy switch",
-    comment: "Light quality is nice but the switch feels cheap. Works fine so far.",
+    comment:
+      "Light quality is nice but the switch feels cheap. Works fine so far.",
     date: "18 Aug 2026",
     helpful: 2,
   },
@@ -68,7 +116,14 @@ const REVIEW_FIELDS = [
       value: String(n),
     })),
   },
-  { name: "title", label: "Title", type: "text", span: "full", required: true, placeholder: "Sum up your experience" },
+  {
+    name: "title",
+    label: "Title",
+    type: "text",
+    span: "full",
+    required: true,
+    placeholder: "Sum up your experience",
+  },
   {
     name: "comment",
     label: "Your review",
@@ -82,7 +137,10 @@ const REVIEW_FIELDS = [
 
 const reviewSchema = Yup.object({
   rating: Yup.string().required("Select a rating"),
-  title: Yup.string().trim().max(80, "Keep the title under 80 characters").required("Add a title"),
+  title: Yup.string()
+    .trim()
+    .max(80, "Keep the title under 80 characters")
+    .required("Add a title"),
   comment: Yup.string()
     .trim()
     .min(10, "Write at least 10 characters")
@@ -91,25 +149,6 @@ const reviewSchema = Yup.object({
 });
 
 const inr = (n) => `₹${n.toLocaleString("en-IN")}`;
-
-/* ---------- small pieces ---------- */
-function Stars({ value, className = "h-4 w-4" }) {
-  return (
-    <span className="flex items-center gap-0.5" aria-label={`${value} out of 5 stars`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          className={className}
-          fill={i <= Math.round(value) ? "currentColor" : "none"}
-          strokeWidth={1.6}
-        />
-      ))}
-    </span>
-  );
-}
-
-const pillBtn =
-  "flex items-center gap-1.5 rounded-full border border-black px-4 py-1.5 text-xs font-semibold transition hover:bg-black hover:text-white";
 
 function Empty({ icon: Icon, title, text }) {
   return (
@@ -142,14 +181,20 @@ function LikedCard({ item, onUnlike }) {
         )}
       </div>
 
-      <h3 className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-semibold">{item.name}</h3>
-      <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-500">
-        <Stars value={item.rating} className="h-3 w-3" />
+      <h3 className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-semibold">
+        {item.name}
+      </h3>
+      <div className="mt-1 flex h-4 overflow-hidden items-center gap-1.5 text-xs text-neutral-500">
+        <Rating rating={item.rating} className="h-16 w-16 mt-0" />
         {item.rating} ({item.reviews.toLocaleString("en-IN")})
       </div>
       <p className="mt-2 text-sm">
         <span className="font-bold">{inr(item.price)}</span>
-        {item.was && <span className="ml-2 text-xs text-neutral-400 line-through">{inr(item.was)}</span>}
+        {item.was && (
+          <span className="ml-2 text-xs text-neutral-400 line-through">
+            {inr(item.was)}
+          </span>
+        )}
       </p>
 
       <Button
@@ -204,7 +249,12 @@ export default function LikesReviews() {
     setReviews((list) =>
       list.map((r) =>
         r.id === editingId
-          ? { ...r, rating: Number(values.rating), title: values.title, comment: values.comment }
+          ? {
+              ...r,
+              rating: Number(values.rating),
+              title: values.title,
+              comment: values.comment,
+            }
           : r,
       ),
     );
@@ -219,14 +269,9 @@ export default function LikesReviews() {
   };
 
   const tabBtn = (key, label, count) => (
-    <button
-      onClick={() => setTab(key)}
-      className={`flex-1 rounded-full border px-5 py-2.5 text-sm font-semibold transition sm:flex-none ${
-        tab === key ? "border-black bg-black text-white" : "border-black/25 hover:border-black"
-      }`}
-    >
+    <Button onClick={() => setTab(key)}>
       {label} ({count})
-    </button>
+    </Button>
   );
 
   return (
@@ -238,7 +283,9 @@ export default function LikesReviews() {
         <BackButtonUser variant="secondary" />
 
         <header className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Likes &amp; Reviews</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Likes &amp; Reviews
+          </h1>
           <p className="mt-1 text-sm text-neutral-500">
             Your wishlist and everything you've said about what you bought.
           </p>
@@ -256,7 +303,9 @@ export default function LikesReviews() {
                 <LikedCard
                   key={item.id}
                   item={item}
-                  onUnlike={() => setLiked((list) => list.filter((l) => l.id !== item.id))}
+                  onUnlike={() =>
+                    setLiked((list) => list.filter((l) => l.id !== item.id))
+                  }
                 />
               ))}
             </div>
@@ -281,21 +330,29 @@ export default function LikesReviews() {
                       className="flex flex-wrap items-center gap-4 rounded-2xl border border-black/15 p-4 sm:px-6"
                     >
                       <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-black/15 bg-neutral-50">
-                        <Package className="h-5 w-5 text-neutral-400" strokeWidth={1.5} />
+                        <Package
+                          className="h-5 w-5 text-neutral-400"
+                          strokeWidth={1.5}
+                        />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">{p.product}</p>
-                        <p className="text-xs text-neutral-500">Delivered {p.delivered}</p>
+                        <p className="truncate text-sm font-semibold">
+                          {p.product}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          Delivered {p.delivered}
+                        </p>
                       </div>
-                      <button
+                      <Button
                         onClick={() => {
                           setWriteTarget(p);
                           setCreateOpen(true);
                         }}
-                        className={pillBtn}
+                        className="w-fit"
+                        variant="secondary"
                       >
                         <PenLine className="h-3 w-3" /> Write review
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -303,7 +360,9 @@ export default function LikesReviews() {
             )}
 
             <section>
-              <h2 className="mb-3 text-sm font-bold uppercase tracking-widest">Your reviews</h2>
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-widest">
+                Your reviews
+              </h2>
               <div className="space-y-4">
                 {reviews.map((r) => (
                   <article
@@ -314,31 +373,34 @@ export default function LikesReviews() {
                       <p className="text-sm font-semibold">{r.product}</p>
                       <span className="text-xs text-neutral-500">{r.date}</span>
                     </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <Stars value={r.rating} />
+                    <div className="mt-2 flex items-center h-5 overflow-hidden gap-2">
+                      <Rating className="h-16 w-16 mt-0" rating={r.rating} />
                       <span className="text-sm font-bold">{r.title}</span>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-600">{r.comment}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                      {r.comment}
+                    </p>
 
                     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4">
-                      <button
+                      <Button
                         onClick={() => {
                           setEditingId(r.id);
                           setEditOpen(true);
                         }}
-                        className={pillBtn}
+                        className={"w-fit"}
                       >
                         <Pencil className="h-3 w-3" /> Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => {
                           setDeleteTarget(r);
                           setConfirmOpen(true);
                         }}
-                        className={pillBtn}
+                        variant="secondary"
+                        className={"text-red-500 w-fit"}
                       >
                         <Trash2 className="h-3 w-3" /> Delete
-                      </button>
+                      </Button>
                       <span className="ml-auto text-xs text-neutral-500">
                         {r.helpful} found this helpful
                       </span>
@@ -380,7 +442,11 @@ export default function LikesReviews() {
         fields={REVIEW_FIELDS}
         initialValues={
           editing
-            ? { rating: String(editing.rating), title: editing.title, comment: editing.comment }
+            ? {
+                rating: String(editing.rating),
+                title: editing.title,
+                comment: editing.comment,
+              }
             : {}
         }
         validationSchema={reviewSchema}

@@ -44,6 +44,18 @@ export const registerUser = createAsyncThunk(
   },
 );
 
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (payload, { rejectWithValue }) => {
+    try {
+      // payload = plain object of changed fields, or FormData when a new photo was picked
+      return await AuthAPI.updateProfile(payload);
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Profile update failed"));
+    }
+  },
+);
+
 export const verifyOTP = createAsyncThunk(
   "auth/verifyOTP",
   async ({ email, otp }, { rejectWithValue }) => {
@@ -391,6 +403,25 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload || "Failed to fetch products";
         state.user = null;
+      });
+
+    // update profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // backend returns { message, data: updatedUser } (same shape as googleProfileCompletion)
+        const updated = { ...state.user, ...action.payload.data };
+        state.user = updated;
+        state.message = action.payload.message;
+        saveUser(updated); // keep localStorage in sync so a refresh keeps the new data
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

@@ -11,6 +11,11 @@ export const AuthAPI = {
     console.log("Register data:", data);
     return api.post("auth/register", data);
   },
+  //update profile
+  updateProfile: async (data) => {
+    console.log("Update profile data:", data);
+    return api.patch("auth/update-profile", data);
+  },
   // verify otp
   verifyOTP: async (data) => {
     console.log("OTP data:", data);

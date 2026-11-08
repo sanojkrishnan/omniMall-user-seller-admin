@@ -8,10 +8,15 @@ export function useToastError({
   const shownRef = useRef(null);
 
   useEffect(() => {
-    if (!errorMessage) return;
+    if (!errorMessage) {
+      shownRef.current = null; // error cleared, so allow the same message again
+      return;
+    }
     if (shownRef.current === errorMessage) return;
 
     shownRef.current = errorMessage;
-    toast.error(errorMessage || fallbackErrorMessage);
-  }, [errorMessage]);
+    toast.error(errorMessage || fallbackErrorMessage, {
+      toastId: errorMessage || fallbackErrorMessage,
+    });
+  }, [errorMessage, fallbackErrorMessage]);
 }

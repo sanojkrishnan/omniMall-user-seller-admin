@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Home,
   Briefcase,
@@ -15,6 +15,11 @@ import { CreatePanel } from "./ui/CreatePanel";
 import { EditPanel } from "./ui/EditPanel";
 import ConfirmProvider from "./ui/ConfirmProvider";
 import { addressSchema } from "../validation/addressSchema";
+import { useDispatch, useSelector } from "react-redux";
+import CartLoading from "./ui/CartLoading";
+import ErrorFallback from "./ui/ErrorFallback";
+import { clearSellerError, fetchAllAddress } from "../redux/slice/addressSlice";
+import { useToastError } from "../hooks/useToastError";
 
 /* ---------- panel config (shared by create + edit) ---------- */
 const ADDRESS_FIELDS = [
@@ -60,58 +65,7 @@ const ADDRESS_FIELDS = [
   },
 ];
 
-/* ---------- static data ---------- */
-const initialAddresses = [
-  {
-    id: 1,
-    label: "Home",
-    name: "Aarav Menon",
-    phone: "+91 98765 43210",
-    line1: "12/45, Lotus Apartments, MG Road",
-    line2: "Near City Hospital",
-    city: "Kochi",
-    state: "Kerala",
-    pincode: "682001",
-    isDefault: true,
-  },
-  {
-    id: 2,
-    label: "Work",
-    name: "Aarav Menon",
-    phone: "+91 98765 43210",
-    line1: "4th Floor, Techpark Tower, Infopark Road",
-    line2: "",
-    city: "Kakkanad",
-    state: "Kerala",
-    pincode: "682042",
-    isDefault: false,
-  },
-  {
-    id: 3,
-    label: "Other",
-    name: "Meera Menon",
-    phone: "+91 91234 56789",
-    line1: "Thekkedath House, Temple Road",
-    line2: "Opp. Bus Stand",
-    city: "Alathur",
-    state: "Kerala",
-    pincode: "678541",
-    isDefault: false,
-  },
-];
-
 const labelIcons = { Home, Work: Briefcase, Other: MapPin };
-
-// keeps exactly one default address in the list
-function normalizeDefaults(list, preferredId) {
-  let next = preferredId
-    ? list.map((a) => ({ ...a, isDefault: a.id === preferredId }))
-    : list;
-  if (next.length && !next.some((a) => a.isDefault)) {
-    next = next.map((a, i) => (i === 0 ? { ...a, isDefault: true } : a));
-  }
-  return next;
-}
 
 /* ---------- address card ---------- */
 function AddressCard({ address, onEdit, onDelete, onSetDefault }) {
@@ -179,16 +133,22 @@ function AddressCard({ address, onEdit, onDelete, onSetDefault }) {
 
 /* ---------- page ---------- */
 export default function AddressBook() {
-  const [addresses, setAddresses] = useState(initialAddresses);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [requested, setRequested] = useState(false);
+  const {
+    address = [],
+    isAddressLoading,
+    addressError,
+  } = useSelector((state) => state.address);
+  const dispatch = useDispatch();
   // kept after the edit panel closes so its close animation still has data
   const [editingId, setEditingId] = useState(null);
   // the address awaiting delete confirmation (kept so the message stays stable while closing)
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const editing = addresses.find((a) => a.id === editingId);
+  const editing = address?.find((a) => a.id === editingId);
   const editingValues = editing
     ? {
         label: editing.label,
@@ -203,48 +163,26 @@ export default function AddressBook() {
       }
     : {};
 
-  const handleCreate = (values) => {
-    const id = Date.now();
-    setAddresses((list) =>
-      normalizeDefaults(
-        [...list, { ...values, id }],
-        values.isDefault ? id : null,
-      ),
-    );
-    setCreateOpen(false);
-  };
+  useToastError({
+    errorMessage: requested && !isAddressLoading ? addressError : null,
+    fallbackErrorMessage: "Failed to load addresses",
+  });
 
-  const handleEdit = (values) => {
-    setAddresses((list) =>
-      normalizeDefaults(
-        list.map((a) => (a.id === editingId ? { ...a, ...values } : a)),
-        values.isDefault ? editingId : null,
-      ),
-    );
-    setEditOpen(false);
-  };
+  useEffect(() => {
+    dispatch(fetchAllAddress());
+    setRequested(true);
+    return () => {
+      dispatch(clearSellerError());
+    };
+  }, [dispatch]);
 
-  const remove = (id) => {
-    setAddresses((list) =>
-      normalizeDefaults(
-        list.filter((a) => a.id !== id),
-        null,
-      ),
-    );
-  };
+  const showLoading =
+    (!requested || isAddressLoading) && !addressError && address.length === 0;
 
-  const handleDeleteResult = (confirmed) => {
-    setConfirmOpen(false);
-    if (confirmed && deleteTarget) remove(deleteTarget.id);
-  };
+  const showEmpty =
+    requested && !isAddressLoading && !addressError && address.length === 0;
 
-  const setDefault = (id) =>
-    setAddresses((list) => normalizeDefaults(list, id));
-
-  const sorted = [...addresses].sort(
-    (a, b) => Number(b.isDefault) - Number(a.isDefault),
-  );
-
+  const showList = !addressError && address.length > 0;
   return (
     <div className="relative min-h-screen bg-white text-black">
       {/* spacer for the fixed navbar */}
@@ -257,8 +195,9 @@ export default function AddressBook() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Address Book</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              {addresses.length} saved{" "}
-              {addresses.length === 1 ? "address" : "addresses"}
+              {requested && !isAddressLoading
+                ? `${address.length} saved ${address.length === 1 ? "address" : "addresses"}`
+                : "Loading addresses..."}
             </p>
           </div>
           <Button className="w-fit" onClick={() => setCreateOpen(true)}>
@@ -267,23 +206,30 @@ export default function AddressBook() {
         </header>
 
         <div className="space-y-4">
-          {sorted.map((a) => (
-            <AddressCard
-              key={a.id}
-              address={a}
-              onEdit={() => {
-                setEditingId(a.id);
-                setEditOpen(true);
-              }}
-              onDelete={() => {
-                setDeleteTarget(a);
-                setConfirmOpen(true);
-              }}
-              onSetDefault={() => setDefault(a.id)}
-            />
-          ))}
+          {showLoading && (
+            <div className="w-full h-[60vh] flex items-center justify-center">
+              <CartLoading />
+            </div>
+          )}
 
-          {addresses.length === 0 && (
+          {showList &&
+            address.map((a) => (
+              <AddressCard
+                key={a.id}
+                address={a}
+                onEdit={() => {
+                  setEditingId(a.id);
+                  setEditOpen(true);
+                }}
+                onDelete={() => {
+                  setDeleteTarget(a);
+                  setConfirmOpen(true);
+                }}
+                // onSetDefault={() => setDefault(a.id)}
+              />
+            ))}
+
+          {showEmpty && (
             <div className="rounded-2xl border-2 border-dashed border-black/30 px-6 py-14 text-center">
               <MapPin className="mx-auto h-8 w-8 text-neutral-400" />
               <p className="mt-3 font-semibold">No saved addresses yet</p>
@@ -292,6 +238,8 @@ export default function AddressBook() {
               </p>
             </div>
           )}
+
+          <ErrorFallback error={addressError} />
         </div>
       </main>
 
@@ -304,7 +252,7 @@ export default function AddressBook() {
         fields={ADDRESS_FIELDS}
         validationSchema={addressSchema}
         submitLabel="Save address"
-        onSubmit={handleCreate}
+        // onSubmit={handleCreate}
       />
 
       <EditPanel
@@ -317,14 +265,14 @@ export default function AddressBook() {
         initialValues={editingValues}
         validationSchema={addressSchema}
         submitLabel="Save changes"
-        onSubmit={handleEdit}
+        // onSubmit={handleEdit}
       />
 
       <ConfirmProvider
         variant="user"
         open={confirmOpen}
         setOpen={setConfirmOpen}
-        onResult={handleDeleteResult}
+        // onResult={handleDeleteResult}
       >
         Are you sure you want to delete your {deleteTarget?.label} address?
       </ConfirmProvider>

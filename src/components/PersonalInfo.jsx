@@ -13,6 +13,7 @@ import { inputBase } from "../utils/inputBase";
 import { handleImage } from "../utils/imageCompressor";
 import { userSchema } from "../validation/userSchema";
 import { updateProfile } from "../redux/slice/authSlice";
+import { toast } from "react-toastify";
 
 // CSS variables FieldLabel / renderField read (same ones CreatePanel sets on its wrapper).
 
@@ -123,6 +124,45 @@ function usePreview(value) {
   return url;
 }
 
+// Focus + select the input when a cell enters edit mode, and make
+// Enter = Done, Escape = Cancel (so Enter never submits the form).
+
+function useEditKeys(
+  editing,
+  { done, cancel, selector = "input, select, textarea" },
+) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!editing) return;
+
+    const el = ref.current?.querySelector(selector);
+    if (!el) return;
+
+    el.focus();
+
+    try {
+      el.select?.(); // selects the existing text; selects/date inputs ignore it
+    } catch {
+      /* some input types don't support select() */
+    }
+  }, [editing, selector]);
+
+  const onKeyDown = (e) => {
+    if (e.target.closest("button")) return; // let Done/Cancel buttons behave normally
+
+    if (e.key === "Enter") {
+      e.preventDefault(); // stops the implicit form submit
+      done();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      cancel();
+    }
+  };
+
+  return { ref, onKeyDown };
+}
+
 /* ---------- cells ---------- */
 
 function EditButton({ onClick }) {
@@ -188,6 +228,8 @@ function EditableCell({ field, formik, format }) {
     setEditing(false);
   };
 
+  const { ref, onKeyDown } = useEditKeys(editing, { done, cancel });
+
   if (!editing) {
     const raw = formik.values[name];
 
@@ -203,7 +245,7 @@ function EditableCell({ field, formik, format }) {
   }
 
   return (
-    <div>
+    <div ref={ref} onKeyDown={onKeyDown}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
         <div className="min-w-0 flex-1">{renderField(field, formik)}</div>
 
@@ -243,6 +285,13 @@ function PhoneCell({ formik }) {
     setEditing(false);
   };
 
+  // the first control is the country-code select, so focus the number input
+  const { ref, onKeyDown } = useEditKeys(editing, {
+    done,
+    cancel,
+    selector: 'input[name="phoneNumber"]',
+  });
+
   if (!editing) {
     return (
       <div className="flex items-center justify-between gap-4 text-sm font-medium">
@@ -256,7 +305,7 @@ function PhoneCell({ formik }) {
   }
 
   return (
-    <div>
+    <div ref={ref} onKeyDown={onKeyDown}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
         <div className="flex min-w-0 flex-1 gap-2">
           <div className="w-32 shrink-0">
@@ -290,11 +339,7 @@ function PhoneCell({ formik }) {
 function InfoTable({ title, hint, data, columns }) {
   return (
     <section className="border rounded-xl overflow-hidden shadow-md">
-      {hint && (
-        <p className="border-b bg-neutral-50 px-5 py-2 text-xs text-neutral-500">
-          {hint}
-        </p>
-      )}
+      {hint && <p className="border-b px-5 py-2 text-xs">{hint}</p>}
 
       <DataTable
         title={title}
@@ -314,7 +359,11 @@ export default function PersonalInfo() {
 
   const navigate = useNavigate();
 
-  const { user, updating, updateError } = useSelector((s) => s.auth);
+  const { user, userUpdating, userUpdateError } = useSelector(
+    (state) => state.auth,
+  );
+
+  const wasUpdating = useRef(false);
 
   const photoInput = useRef(null);
 
@@ -348,20 +397,19 @@ export default function PersonalInfo() {
     validationSchema: personalSchema,
     validateOnMount: true,
 
-    onSubmit: async (values) => {
+    onSubmit: (values) => {
+      // keep only the fields the user actually changed
       const changed = {};
-
-      for (const k of Object.keys(values)) {
-        if (values[k] !== initialValues[k]) changed[k] = values[k];
+      for (const key of Object.keys(values)) {
+        if (values[key] !== initialValues[key]) changed[key] = values[key];
       }
 
+      // phone is stored as one string, so merge code + number when either changed
       if ("phoneCode" in changed || "phoneNumber" in changed) {
         changed.phone = values.phoneNumber
           ? `${values.phoneCode}${values.phoneNumber}`
           : "";
-
         delete changed.phoneCode;
-
         delete changed.phoneNumber;
       }
 
@@ -369,17 +417,33 @@ export default function PersonalInfo() {
 
       let payload = fields;
 
+      // Only a newly picked photo is sent. The existing { url } object is
+      // not a file, so it never goes to the backend.
       if (profileImage instanceof File) {
         payload = new FormData();
-
-        Object.entries(fields).forEach(([k, v]) => payload.append(k, v));
-
+        Object.entries(fields).forEach(([k, v]) => payload.append(k, v ?? ""));
         payload.append("profileImage", profileImage);
       }
 
-      await dispatch(updateProfile(payload));
+      // result is handled by the effect below (toast + reset on failure)
+      dispatch(updateProfile(payload));
     },
   });
+
+  // Toast when a save finishes; on backend failure drop all edits.
+  // Must sit below useFormik because it uses `formik`.
+  useEffect(() => {
+    if (wasUpdating.current && !userUpdating) {
+      if (userUpdateError) {
+        toast.error(userUpdateError);
+        formik.resetForm();
+      } else {
+        toast.success("Profile updated successfully");
+      }
+    }
+    wasUpdating.current = userUpdating;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userUpdating, userUpdateError]);
 
   const photo = usePreview(formik.values.profileImage);
 
@@ -584,10 +648,6 @@ export default function PersonalInfo() {
             />
 
             <InfoTable title="Account" data={account} columns={columns} />
-
-            {updateError && (
-              <p className="text-sm text-[var(--edit-danger)]">{updateError}</p>
-            )}
             {validationErrors.length > 0 && (
               <div
                 role="alert"
@@ -605,8 +665,8 @@ export default function PersonalInfo() {
               </div>
             )}
 
-            <Button type="submit" disabled={!formik.dirty || updating}>
-              {updating ? "Saving..." : "Save Changes"}
+            <Button type="submit" disabled={!formik.dirty || userUpdating}>
+              {userUpdating ? "Saving..." : "Save Changes"}
             </Button>
           </form>
         </div>

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { extractError } from "../../utils/ErrorExtractor";
 import { sellerAPI } from "../../services/sellerService.js";
+import { extractError } from "../../utils/errorExtractor.js";
 
 const initialState = {
   seller: [],

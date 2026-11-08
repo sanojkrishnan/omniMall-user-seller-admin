@@ -14,6 +14,10 @@ const initialState = {
   loggedUser: {},
   token: null,
   isLoading: false,
+  userUpdating: false,
+  userUpdateError: null,
+  sellerSubmitting: false,
+  sellerError: null,
   error: null,
   message: null,
   page: 0,
@@ -147,19 +151,19 @@ export const resendOTP = createAsyncThunk(
     }
   },
 );
-//fetch seller separately
-export const fetchAllSeller = createAsyncThunk(
-  "auth/fetchSeller",
-  async (payload, { rejectWithValue }) => {
-    try {
-      const data = await AuthAPI.fetchSeller(payload);
 
-      return data;
+export const becomeSeller = createAsyncThunk(
+  "auth/becomeSeller",
+  async (formData, { rejectWithValue }) => {
+    try {
+      console.log("3. Data:", Object.fromEntries(formData)); 
+      return await AuthAPI.becomeSeller(formData);
     } catch (err) {
-      return rejectWithValue(extractError(err, "Failed to fetch seller"));
+      return rejectWithValue(extractError(err, "Failed to become seller"));
     }
   },
 );
+
 // Slice
 const authSlice = createSlice({
   name: "auth",
@@ -384,35 +388,14 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       });
-    //fetch seller
-    builder
-      .addCase(fetchAllSeller.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchAllSeller.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.sellers = action.payload.data;
-        console.log("FULFILLED PAYLOAD:", action.payload);
-        state.hasNextPage = action.payload.page;
-        state.totalPages = action.payload.totalPages;
-        state.totalUser = action.payload.totalUser;
-        state.limit = action.payload.limit;
-      })
-      .addCase(fetchAllSeller.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Failed to fetch products";
-        state.user = null;
-      });
-
     // update profile
     builder
       .addCase(updateProfile.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.userUpdating = true;
+        state.userUpdateError = null;
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.userUpdating = false;
         // backend returns { message, data: updatedUser } (same shape as googleProfileCompletion)
         const updated = { ...state.user, ...action.payload.data };
         state.user = updated;
@@ -420,8 +403,22 @@ const authSlice = createSlice({
         saveUser(updated); // keep localStorage in sync so a refresh keeps the new data
       })
       .addCase(updateProfile.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.userUpdating = false;
+        state.userUpdateError = action.payload;
+      });
+
+    builder
+      .addCase(becomeSeller.pending, (state) => {
+        state.sellerSubmitting = true;
+        state.sellerError = null;
+      })
+      .addCase(becomeSeller.fulfilled, (state, action) => {
+        state.sellerSubmitting = false;
+        state.message = action.payload.message;
+      })
+      .addCase(becomeSeller.rejected, (state, action) => {
+        state.sellerSubmitting = false;
+        state.sellerError = action.payload;
       });
   },
 });

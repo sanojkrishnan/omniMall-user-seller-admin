@@ -2,7 +2,7 @@ import * as Yup from "yup";
 
 export const sellerSchema = Yup.object({
   storeName: Yup.string().required("Write your store name"),
-  productCategories: Yup.string().required("invalid product category"),
+  productCategories: Yup.array().required("invalid product category"),
   description: Yup.string().required("Write your store description"),
   businessEmail: Yup.string()
     .email("Invalid email")
@@ -18,7 +18,7 @@ export const sellerSchema = Yup.object({
   status: Yup.string().default("active"),
   businessLogo: Yup.mixed()
     .nullable()
-    .optional()
+    .required("Logo is required")
     .test("fileSize", "File too large", (value) => {
       if (!value) return true; // ← no file selected = ok
       return value.size <= 2 * 1024 * 1024;

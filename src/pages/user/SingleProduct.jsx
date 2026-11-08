@@ -38,6 +38,7 @@ import P from "../../components/ui/P";
 import Loading from "../../components/ui/Loading";
 import { useHandleCartClick } from "../../hooks/useHandleCartClick";
 import { toast } from "react-toastify";
+import BackButtonUser from "../../components/ui/BackButtonUser";
 
 const defaultProduct = {
   subcategory: "Coats",
@@ -220,16 +221,11 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
       {!isProductLoading && singleProduct?._id && !productError && (
         <div className="min-h-screen bg-white text-black">
           {/* Breadcrumb */}
-          <div className="mx-auto max-w-6xl px-6 pt-6">
-            <nav className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-neutral-500">
-              <ChevronRight className="size-3" />
-              <span>{singleCategory?.name}</span>
-              <ChevronRight className="size-3" />
-              <span className="text-black">Sub Category Here</span>
-            </nav>
+          <div className="mx-auto max-w-6xl pt-6">
+            <BackButtonUser variant="secondary" />
           </div>
 
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-8 lg:grid-cols-[1.5fr_1fr] ">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 pb-8 lg:grid-cols-[1.5fr_1fr] ">
             {/* Main image */}
             <div>
               <div className="order-1 lg:order-2">

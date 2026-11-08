@@ -2,12 +2,14 @@ import { useFormik } from "formik";
 import { Store, Phone, MapPin } from "lucide-react";
 import BackButtonUser from "./ui/BackButtonUser";
 import { Button } from "./ui/Button";
-import { FieldError, FieldLabel, renderField } from "./ui/EditFields";
+import { FieldLabel, renderField } from "./ui/EditFields";
 import { cn } from "../utils/CN";
 import { inputBase } from "../utils/inputBase";
 import { sellerSchema } from "../validation/sellerSchema";
 import { toast } from "react-toastify";
-// import { registerSeller } from "../redux/slices/sellerSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { becomeSeller } from "../redux/slice/authSlice";
+import { useEffect, useRef } from "react";
 
 // Same CSS variables CreatePanel sets on its wrapper, so EditFields render correctly on a page.
 const THEME_VARS = {
@@ -31,6 +33,12 @@ const COUNTRY_CODES = [
   { code: "+44", label: "UK +44" },
   { code: "+1", label: "US +1" },
 ];
+
+const COUNTRY_CODE_FIELD = {
+  name: "countryCode",
+  type: "select",
+  options: COUNTRY_CODES.map((c) => ({ label: c.label, value: c.code })),
+};
 
 const initialValues = {
   storeName: "",
@@ -72,8 +80,9 @@ const sections = [
         name: "businessLogo",
         label: "Store logo",
         type: "image",
+        required: true,
         accept: "image/jpeg,image/png,image/webp",
-        helperText: "Optional. JPG, PNG or WebP, up to 2 MB.",
+        helperText: "JPG, PNG or WebP, up to 2 MB.",
       },
       {
         name: "description",
@@ -143,18 +152,10 @@ const termsField = {
 function PhoneField({ field, formik }) {
   return (
     <div className="flex gap-2">
-      <select
-        name="countryCode"
-        value={formik.values.countryCode}
-        onChange={formik.handleChange}
-        className={cn(inputBase, "w-28 shrink-0")}
-      >
-        {COUNTRY_CODES.map((c) => (
-          <option key={c.code} value={c.code}>
-            {c.label}
-          </option>
-        ))}
-      </select>
+      <div className="w-32 shrink-0">
+        {renderField(COUNTRY_CODE_FIELD, formik, "user")}
+      </div>
+
       <input
         type="tel"
         inputMode="numeric"
@@ -173,31 +174,70 @@ function PhoneField({ field, formik }) {
   );
 }
 
-export default function SellerRegistration() {
+// Formik errors can be strings, arrays or nested objects; flatten to messages.
+function flattenErrors(value) {
+  if (!value) return [];
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(flattenErrors);
+  if (typeof value === "object")
+    return Object.values(value).flatMap(flattenErrors);
+  return [];
+}
+
+export default function SellerRegister() {
+  const { message, sellerSubmitting, sellerError } = useSelector(
+    (state) => state.auth,
+  );
+  const wasSubmitting = useRef(false);
+  const dispatch = useDispatch();
+
   const formik = useFormik({
     initialValues,
     validationSchema: sellerSchema,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: async (values, helpers) => {
-      try {
-        const fd = new FormData();
-        Object.entries(values).forEach(([key, value]) => {
-          if (value === null || value === "") return;
-          fd.append(key, value);
-        });
-        // await dispatch(registerSeller(fd)).unwrap();
-        helpers.resetForm();
-      } catch (err) {
-        toast.error(
-          err?.message || "Couldn't submit your application. Try again.",
-        );
+    onSubmit: (values) => {
+      const formData = new FormData();
+
+      formData.append("storeName", values.storeName);
+      formData.append("description", values.description);
+      formData.append("businessEmail", values.businessEmail);
+      formData.append("countryCode", values.countryCode);
+      formData.append("businessPhone", values.businessPhone);
+      formData.append("businessAddress", values.businessAddress);
+      formData.append("pickupLocation", values.pickupLocation);
+      formData.append("conditionCheck", values.conditionCheck);
+      formData.append("status", values.status);
+
+      // array field: one entry per id
+      values.productCategories.forEach((id) =>
+        formData.append("productCategories", id),
+      );
+
+      if (values.businessLogo) {
+        formData.append("businessLogo", values.businessLogo);
       }
+
+      dispatch(becomeSeller(formData));
     },
   });
 
-  const errorFor = (name) =>
-    formik.submitCount > 0 ? formik.errors[name] : undefined;
+  useEffect(() => {
+    if (wasSubmitting.current && !sellerSubmitting) {
+      if (sellerError) {
+        toast.error(sellerError); // keep the values so the user can retry
+      } else {
+        toast.success(message);
+        formik.resetForm();
+      }
+    }
+    wasSubmitting.current = sellerSubmitting;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sellerSubmitting, sellerError]);
+
+  // All validation messages together, shown only after a submit attempt.
+  const validationErrors =
+    formik.submitCount > 0 ? [...new Set(flattenErrors(formik.errors))] : [];
 
   const renderItem = (field) => (
     <div
@@ -210,12 +250,11 @@ export default function SellerRegistration() {
       ) : (
         renderField(field, formik, "user")
       )}
-      {field.helperText && !errorFor(field.name) && (
+      {field.helperText && (
         <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
           {field.helperText}
         </p>
       )}
-      <FieldError message={errorFor(field.name)} />
     </div>
   );
 
@@ -254,21 +293,35 @@ export default function SellerRegistration() {
             </section>
           ))}
 
-          <div>
-            {renderField(termsField, formik, "user")}
-            <FieldError message={errorFor("conditionCheck")} />
-          </div>
+          <div>{renderField(termsField, formik, "user")}</div>
+
+          {validationErrors.length > 0 && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="rounded-lg border border-red-200 bg-red-50 p-4"
+            >
+              <p className="mb-2 text-sm font-semibold text-red-700">
+                Please fix the following errors:
+              </p>
+              <ul className="list-disc space-y-1 pl-5 text-sm text-red-600">
+                {validationErrors.map((error, index) => (
+                  <li key={`${error}-${index}`}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={formik.isSubmitting}
+              disabled={sellerSubmitting}
               className={cn(
                 "border border-black bg-black text-white",
-                formik.isSubmitting && "opacity-60",
+                sellerSubmitting && "opacity-60",
               )}
             >
-              {formik.isSubmitting ? "Submitting..." : "Submit application"}
+              {sellerSubmitting ? "Submitting..." : "Submit application"}
             </Button>
           </div>
         </form>

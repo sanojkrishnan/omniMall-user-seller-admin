@@ -46,4 +46,7 @@ export const AuthAPI = {
     console.log("Google profile completion data:", data);
     return api.patch("auth/complete-profile", data);
   },
+  becomeSeller: async (formData) => {
+    return api.upload("auth/become-seller", formData);
+  },
 };

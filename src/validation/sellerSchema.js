@@ -15,7 +15,7 @@ export const sellerSchema = Yup.object({
   conditionCheck: Yup.boolean()
     .oneOf([true], "You must agree to the terms and conditions")
     .required(),
-  status: Yup.string().default("active"),
+  status: Yup.string().default("pending"),
   businessLogo: Yup.mixed()
     .nullable()
     .required("Logo is required")

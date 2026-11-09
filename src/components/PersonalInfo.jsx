@@ -540,11 +540,11 @@ export default function PersonalInfo() {
     },
   ];
 
-  const contact = [
-    { _id: "email", label: "Email", field: FIELDS.email },
+  // const contact = [
+  //   { _id: "email", label: "Email", field: FIELDS.email },
 
-    { _id: "phone", label: "Phone", kind: "phone" },
-  ];
+  //   { _id: "phone", label: "Phone", kind: "phone" },
+  // ];
 
   const account = [
     { _id: "role", label: "Account type", value: user.role, kind: "static" },
@@ -640,12 +640,12 @@ export default function PersonalInfo() {
               columns={columns}
             />
 
-            <InfoTable
+            {/* <InfoTable
               title="Contact"
               hint="We use these to send order updates."
               data={contact}
               columns={columns}
-            />
+            /> */}
 
             <InfoTable title="Account" data={account} columns={columns} />
             {validationErrors.length > 0 && (

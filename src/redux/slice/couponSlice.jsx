@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { extractError } from "../../utils/ErrorExtractor";
 import { couponAPI } from "../../services/couponService";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { extractError } from "../../utils/errorExtractor";
 
 const initialState = {
   coupon: [],

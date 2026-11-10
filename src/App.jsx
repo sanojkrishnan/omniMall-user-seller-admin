@@ -7,6 +7,7 @@ import adminRoutes from "./routes/AdminRoutes";
 import publicRoutes from "./routes/PublicRoutes";
 import userRoutes from "./routes/UserRoutes";
 import useScrollToTop from "./hooks/useScrollToTop";
+import sellerRoutes from "./routes/SellerRoutes";
 
 function ScrollToTop() {
   useScrollToTop();
@@ -23,7 +24,7 @@ function App() {
             {adminRoutes}
             {publicRoutes}
             {userRoutes}
-
+            {sellerRoutes}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

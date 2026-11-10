@@ -80,24 +80,45 @@ export const clearTokens = () => {
   delete apiClient.defaults.headers.common["Authorization"];
 };
 
-// User Data Helpers
+export const clearSellerToken = () => {
+  _sellerToken = null;
 
-export const saveUser = (user) => {
-  const key =
-    user.role === "admin"
-      ? AUTH_CONFIG.adminKey
-      : user.role === "seller"
-        ? AUTH_CONFIG.sellerKey
-        : AUTH_CONFIG.userKey;
-  localStorage.setItem(key, JSON.stringify(user));
+  localStorage.removeItem(AUTH_CONFIG.sellerTokenKey);
+  localStorage.removeItem(AUTH_CONFIG.sellerKey);
 };
 
+// User Data Helpers
+
+// Always save the normal user in userKey
+export const saveUser = (user) => {
+  if (user) {
+    localStorage.setItem(AUTH_CONFIG.userKey, JSON.stringify(user));
+  }
+};
+
+// Always retrieve the normal user
 export const getStoredUser = () => {
-  const raw =
-    localStorage.getItem(AUTH_CONFIG.userKey) ||
-    localStorage.getItem(AUTH_CONFIG.sellerKey) ||
-    localStorage.getItem(AUTH_CONFIG.adminKey);
   try {
+    const raw = localStorage.getItem(AUTH_CONFIG.userKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+// Seller Data Helpers
+
+// Always save seller separately
+export const saveSeller = (seller) => {
+  if (seller) {
+    localStorage.setItem(AUTH_CONFIG.sellerKey, JSON.stringify(seller));
+  }
+};
+
+// Always retrieve seller separately
+export const getStoredSeller = () => {
+  try {
+    const raw = localStorage.getItem(AUTH_CONFIG.sellerKey);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;

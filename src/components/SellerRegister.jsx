@@ -260,7 +260,7 @@ export default function SellerRegister() {
 
   return (
     <div style={THEME_VARS} className="min-h-screen bg-white">
-      <div className="h-24" />
+      <div className="lg:h-24 h-10" />
 
       <div className="mx-auto w-full max-w-6xl px-4 pb-16">
         <BackButtonUser variant="secondary" />

@@ -76,7 +76,7 @@ function Header({ hideMenu, borderLine, selection }) {
 
   return (
     <div
-      className={`w-full fixed z-50 m-0 top-0 h-18 flex items-center justify-between ${borderLine ? "border-b-1 shadow-lg bg-white" : ""}`}
+      className={`w-full fixed z-50 m-0 top-0 h-16 flex items-center justify-between ${borderLine ? "border-b-1 shadow-lg bg-white" : ""}`}
     >
       <div className="m-2 ml-4 w-fit">
         <OmniMall />

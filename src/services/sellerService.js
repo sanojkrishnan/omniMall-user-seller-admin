@@ -9,7 +9,7 @@ export const sellerAPI = {
     );
   },
   //fetch single seller
-  fetchOneSeller: async (id) => {
-    return api.get(`seller/fetch-single/${id}`);
+  fetchOneSeller: async () => {
+    return api.get(`seller/fetch-single`);
   },
 };

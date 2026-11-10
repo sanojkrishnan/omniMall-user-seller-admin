@@ -14,6 +14,9 @@ import { handleImage } from "../utils/imageCompressor";
 import { userSchema } from "../validation/userSchema";
 import { updateProfile } from "../redux/slice/authSlice";
 import { toast } from "react-toastify";
+import { singleSellerFetch } from "../redux/slice/sellerSlice";
+import Loading from "./ui/Loading";
+import { useToastError } from "../hooks/useToastError";
 
 // CSS variables FieldLabel / renderField read (same ones CreatePanel sets on its wrapper).
 
@@ -356,44 +359,51 @@ function InfoTable({ title, hint, data, columns }) {
 
 export default function PersonalInfo() {
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
+  const wasUpdating = useRef(false);
+  const photoInput = useRef(null);
+  const [requested, setRequested] = useState(false);
 
-  const { user, userUpdating, userUpdateError } = useSelector(
+  const { user, userUpdating, userUpdateError, message } = useSelector(
     (state) => state.auth,
   );
 
-  const wasUpdating = useRef(false);
+  const { seller, isSellerLoading, sellerError, sellerMessage } = useSelector(
+    (state) => state.seller,
+  );
 
-  const photoInput = useRef(null);
+  const sellerBusy = isSellerLoading;
+  const sellerCame = !isSellerLoading && !!seller?._id;
+  const sellerCrash = !isSellerLoading && !seller && sellerError;
+
+  useToastError({
+    errorMessage: requested && !isSellerLoading ? sellerError : null,
+    fallbackErrorMessage: "Failed to load addresses",
+  });
+  //seller fetch
+  useEffect(() => {
+    dispatch(singleSellerFetch());
+    setRequested(true);
+  }, [dispatch]);
 
   const initialValues = useMemo(() => {
     const { code, number } = parsePhone(user.phone);
 
     return {
       firstName: user.firstName ?? "",
-
       lastName: user.lastName ?? "",
-
       email: user.email ?? "",
-
       dateOfBirth: toDateInput(user.dateOfBirth),
-
       gender: (user.gender ?? "male").toLowerCase(),
-
       profileImage: user.profileImage ?? null, // {url} or later a File
-
       phoneCode: code,
-
       phoneNumber: number,
     };
   }, [user]);
 
   const formik = useFormik({
     initialValues,
-
     enableReinitialize: true, // after a successful save the form resets to the new user
-
     validationSchema: personalSchema,
     validateOnMount: true,
 
@@ -438,7 +448,7 @@ export default function PersonalInfo() {
         toast.error(userUpdateError);
         formik.resetForm();
       } else {
-        toast.success("Profile updated successfully");
+        toast.success(message);
       }
     }
     wasUpdating.current = userUpdating;
@@ -446,26 +456,18 @@ export default function PersonalInfo() {
   }, [userUpdating, userUpdateError]);
 
   const photo = usePreview(formik.values.profileImage);
-
   const initial = (formik.values.firstName || "?").charAt(0).toUpperCase();
-
   async function handlePhotoPick(e) {
     const file = e.target.files?.[0];
-
     e.target.value = "";
-
     if (!file) return;
-
     try {
       const res = await handleImage(file, "profile"); // use an imageType your util supports
-
       const f =
         res instanceof File
           ? res
           : new File([res], file.name, { type: res.type || file.type });
-
       formik.setFieldValue("profileImage", f); // userSchema's size/type tests run here
-
       formik.setFieldTouched("profileImage", true, false);
     } catch {
       formik.setFieldError("profileImage", "Could not process this image");
@@ -487,22 +489,16 @@ export default function PersonalInfo() {
   const columns = [
     {
       header: "Field",
-
       headerClassName:
         "w-1/3 text-xs uppercase tracking-widest text-neutral-500",
-
       cellClassName: "w-1/3 align-middle",
-
       render: (row) => <FieldLabel>{row.label}</FieldLabel>,
     },
 
     {
       header: "Details",
-
       headerClassName: "text-xs uppercase tracking-widest text-neutral-500",
-
       cellClassName: "align-middle",
-
       render: (row) =>
         row.kind === "phone" ? (
           <PhoneCell formik={formik} />
@@ -516,26 +512,17 @@ export default function PersonalInfo() {
 
   const basicDetails = [
     { _id: "firstName", label: "First name", field: FIELDS.firstName },
-
     { _id: "lastName", label: "Last name", field: FIELDS.lastName },
-
     {
       _id: "dob",
-
       label: "Date of birth",
-
       field: FIELDS.dateOfBirth,
-
       format: formatDate,
     },
-
     {
       _id: "gender",
-
       label: "Gender",
-
       field: FIELDS.gender,
-
       format: formatGender,
     },
   ];
@@ -608,13 +595,40 @@ export default function PersonalInfo() {
                 </p>
               </div>
 
-              <div className="w-fit lg:w-full">
+              <div className="w-full">
                 <Button
+                  variant={sellerCame ? "primary" : "secondary"}
+                  disabled={sellerBusy || sellerCrash}
                   type="button"
-                  onClick={() => navigate("/user/profile/seller-register")}
+                  onClick={() => {
+                    if (sellerCame) {
+                      navigate("/seller/dashboard");
+                      toast.success(sellerMessage);
+                    } else {
+                      navigate("/user/profile/seller-register");
+                    }
+                  }}
                 >
-                  <HandCoins />{" "}
-                  <span className="lg:block hidden">Become a seller</span>
+                  {sellerBusy ? (
+                    <Loading className="size-6" />
+                  ) : (
+                    <>
+                      {sellerCame ? (
+                        <HandCoins />
+                      ) : sellerCrash ? (
+                        ""
+                      ) : (
+                        <HandCoins />
+                      )}
+                      <span>
+                        {sellerCame
+                          ? "Go to seller dashboard"
+                          : sellerCrash
+                            ? "404"
+                            : "Become a seller"}
+                      </span>
+                    </>
+                  )}
                 </Button>
               </div>
             </FormCard>

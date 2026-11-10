@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   baseURL: import.meta.env.VITE_SERVER_URL,
-socketURL: import.meta.env.VITE_SOCKET_URL,
+  socketURL: import.meta.env.VITE_SOCKET_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -13,6 +13,7 @@ export const AUTH_CONFIG = {
   sellerTokenKey: "sellerToken",
   userKey: "user",
   adminKey: "admin",
+  sellerKey: "seller",
   refreshThreshold: 5 * 60 * 1000, // 5 minutes before expiry
   maxLoginAttempts: 5,
   lockoutDuration: 15 * 60 * 1000, // 15 minutes

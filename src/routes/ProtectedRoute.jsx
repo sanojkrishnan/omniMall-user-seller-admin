@@ -1,50 +1,105 @@
-// src/components/ProtectedRoute.jsx
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
-//private route
-
+// Private route
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, token } = useSelector((state) => state.auth);
+  const { seller, sellerToken } = useSelector((state) => state.seller);
 
   const isAuthenticated = !!token && !!user;
+  const isSellerAuthenticated = !!sellerToken && !!seller;
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // Check whether the authenticated account has permission
+  const hasAccess = allowedRoles
+    ? allowedRoles.some((role) => {
+        if (role === "seller") return isSellerAuthenticated;
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+        return isAuthenticated && user.role === role;
+      })
+    : isAuthenticated || isSellerAuthenticated;
+
+  if (!hasAccess) {
+    // Guest
+    if (!isAuthenticated && !isSellerAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+
+    // Normal user trying to access seller/admin pages
+    if (isAuthenticated && user.role === "user") {
+      return <Navigate to="/user" replace />;
+    }
+
+    // Seller trying to access another role's pages
+    if (isSellerAuthenticated) {
+      return <Navigate to="/seller/dashboard" replace />;
+    }
+
+    // Admin
+    if (isAuthenticated && user.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+
     return <Navigate to="/not-found" replace />;
   }
 
   return children;
 }
-// public route
+
+// Public route (login, register, forgot password, etc.)
 function PublicRoute({ children }) {
   const { user, token } = useSelector((state) => state.auth);
+  const { seller, sellerToken } = useSelector((state) => state.seller);
 
   const isAuthenticated = !!token && !!user;
+  const isSellerAuthenticated = !!sellerToken && !!seller;
+
+  if (isSellerAuthenticated) {
+    return <Navigate to="/seller/dashboard" replace />;
+  }
 
   if (isAuthenticated) {
-    // redirect based on role
-    if (user.role === "admin")
-      return <Navigate to="/admin/dashboard" replace />;
-    if (user.role === "seller") return <Navigate to="/seller/panel" replace />;
-    if (user.role === "user") return <Navigate to="/user" replace />;
+    switch (user.role) {
+      case "admin":
+        return <Navigate to="/admin/dashboard" replace />;
+
+      case "seller":
+        return <Navigate to="/seller/dashboard" replace />;
+
+      case "user":
+        return <Navigate to="/user" replace />;
+
+      default:
+        return <Navigate to="/not-found" replace />;
+    }
   }
 
   return children;
 }
 
-//restricted route (only for some pages that can access for guests and users but not for admin and seller. eg: home page)
-function RestrictRoles({ children, blockedRoles }) {
+// Restricted route (accessible to guests and normal users,
+// but not admins or sellers)
+function RestrictRoles({ children, blockedRoles = [] }) {
   const { user, token } = useSelector((state) => state.auth);
-  const isAuthenticated = !!token && !!user;
+  const { seller, sellerToken } = useSelector((state) => state.seller);
 
-  if (isAuthenticated && blockedRoles?.includes(user.role)) {
-    if (user.role === "admin")
-      return <Navigate to="/admin/dashboard" replace />;
-    if (user.role === "seller") return <Navigate to="/seller/panel" replace />;
+  const isAuthenticated = !!token && !!user;
+  const isSellerAuthenticated = !!sellerToken && !!seller;
+
+  if (isSellerAuthenticated && blockedRoles.includes("seller")) {
+    return <Navigate to="/seller/dashboard" replace />;
+  }
+
+  if (isAuthenticated && blockedRoles.includes(user.role)) {
+    switch (user.role) {
+      case "admin":
+        return <Navigate to="/admin/dashboard" replace />;
+
+      case "seller":
+        return <Navigate to="/seller/dashboard" replace />;
+
+      default:
+        return <Navigate to="/user" replace />;
+    }
   }
 
   return children;

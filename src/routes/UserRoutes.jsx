@@ -16,6 +16,7 @@ import LoginSecurity from "../components/LoginSecurity";
 import LikesReviews from "../components/LikesReviews";
 import ShoppingPreferences from "../components/ShoppingPreferences";
 import SellerRegister from "../components/SellerRegister";
+import SellerStore from "../pages/user/SellerStore";
 
 const userRoutes = (
   <>
@@ -50,6 +51,7 @@ const userRoutes = (
       <Route path={`profile/preferences`} element={<ShoppingPreferences />} />
       <Route path={`profile/likes-reviews`} element={<LikesReviews />} />
       <Route path={`profile/seller-register`} element={<SellerRegister />} />
+      <Route path={`shop/seller-profile`} element={<SellerStore />} />
     </Route>
   </>
 );

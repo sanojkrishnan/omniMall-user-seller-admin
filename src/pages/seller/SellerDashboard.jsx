@@ -1,7 +1,6 @@
 import { Star, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BarChartCard from "../../components/ui/BarChartCard";
-import { FormCard } from "../../components/ui/FormCard";
 import LineChart from "../../components/ui/LineChartCard";
 import PyChartCard from "../../components/ui/PyChartCard";
 import SelectionButton from "../../components/ui/SelectionButton";
@@ -20,8 +19,8 @@ const pyColors = [
   "#0088FE", // Blue
 ];
 
-const PLACEHOLDER_IMG =
-  "../../../public/logo and other utilities/lipstick_profile.jpg";
+// files in /public are served from the site root (not a relative path)
+const PLACEHOLDER_IMG = "/logo and other utilities/lipstick_profile.jpg";
 
 const inr = (n) => `₹ ${n.toLocaleString("en-IN")}`;
 
@@ -217,6 +216,12 @@ const recentOrders = [
   },
 ];
 
+// order totals (pending + delivered + canceled = total)
+const ORDER_TOTAL = 640;
+const ORDER_PENDING = 38;
+const ORDER_CANCELED = 14;
+const ORDER_DELIVERED = ORDER_TOTAL - ORDER_PENDING - ORDER_CANCELED;
+
 const ratingBreakdown = [
   { star: 5, count: 214 },
   { star: 4, count: 104 },
@@ -322,11 +327,7 @@ function Stars({ rating, size = "size-3.5" }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          className={`${size} ${
-            n <= Math.round(rating)
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
-          }`}
+          className={`${size} ${n <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
         />
       ))}
     </div>
@@ -369,6 +370,10 @@ function CardHeader({ title, onViewAll }) {
   );
 }
 
+// shared card shell so every block has the same border/padding
+const CARD =
+  "flex flex-col shadow-md items-center border w-full rounded-lg p-6 justify-center mt-6";
+
 /* ------------------------------ component ------------------------------ */
 
 function SellerDashboard() {
@@ -378,49 +383,95 @@ function SellerDashboard() {
   const totalProfit = monthly.reduce((s, m) => s + m.profit, 0);
   const bestMonth = monthly.reduce((a, b) => (b.profit > a.profit ? b : a));
 
+  // products that need restocking
+  const outOfStock = productSales.filter((p) => p.stock === 0);
+  const lowStock = productSales.filter((p) => p.stock > 0 && p.stock <= 10);
+
   return (
-    <>
+    <div className="max-w-6xl mx-auto">
+      {/* page title (the top header comes from SellerLayout) */}
+      <div className="py-6 px-2">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <p className="text-sm text-gray-500">
+          Sales, profit, orders and reviews for your store.
+        </p>
+      </div>
+
+      {/* restock alert */}
+      {(outOfStock.length > 0 || lowStock.length > 0) && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 border border-yellow-500 bg-yellow-500/10 rounded-lg p-3 mb-6 text-sm"
+        >
+          <div className="flex items-center gap-2">
+            <TriangleAlert className="size-4 text-yellow-500 shrink-0" />
+            <p>
+              {outOfStock.length > 0 && (
+                <>
+                  <b>{outOfStock.map((p) => p.name).join(", ")}</b> out of
+                  stock.{" "}
+                </>
+              )}
+              {lowStock.length > 0 && (
+                <>
+                  <b>{lowStock.map((p) => p.name).join(", ")}</b> running low.
+                </>
+              )}
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            className="w-fit mt-0 text-xs p-2"
+            onClick={() => navigate("/seller/products")}
+          >
+            Restock
+          </Button>
+        </div>
+      )}
+
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center mb-6">
-        {kpiCards.map((children, index) => (
-          <LineChart key={index} children={children} index={index} />
+        {kpiCards.map((card, index) => (
+          <LineChart key={card.cardName} children={card} index={index} />
         ))}
       </div>
       <div className="w-full h-[0.5px] border mb-6"></div>
-      <div className="flex justify-end mr-10">
+
+      {/* TODO: wire this filter to the charts / API (daily, weekly...) */}
+      <div className="flex justify-end sm:mr-10">
         <SelectionButton className="w-fit" defaultValue={filter[0]}>
           {filter}
         </SelectionButton>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 place-items-center">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
         {/* Sales overview */}
-        <FormCard className="flex-col items-center border min-w-[400px] shadow-none p-2 justify-center mt-6">
+        <div className={CARD}>
           <div className="p-2 mb-4 text-center border-b">
             <h1>Sales Overview</h1>
           </div>
-          <div className="w-[450px] mb-4 overflow-hidden h-[250px]">
+          <div className="w-full max-w-[450px] mb-4 overflow-hidden h-[250px]">
             <BarChartCard data={revenueData} />
           </div>
           <SummaryStrip
             items={[
               { label: "Total Revenue", value: inr(totalRevenue) },
-              { label: "Total Orders", value: "640" },
+              { label: "Total Orders", value: String(ORDER_TOTAL) },
               {
                 label: "Average Order Value",
-                value: inr(Math.round(totalRevenue / 640)),
+                value: inr(Math.round(totalRevenue / ORDER_TOTAL)),
               },
               { label: "Conversion Rate", value: "6.2 %" },
             ]}
           />
-        </FormCard>
+        </div>
 
         {/* Profit overview */}
-        <FormCard className="flex-col items-center border min-w-[400px] shadow-none p-2 justify-center mt-6">
+        <div className={CARD}>
           <div className="p-2 mb-4 text-center border-b">
             <h1>Profit Overview</h1>
           </div>
-          <div className="w-[450px] mb-4 overflow-hidden h-[250px]">
+          <div className="w-full max-w-[450px] mb-4 overflow-hidden h-[250px]">
             <BarChartCard data={profitData} />
           </div>
           <SummaryStrip
@@ -437,33 +488,31 @@ function SellerDashboard() {
               { label: "Pending Payout", value: inr(21400) },
             ]}
           />
-        </FormCard>
+        </div>
 
         {/* Product based sales share */}
-        <FormCard className="flex-col items-center shadow-none border min-w-[400px] p-2 justify-center mt-6">
+        <div className={CARD}>
           <div className="p-2 mb-4 text-center border-b">
             <h1>Product Based Sales Report</h1>
           </div>
-          <div className="w-[400px] mb-4 overflow-hidden flex h-[250px]">
+          <div className="w-full max-w-[400px] mb-4 overflow-hidden flex h-[250px]">
             <PyChartCard category={productShare} />
-            <div>
-              <ul>
-                {productShare.map((item, index) => (
-                  <li
-                    key={item.name}
-                    className="pt-2 grid grid-cols-3 items-center"
-                  >
-                    <div
-                      className="w-2 h-2 mr-6 rounded-full justify-self-end"
-                      style={{
-                        backgroundColor: pyColors[index % pyColors.length],
-                      }}
-                    ></div>
-                    <p className="col-span-2 text-xs">{item.name}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ul>
+              {productShare.map((item, index) => (
+                <li
+                  key={item.name}
+                  className="pt-2 grid grid-cols-3 items-center"
+                >
+                  <div
+                    className="w-2 h-2 mr-6 rounded-full justify-self-end"
+                    style={{
+                      backgroundColor: pyColors[index % pyColors.length],
+                    }}
+                  ></div>
+                  <p className="col-span-2 text-xs">{item.name}</p>
+                </li>
+              ))}
+            </ul>
           </div>
           <SummaryStrip
             items={productSales.map((p) => ({
@@ -471,10 +520,10 @@ function SellerDashboard() {
               value: inr(p.revenue),
             }))}
           />
-        </FormCard>
+        </div>
 
         {/* Recent orders */}
-        <FormCard className="flex-col shadow-none items-center border min-w-[400px] p-2 justify-between mt-6 h-[500px]">
+        <div className={CARD}>
           <CardHeader
             title="Recent Orders"
             onViewAll={() => navigate("/seller/orders")}
@@ -503,17 +552,17 @@ function SellerDashboard() {
           </div>
           <SummaryStrip
             items={[
-              { label: "Pending Orders", value: "38" },
-              { label: "Delivered", value: "588" },
-              { label: "Canceled", value: "14" },
-              { label: "Grand Total", value: "640" },
+              { label: "Pending Orders", value: String(ORDER_PENDING) },
+              { label: "Delivered", value: String(ORDER_DELIVERED) },
+              { label: "Canceled", value: String(ORDER_CANCELED) },
+              { label: "Grand Total", value: String(ORDER_TOTAL) },
             ]}
           />
-        </FormCard>
+        </div>
       </div>
 
       {/* product wise sales */}
-      <div className="flex flex-col rounded-lg w-full items-center border min-w-[400px] p-2 justify-between mt-6">
+      <div className="flex flex-col shadow-md rounded-lg w-full items-center border p-2 justify-between mt-6">
         <CardHeader
           title="Product Wise Sales"
           onViewAll={() => navigate("/seller/products")}
@@ -566,7 +615,7 @@ function SellerDashboard() {
       </div>
 
       {/* customer reviews */}
-      <div className="flex flex-col rounded-lg w-full items-center border min-w-[400px] p-2 mt-6 mb-6">
+      <div className="flex flex-col shadow-md rounded-lg w-full items-center border p-2 mt-6 mb-6">
         <CardHeader
           title="Customer Reviews"
           onViewAll={() => navigate("/seller/reviews")}
@@ -633,7 +682,7 @@ function SellerDashboard() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

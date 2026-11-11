@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFormik } from "formik";
+import { replace, useFormik } from "formik";
 import * as Yup from "yup";
 import { Camera, Pencil, HandCoins } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -602,7 +602,7 @@ export default function PersonalInfo() {
                   type="button"
                   onClick={() => {
                     if (sellerCame) {
-                      navigate("/seller/dashboard");
+                      navigate("/seller", { replace: true });
                       toast.success(sellerMessage);
                     } else {
                       navigate("/user/profile/seller-register");

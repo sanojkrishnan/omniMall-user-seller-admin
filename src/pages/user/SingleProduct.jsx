@@ -20,7 +20,7 @@ import {
   clearProductState,
   singleProductFetch,
 } from "../../redux/slice/productSlice";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import {
@@ -89,6 +89,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState("description");
   const [status, setStatus] = useState({});
+  const navigate = useNavigate();
 
   //product selector
   const { singleProduct, isProductLoading, productError } = useSelector(
@@ -361,7 +362,10 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               {singleSeller && !isSellerLoading && !isCategoryLoading && (
                 <div className="mt-6 flex items-center justify-between border-y border-neutral-200 py-4">
                   <div className="flex items-center gap-2">
-                    <div className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold overflow-hidden">
+                    <div
+                      className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold overflow-hidden"
+                      onClick={() => navigate("user/seller-profile")}
+                    >
                       {singleSeller.profileImage.url ? (
                         <img
                           src={singleSeller.profileImage.url}

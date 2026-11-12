@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { replace, useFormik } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Camera, Pencil, HandCoins } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -373,7 +373,7 @@ export default function PersonalInfo() {
   );
 
   const sellerBusy = isSellerLoading;
-  const sellerCame = !isSellerLoading && !!seller?._id;
+  const sellerCame = !isSellerLoading && !!seller?.storeName;
   const sellerCrash = !isSellerLoading && !seller && sellerError;
 
   useToastError({

@@ -22,6 +22,7 @@ const initialState = {
   sellerUpdateError: null,
 
   sellerError: null,
+  sellerErrorCode: null,
   sellerMessage: null,
 
   page: 0,
@@ -51,11 +52,13 @@ export const fetchAllSellers = createAsyncThunk(
 // Fetch the seller belonging to the logged-in user
 export const singleSellerFetch = createAsyncThunk(
   "seller/fetchSingleSeller",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
-      const data = await sellerAPI.fetchOneSeller();
-      return data;
+      return await sellerAPI.fetchOneSeller();
     } catch (err) {
+      if (err.response?.status === 401) {
+        dispatch(logoutSeller());
+      }
       return rejectWithValue(extractError(err, "Failed to fetch seller"));
     }
   },
@@ -69,6 +72,7 @@ const sellerSlice = createSlice({
   reducers: {
     clearSellerError(state) {
       state.sellerError = null;
+      state.sellerErrorCode = null;
     },
 
     clearSellerState(state) {
@@ -107,6 +111,7 @@ const sellerSlice = createSlice({
       .addCase(fetchAllSellers.rejected, (state, action) => {
         state.isLoading = false;
         state.sellerError = getErrorMessage(action.payload);
+        state.sellerErrorCode = action.payload?.status;
         state.sellers = [];
       });
 
@@ -133,8 +138,9 @@ const sellerSlice = createSlice({
       })
       .addCase(singleSellerFetch.rejected, (state, action) => {
         state.isLoading = false;
+        console.log("ACTION DO :", action.payload);
         state.sellerError = getErrorMessage(action.payload);
-        state.seller = null;
+        state.sellerErrorCode = action.payload?.status;
       });
   },
 });

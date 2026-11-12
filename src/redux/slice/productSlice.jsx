@@ -1,12 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { productAPI } from "../../services/productService";
 import { extractError } from "../../utils/errorExtractor";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const initialState = {
   products: [],
   singleProduct: {},
   isProductLoading: false,
   productError: null,
+  productErrorStatus: null,
   page: 0,
   totalPages: 0,
   totalProducts: 0,
@@ -111,6 +113,7 @@ const productSlice = createSlice({
   reducers: {
     clearProductError(state) {
       state.productError = null;
+      state.productStatusError = null;
     },
     clearProductState(state) {
       state.message = null;
@@ -132,7 +135,8 @@ const productSlice = createSlice({
       })
       .addCase(addAProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload;
+        state.productStatusError = action.payload.status;
+        state.productError = getErrorMessage(action.payload);
       });
 
     //fetching all products
@@ -162,7 +166,8 @@ const productSlice = createSlice({
       .addCase(fetchAllProducts.rejected, (state, action) => {
         if (action.meta.aborted) return;
         state.isProductLoading = false;
-        state.productError = action.payload || "Failed to fetch products";
+        state.productStatusError = action.payload.status;
+        state.productError = getErrorMessage(action.payload);
         const page = action.meta.arg.pagination?.page ?? 1;
         if (page === 1) {
           state.products = [];
@@ -181,7 +186,8 @@ const productSlice = createSlice({
       })
       .addCase(singleProductFetch.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload;
+        state.productStatusError = action.payload.status;
+        state.productError = getErrorMessage(action.payload);
         state.singleProduct = {};
       });
 
@@ -199,7 +205,8 @@ const productSlice = createSlice({
       })
       .addCase(deleteSingleProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload;
+        state.productStatusError = action.payload.status;
+        state.productError = getErrorMessage(action.payload);
       });
     //update a product
     builder
@@ -213,7 +220,8 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productError = action.payload;
+        state.productStatusError = action.payload.status;
+        state.productError = getErrorMessage(action.payload);
         state.singleProduct = {};
       });
   },

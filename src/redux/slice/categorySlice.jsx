@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { extractError } from "../../utils/ErrorExtractor";
 import { categoryAPI } from "../../services/categoryService";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { extractError } from "../../utils/errorExtractor";
 
 const initialState = {
   category: [],
@@ -14,6 +14,7 @@ const initialState = {
   categoriesTotalPages: 0,
   totalCategories: 0,
   categoryError: null,
+  categoryErrorStatus: null,
   isCategoryLoading: false,
   isCategoryUpdating: false,
   isCategoryDeleting: false,
@@ -97,6 +98,7 @@ const categorySlice = createSlice({
   reducers: {
     clearCategoryError(state) {
       state.categoryError = null;
+      state.categoryErrorStatus = null;
     },
     clearCategoryState(state) {
       state.categoryMessage = null;
@@ -133,7 +135,8 @@ const categorySlice = createSlice({
       })
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.isCategoryLoading = false;
-        state.categoryError = action.payload || "Failed to fetch categories";
+        state.categoryError = getErrorMessage(action.payload);
+        state.categoryErrorStatus = action.payload.status;
       });
     //fetch single category
     builder
@@ -148,10 +151,8 @@ const categorySlice = createSlice({
       })
       .addCase(singleCategoryFetch.rejected, (state, action) => {
         state.isCategoryLoading = false;
-        state.categoryError = extractError(
-          action.payload,
-          "Failed to fetch category",
-        );
+        state.categoryError = getErrorMessage(action.payload);
+        state.categoryErrorStatus = action.payload.status;
         state.singleCategory = null;
       });
     //update category
@@ -168,10 +169,8 @@ const categorySlice = createSlice({
       })
       .addCase(updateCategory.rejected, (state, action) => {
         state.isCategoryUpdating = false;
-        state.categoryUpdateError = getErrorMessage(
-          action.payload,
-          "Failed to update category",
-        );
+        state.categoryError = getErrorMessage(action.payload);
+        state.categoryErrorStatus = action.payload.status;
       });
     //delete category
     builder
@@ -189,10 +188,8 @@ const categorySlice = createSlice({
       })
       .addCase(deleteSingleCategory.rejected, (state, action) => {
         state.isCategoryDeleting = false;
-        state.categoryDeleteError = getErrorMessage(
-          action.payload,
-          "Failed to delete category",
-        );
+        state.categoryError = getErrorMessage(action.payload);
+        state.categoryErrorStatus = action.payload.status;
       });
     //add category
     builder
@@ -210,10 +207,8 @@ const categorySlice = createSlice({
       })
       .addCase(addCategory.rejected, (state, action) => {
         state.isCategoryLoading = false;
-        state.categoryCreateError = getErrorMessage(
-          action.payload,
-          "Failed to update category",
-        );
+        state.categoryError = getErrorMessage(action.payload);
+        state.categoryErrorStatus = action.payload.status;
       });
   },
 });

@@ -217,28 +217,30 @@ export function CouponList({ coupons = [], loading, error, onApply, feature }) {
   const wrong = !loading && error && list.length === 0;
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: 16,
-        gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-      }}
-    >
-      <style>{css}</style>
+    <>
+      <div
+        style={{
+          display: "grid",
+          gap: 16,
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+        }}
+      >
+        <style>{css}</style>
 
-      {showSkeleton &&
-        Array.from({ length: 3 }).map((_, i) => <CouponSkeleton key={i} />)}
+        {showSkeleton &&
+          Array.from({ length: 3 }).map((_, i) => <CouponSkeleton key={i} />)}
 
-      {list.map((c) => (
-        <CouponCard
-          key={c._id || c.code}
-          coupon={c}
-          onApply={onApply}
-          onClick={() => navigate(`/user/profile/coupon/${c._id}`)}
-        />
-      ))}
+        {list.map((c) => (
+          <CouponCard
+            key={c._id || c.code}
+            coupon={c}
+            onApply={onApply}
+            onClick={() => navigate(`/user/profile/coupon/${c._id}`)}
+          />
+        ))}
+      </div>
       {wrong && <span className="text-center">Something Went Wrong !</span>}
-    </div>
+    </>
   );
 }
 

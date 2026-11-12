@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  ExternalLinkIcon,
   LayoutDashboard,
   LogOut,
   Package,
@@ -13,6 +12,8 @@ import {
 import { Button } from "./Button";
 import { useState } from "react";
 import P2 from "./P2";
+import { useDispatch } from "react-redux";
+import { logoutSeller } from "../../redux/slice/sellerSlice";
 
 // `selection` values come from SellerLayout: home | dashboard | products | profile
 const navItems = [
@@ -46,6 +47,8 @@ function SellerHeader({
   const [showNotification, setShowNotification] = useState(false);
   const [notificationDot, setNotificationDot] = useState(true);
   const [ringKey, setRingKey] = useState(0);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   return (
     <header
@@ -88,7 +91,13 @@ function SellerHeader({
         {/* actions */}
         <div className="flex items-center gap-2">
           <Button
-            className={"text-red-500 rounded-full px-2 py-2 shadow-none"}
+            className={
+              "text-red-500 lg:rounded-xl rounded-full px-2 py-2 shadow-none"
+            }
+            onClick={() => {
+              dispatch(logoutSeller());
+              navigate("/user", { replace: true });
+            }}
             variant="secondary"
           >
             <LogOut className="size-4" />{" "}
@@ -117,7 +126,7 @@ function SellerHeader({
           </Button>
 
           <div
-            className={`border absolute top-16 right-48 rounded-b-lg p-2 shadow-lg w-80 min-h-4 ${showNotification ? "scale-y-100 " : "scale-y-0 "} origin-top transition-all duration-500 bg-white`}
+            className={`border absolute top-20 right-48 rounded-b-lg p-2 shadow-lg w-80 min-h-4 ${showNotification ? "scale-y-100 " : "scale-y-0 "} origin-top transition-all duration-500 bg-white`}
           >
             <P2
               className={`${showNotification ? "opacity-100" : "opacity-0"} transition-all duration-200 text-gray-500`}

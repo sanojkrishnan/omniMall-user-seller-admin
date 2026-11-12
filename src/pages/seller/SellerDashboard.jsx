@@ -337,14 +337,14 @@ function Stars({ rating, size = "size-3.5" }) {
 // bottom summary strip used inside the cards
 function SummaryStrip({ items }) {
   return (
-    <div className="w-full max-w-[500px] flex overflow-x-auto border-t mt-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
+    <div className="w-full flex overflow-x-auto border-t mt-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-gray-200">
       {items.map((item, i) => (
         <div
           key={item.label}
           className={`flex-1 min-w-[96px] text-center text-xs p-2 ${i < items.length - 1 ? "border-r" : ""}`}
         >
           <h5>{item.label}</h5>
-          <p className="text-md font-bold mt-3 whitespace-nowrap">
+          <p className="text-sm sm:text-base font-bold mt-3 whitespace-nowrap">
             {item.value}
           </p>
         </div>
@@ -355,11 +355,11 @@ function SummaryStrip({ items }) {
 
 function CardHeader({ title, onViewAll }) {
   return (
-    <div className="w-full grid grid-cols-2 p-2 justify-items-end border-b">
-      <h1 className="justify-self-start">{title}</h1>
+    <div className="w-full flex items-center justify-between p-2 border-b gap-2">
+      <h1 className="truncate">{title}</h1>
       {onViewAll && (
         <Button
-          className="w-fit text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
+          className="w-fit shrink-0 text-xs mt-0 p-2 font-thin text-blue-500 border-none shadow-none"
           variant="secondary"
           onClick={onViewAll}
         >
@@ -370,9 +370,9 @@ function CardHeader({ title, onViewAll }) {
   );
 }
 
-// shared card shell so every block has the same border/padding
+// shared card shell (min-w-0 stops grid children from overflowing)
 const CARD =
-  "flex flex-col shadow-md items-center border w-full rounded-lg p-6 justify-center mt-6";
+  "flex flex-col min-w-0 shadow-md items-center border w-full rounded-lg p-3 sm:p-6 justify-center mt-4 sm:mt-6";
 
 /* ------------------------------ component ------------------------------ */
 
@@ -383,16 +383,15 @@ function SellerDashboard() {
   const totalProfit = monthly.reduce((s, m) => s + m.profit, 0);
   const bestMonth = monthly.reduce((a, b) => (b.profit > a.profit ? b : a));
 
-  // products that need restocking
   const outOfStock = productSales.filter((p) => p.stock === 0);
   const lowStock = productSales.filter((p) => p.stock > 0 && p.stock <= 10);
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* page title (the top header comes from SellerLayout) */}
-      <div className="py-6 px-2">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-        <p className="text-sm text-gray-500">
+    <div className="max-w-6xl mx-auto w-full px-2 sm:px-4 overflow-x-hidden">
+      {/* page title */}
+      <div className="py-4 sm:py-6 px-2">
+        <h1 className="text-lg sm:text-xl font-bold">Dashboard</h1>
+        <p className="text-xs sm:text-sm text-gray-500">
           Sales, profit, orders and reviews for your store.
         </p>
       </div>
@@ -401,11 +400,11 @@ function SellerDashboard() {
       {(outOfStock.length > 0 || lowStock.length > 0) && (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 border border-yellow-500 bg-yellow-500/10 rounded-lg p-3 mb-6 text-sm"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-yellow-500 bg-yellow-500/10 rounded-lg p-3 mb-4 sm:mb-6 text-sm"
         >
-          <div className="flex items-center gap-2">
-            <TriangleAlert className="size-4 text-yellow-500 shrink-0" />
-            <p>
+          <div className="flex items-start gap-2 min-w-0">
+            <TriangleAlert className="size-4 mt-0.5 text-yellow-500 shrink-0" />
+            <p className="min-w-0 break-words">
               {outOfStock.length > 0 && (
                 <>
                   <b>{outOfStock.map((p) => p.name).join(", ")}</b> out of
@@ -421,7 +420,7 @@ function SellerDashboard() {
           </div>
           <Button
             variant="secondary"
-            className="w-fit mt-0 text-xs p-2"
+            className="w-full sm:w-fit mt-0 text-xs p-2"
             onClick={() => navigate("/seller/products")}
           >
             Restock
@@ -429,28 +428,28 @@ function SellerDashboard() {
         </div>
       )}
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center mb-6">
+      {/* KPI cards: 1 col -> 2 cols -> 4 cols */}
+      <div className="grid grid-cols-1 min-[600px]:grid-cols-2 lg:grid-cols-4 gap-x-3 mb-4 sm:mb-6">
         {kpiCards.map((card, index) => (
           <LineChart key={card.cardName} children={card} index={index} />
         ))}
       </div>
-      <div className="w-full h-[0.5px] border mb-6"></div>
+      <div className="w-full h-[0.5px] border mb-4 sm:mb-6"></div>
 
-      {/* TODO: wire this filter to the charts / API (daily, weekly...) */}
+      {/* TODO: wire this filter to the charts / API */}
       <div className="flex justify-end sm:mr-10">
         <SelectionButton className="w-fit" defaultValue={filter[0]}>
           {filter}
         </SelectionButton>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-2">
         {/* Sales overview */}
         <div className={CARD}>
           <div className="p-2 mb-4 text-center border-b">
             <h1>Sales Overview</h1>
           </div>
-          <div className="w-full max-w-[450px] mb-4 overflow-hidden h-[250px]">
+          <div className="w-full max-w-[450px] min-w-0 mb-4 overflow-hidden h-[250px]">
             <BarChartCard data={revenueData} />
           </div>
           <SummaryStrip
@@ -471,7 +470,7 @@ function SellerDashboard() {
           <div className="p-2 mb-4 text-center border-b">
             <h1>Profit Overview</h1>
           </div>
-          <div className="w-full max-w-[450px] mb-4 overflow-hidden h-[250px]">
+          <div className="w-full max-w-[450px] min-w-0 mb-4 overflow-hidden h-[250px]">
             <BarChartCard data={profitData} />
           </div>
           <SummaryStrip
@@ -490,26 +489,25 @@ function SellerDashboard() {
           />
         </div>
 
-        {/* Product based sales share */}
+        {/* Product based sales share: legend goes under the pie on mobile */}
         <div className={CARD}>
           <div className="p-2 mb-4 text-center border-b">
             <h1>Product Based Sales Report</h1>
           </div>
-          <div className="w-full max-w-[400px] mb-4 overflow-hidden flex h-[250px]">
-            <PyChartCard category={productShare} />
-            <ul>
+          <div className="w-full max-w-[420px] mb-4 flex flex-col sm:flex-row items-center gap-3">
+            <div className="w-full sm:flex-1 min-w-0 h-[220px]">
+              <PyChartCard category={productShare} innerRadius={"50%"} />
+            </div>
+            <ul className="grid grid-cols-2 sm:grid-cols-1 gap-x-6 gap-y-2 shrink-0">
               {productShare.map((item, index) => (
-                <li
-                  key={item.name}
-                  className="pt-2 grid grid-cols-3 items-center"
-                >
-                  <div
-                    className="w-2 h-2 mr-6 rounded-full justify-self-end"
+                <li key={item.name} className="flex items-center gap-2 text-xs">
+                  <span
+                    className="size-2 rounded-full shrink-0"
                     style={{
                       backgroundColor: pyColors[index % pyColors.length],
                     }}
-                  ></div>
-                  <p className="col-span-2 text-xs">{item.name}</p>
+                  />
+                  <span className="whitespace-nowrap">{item.name}</span>
                 </li>
               ))}
             </ul>
@@ -528,21 +526,27 @@ function SellerDashboard() {
             title="Recent Orders"
             onViewAll={() => navigate("/seller/orders")}
           />
-          <div className="w-full flex-1 px-4">
-            <ul className="w-full h-[370px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+          <div className="w-full flex-1 sm:px-4">
+            <ul className="w-full h-[320px] sm:h-[370px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
               {recentOrders.map((item, index) => (
                 <li
                   key={index}
                   className={`${index % 2 === 0 ? "bg-slate-50" : "bg-white"} py-2 px-2 w-full flex border-y justify-between items-center gap-2`}
                 >
                   <Thumb src={item.image} />
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm">{item.productName}</p>
-                    <p className="text-xs">Ordered by {item.customer}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">
+                      {item.productName}
+                    </p>
+                    <p className="text-xs truncate">
+                      Ordered by {item.customer}
+                    </p>
                   </div>
-                  <p className="text-sm">{item.paymentType}</p>
+                  <p className="text-xs sm:text-sm shrink-0">
+                    {item.paymentType}
+                  </p>
                   <p
-                    className={`text-xs border p-1 px-2 rounded-lg ${statusClass(item.status)}`}
+                    className={`text-xs border p-1 px-2 rounded-lg shrink-0 ${statusClass(item.status)}`}
                   >
                     {item.status}
                   </p>
@@ -561,61 +565,78 @@ function SellerDashboard() {
         </div>
       </div>
 
-      {/* product wise sales */}
-      <div className="flex flex-col shadow-md rounded-lg w-full items-center border p-2 justify-between mt-6">
+      {/* product wise sales: table on md+, stacked cards on mobile */}
+      <div className="flex flex-col min-w-0 shadow-md rounded-lg w-full items-center border p-2 mt-4 sm:mt-6">
         <CardHeader
           title="Product Wise Sales"
           onViewAll={() => navigate("/seller/products")}
         />
-        <div className="w-full overflow-x-auto px-4">
-          <div className="min-w-[620px]">
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr] gap-2 py-2 px-2 text-xs text-gray-500">
-              <p>Product</p>
-              <p className="text-right">Units Sold</p>
-              <p className="text-right">Revenue</p>
-              <p className="text-right">Profit</p>
-              <p className="text-right">Stock</p>
-            </div>
-            <ul>
-              {productSales.map((item, index) => {
-                const stock = stockInfo(item.stock);
-                return (
-                  <li
-                    key={item.name}
-                    className={`${index % 2 === 0 ? "bg-slate-50" : "bg-white"} grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr] gap-2 py-2 px-2 border-y items-center`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Thumb
-                        src={item.image}
-                        box="w-12 h-12"
-                        icon="size-6"
-                        rounded="rounded-none"
-                      />
-                      <div>
-                        <p className="font-semibold text-sm">{item.name}</p>
-                        <p className="text-xs">{item.category}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-right">{item.units}</p>
-                    <p className="text-sm text-right">{inr(item.revenue)}</p>
-                    <p className="text-sm text-right">{inr(item.profit)}</p>
-                    <div className="flex justify-end">
-                      <p
-                        className={`text-xs border p-1 px-2 rounded-lg whitespace-nowrap ${stock.cls}`}
-                      >
-                        {stock.label}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+        <div className="w-full sm:px-2 md:px-4">
+          <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr] gap-2 py-2 px-2 text-xs text-gray-500">
+            <p>Product</p>
+            <p className="text-right">Units Sold</p>
+            <p className="text-right">Revenue</p>
+            <p className="text-right">Profit</p>
+            <p className="text-right">Stock</p>
           </div>
+          <ul>
+            {productSales.map((item, index) => {
+              const stock = stockInfo(item.stock);
+              return (
+                <li
+                  key={item.name}
+                  className={`${index % 2 === 0 ? "bg-slate-50" : "bg-white"} grid grid-cols-3 md:grid-cols-[2fr_1fr_1fr_1fr_1.2fr] gap-x-2 gap-y-3 py-3 md:py-2 px-2 border-y items-center`}
+                >
+                  <div className="col-span-3 md:col-span-1 flex items-center gap-3 min-w-0">
+                    <Thumb
+                      src={item.image}
+                      box="w-12 h-12"
+                      icon="size-6"
+                      rounded="rounded-none"
+                    />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-xs">{item.category}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm md:text-right">
+                    <span className="md:hidden block text-xs text-gray-500">
+                      Units
+                    </span>
+                    {item.units}
+                  </p>
+                  <p className="text-sm md:text-right">
+                    <span className="md:hidden block text-xs text-gray-500">
+                      Revenue
+                    </span>
+                    {inr(item.revenue)}
+                  </p>
+                  <p className="text-sm md:text-right">
+                    <span className="md:hidden block text-xs text-gray-500">
+                      Profit
+                    </span>
+                    {inr(item.profit)}
+                  </p>
+
+                  <div className="col-span-3 md:col-span-1 flex md:justify-end">
+                    <p
+                      className={`text-xs border p-1 px-2 rounded-lg whitespace-nowrap ${stock.cls}`}
+                    >
+                      {stock.label}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
 
       {/* customer reviews */}
-      <div className="flex flex-col shadow-md rounded-lg w-full items-center border p-2 mt-6 mb-6">
+      <div className="flex flex-col min-w-0 shadow-md rounded-lg w-full items-center border p-2 mt-4 sm:mt-6 mb-6">
         <CardHeader
           title="Customer Reviews"
           onViewAll={() => navigate("/seller/reviews")}
@@ -624,7 +645,7 @@ function SellerDashboard() {
           {/* rating summary */}
           <div className="md:w-72 shrink-0 p-4 md:border-r border-b md:border-b-0">
             <div className="flex items-center gap-3 mb-4">
-              <p className="text-4xl font-bold">{averageRating}</p>
+              <p className="text-3xl sm:text-4xl font-bold">{averageRating}</p>
               <div>
                 <Stars rating={Number(averageRating)} size="size-4" />
                 <p className="text-xs mt-1">{totalReviews} reviews</p>
@@ -648,7 +669,7 @@ function SellerDashboard() {
           </div>
 
           {/* review list */}
-          <div className="flex-1 px-4 md:h-[360px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+          <div className="flex-1 min-w-0 px-0 sm:px-4 max-h-[440px] md:max-h-none md:h-[360px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
             <ul className="w-full">
               {reviews.map((review, index) => (
                 <li
@@ -661,20 +682,20 @@ function SellerDashboard() {
                       .map((part) => part[0])
                       .join("")}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <p className="font-semibold text-sm">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap justify-between items-start gap-x-2 gap-y-1">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate">
                           {review.customer}
                         </p>
                         <p className="text-xs">on {review.product}</p>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+                      <div className="flex flex-col items-start sm:items-end gap-1">
                         <Stars rating={review.rating} />
                         <p className="text-xs text-gray-500">{review.date}</p>
                       </div>
                     </div>
-                    <p className="text-sm mt-2">{review.comment}</p>
+                    <p className="text-sm mt-2 break-words">{review.comment}</p>
                   </div>
                 </li>
               ))}

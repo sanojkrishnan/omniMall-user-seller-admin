@@ -21,13 +21,13 @@ function LineChart({ children, index }) {
   return (
     <div
       className={
-        "w-fit mb-4 px-4 p-2 border overflow-hidden bg-gradient-to-br  from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl"
+        "w-full mb-4 px-4 p-2 border overflow-hidden bg-gradient-to-br from-white/0 via-white/40 to-white/0 backdrop-blur-md rounded-xl"
       }
     >
-      <div className="w-fit">
-        <div className="flex mt-4">
+      <div className="w-full">
+        <div className="flex justify-center items-center lg:p-1 p-4 ">
           <div
-            className={`rounded-full p-2 w-fit h-fit flex justify-center items-center ${index === 0 && "bg-green-100"} ${index === 1 && "bg-blue-100"} ${index === 2 && " bg-purple-100"} ${index === 3 && " bg-orange-100"} ${index === 4 && " bg-yellow-100"} ${index === 5 && " bg-green-100"} ${index === 6 && " bg-red-100"} ${index === 7 && " bg-sky-100"}`}
+            className={`rounded-full p-6 lg:p-2 w-fit h-fit flex justify-center items-center ${index === 0 && "bg-green-100"} ${index === 1 && "bg-blue-100"} ${index === 2 && " bg-purple-100"} ${index === 3 && " bg-orange-100"} ${index === 4 && " bg-yellow-100"} ${index === 5 && " bg-green-100"} ${index === 6 && " bg-red-100"} ${index === 7 && " bg-sky-100"}`}
           >
             {children.logo === "IndianRupee" && (
               <IndianRupee className="size-8 font-extrabold text-green-500" />

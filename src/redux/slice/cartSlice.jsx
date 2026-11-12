@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { extractError } from "../../utils/ErrorExtractor";
 import { cartAPI } from "../../services/cartService";
+import { extractError } from "../../utils/errorExtractor";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const initialState = {
   cart: [],
@@ -11,6 +12,7 @@ const initialState = {
   cartTotalPages: 0,
   totalCarts: 0,
   cartError: null,
+  cartErrorStatus: null,
   isCartLoading: false,
   cartStatus: "idle",
 };
@@ -77,6 +79,7 @@ const cartSlice = createSlice({
       state.cartMessage = null;
       state.cartDeleteMessage = null;
       state.cartUpdateMessage = null;
+      state.cartErrorStatus = null;
     },
     clearCartState(state) {
       state.cartError = null;
@@ -104,7 +107,8 @@ const cartSlice = createSlice({
       })
       .addCase(addCart.rejected, (state, action) => {
         state.isCartLoading = false;
-        state.cartError = action.payload?.data?.error;
+        state.cartError = getErrorMessage(action.payload);
+        state.cartErrorStatus = action.payload.status;
       });
     builder
       // fetch cart
@@ -121,8 +125,8 @@ const cartSlice = createSlice({
       .addCase(fetchCart.rejected, (state, action) => {
         state.isCartLoading = false;
         state.cartStatus = "failed";
-        state.cartError = action.payload;
-        console.log("CART FETCH FAILED :", action.payload);
+        state.cartError = getErrorMessage(action.payload);
+        state.cartErrorStatus = action.payload.status;
       });
     builder
       // remove from cart
@@ -138,7 +142,8 @@ const cartSlice = createSlice({
       })
       .addCase(removeCart.rejected, (state, action) => {
         state.isCartLoading = false;
-        state.cartError = action.payload;
+        state.cartError = getErrorMessage(action.payload);
+        state.cartErrorStatus = action.payload.status;
         state.cartDeleteMessage = action.payload?.message;
       });
     builder
@@ -155,7 +160,8 @@ const cartSlice = createSlice({
       })
       .addCase(updateQuantity.rejected, (state, action) => {
         state.isCartLoading = false;
-        state.cartError = action.payload;
+        state.cartError = getErrorMessage(action.payload);
+        state.cartErrorStatus = action.payload.status;
         state.cartUpdateMessage = action.payload?.message;
       });
   },

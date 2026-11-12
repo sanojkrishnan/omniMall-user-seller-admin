@@ -1,18 +1,93 @@
-import { ShoppingBag } from "lucide-react";
+import {
+  CircleX,
+  RotateCw,
+  ServerCrash,
+  ShoppingBag,
+  WifiOff,
+} from "lucide-react";
 import P2 from "./P2";
 import P from "./P";
+import { Button } from "./Button";
 
-function ErrorFallback({ loading, error, message, item }) {
+// accepts a string, an Error, an axios error, or { statusCode, message }
+const getStatusCode = (error, statusCode) =>
+  statusCode ??
+  error?.statusCode ??
+  error?.status ??
+  error?.response?.status ??
+  null;
+
+const getErrorText = (error, message) => {
+  if (message) return message;
+  if (typeof error === "string") return error;
+  return error?.message ?? error?.response?.data?.message ?? null;
+};
+
+function ErrorFallback({
+  loading,
+  error,
+  message,
+  statusCode,
+  item,
+  onRetry,
+  className = "",
+}) {
+  const code = getStatusCode(error, statusCode);
+  const isServerError = code !== null && Number(code) >= 500;
+  const text = getErrorText(error, message);
+  const isNetworkError = /unable to connect|network|connection/i.test(
+    text ?? "",
+  );
+
+  // if the caller gives onRetry, refetch; otherwise reload the page
+  const handleRetry = () => (onRetry ? onRetry() : window.location.reload());
+
   return (
     <>
       {!loading && error && (
-        <div className="w-full h-[60vh] flex flex-col justify-center items-center">
-          <h1 className="text-md font-semibold text-gray-800">
-            {message || "Something went wrong"}
-          </h1>
-          <P2 className="text-sm text-neutral-500 mt-1">
-            Please try again later.
-          </P2>
+        <div
+          role="alert"
+          className={`w-full flex flex-col items-center justify-center gap-3 text-center px-4 py-12 ${className}`}
+        >
+          <div className="relative">
+            <span className="absolute inset-0 rounded-full bg-red-500/20 animate-ping" />
+            <div className="relative rounded-full bg-red-500/10 p-4 animate-shake">
+              {isServerError ? (
+                <ServerCrash className="size-8 sm:size-10 text-red-500" />
+              ) : isNetworkError ? (
+                <WifiOff className="size-8 sm:size-10 text-red-500" />
+              ) : (
+                <CircleX className="size-8 sm:size-10 text-red-500" />
+              )}
+            </div>
+          </div>
+
+          <div className="max-w-sm">
+            <p className="font-semibold text-sm sm:text-base">
+              {isServerError
+                ? "Server error"
+                : isNetworkError
+                  ? "No connection"
+                  : "Something went wrong"}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              {isServerError
+                ? "Something went wrong on our side. Please reload and try again in a moment."
+                : (text ?? "Please try again.")}
+            </p>
+            {isServerError && (
+              <p className="text-xl text-gray-400 mt-1">Error code: {code}</p>
+            )}
+          </div>
+
+          <Button
+            variant="secondary"
+            className="w-fit flex items-center gap-2 text-sm"
+            onClick={handleRetry}
+          >
+            <RotateCw className="size-4" />
+            {isServerError ? "Reload" : "Try again"}
+          </Button>
         </div>
       )}
 

@@ -8,6 +8,7 @@ import {
 } from "../../utils/apiClient";
 import { AuthAPI } from "../../services/authService";
 import { extractError } from "../../utils/errorExtractor";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const initialState = {
   user: [],
@@ -18,6 +19,7 @@ const initialState = {
   userUpdateError: null,
   sellerSubmitting: false,
   sellerError: null,
+  errorStatus: null,
   error: null,
   message: null,
   page: 0,
@@ -156,7 +158,7 @@ export const becomeSeller = createAsyncThunk(
   "auth/becomeSeller",
   async (formData, { rejectWithValue }) => {
     try {
-      console.log("3. Data:", Object.fromEntries(formData)); 
+      console.log("3. Data:", Object.fromEntries(formData));
       return await AuthAPI.becomeSeller(formData);
     } catch (err) {
       return rejectWithValue(extractError(err, "Failed to become seller"));
@@ -171,6 +173,7 @@ const authSlice = createSlice({
   reducers: {
     clearAuthError(state) {
       state.error = null;
+      state.errorStatus = null;
     },
     clearAuthState(state) {
       state.message = null;
@@ -225,7 +228,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     // verify otp
@@ -254,7 +258,8 @@ const authSlice = createSlice({
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     //resend OTP
@@ -276,7 +281,8 @@ const authSlice = createSlice({
       })
       .addCase(resendOTP.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
         // don't wipe otpSent here either — the existing OTP is still valid,
         // the resend attempt itself just failed (e.g. rate-limited)
       });
@@ -309,7 +315,8 @@ const authSlice = createSlice({
       })
       .addCase(googleRegister.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     //google user profile completion
@@ -330,7 +337,8 @@ const authSlice = createSlice({
       })
       .addCase(googleProfileCompletion.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     // login
@@ -357,7 +365,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
     // forgot password
     builder
@@ -371,7 +380,8 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     // reset password
@@ -386,7 +396,8 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
     // update profile
     builder
@@ -404,7 +415,8 @@ const authSlice = createSlice({
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.userUpdating = false;
-        state.userUpdateError = action.payload;
+        state.userUpdateError = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
 
     builder
@@ -418,7 +430,8 @@ const authSlice = createSlice({
       })
       .addCase(becomeSeller.rejected, (state, action) => {
         state.sellerSubmitting = false;
-        state.sellerError = action.payload;
+        state.sellerError = getErrorMessage(action.payload);
+        state.errorStatus = action.payload.status;
       });
   },
 });

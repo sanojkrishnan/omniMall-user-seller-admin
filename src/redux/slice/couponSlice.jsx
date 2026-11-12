@@ -13,6 +13,7 @@ const initialState = {
   couponTotalPages: 0,
   totalCoupons: 0,
   couponError: null,
+  couponErrorStatus: null,
   isCouponLoading: false,
   couponCreateMessage: null,
 };
@@ -128,7 +129,8 @@ const couponSlice = createSlice({
       })
       .addCase(fetchCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponError = action.payload;
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
       });
     builder
       // fetch coupon by id
@@ -143,7 +145,8 @@ const couponSlice = createSlice({
       })
       .addCase(fetchCouponById.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponError = action.payload;
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
       });
     //update a coupon
     builder
@@ -158,7 +161,8 @@ const couponSlice = createSlice({
       })
       .addCase(updateCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponError = action.payload;
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
         state.singleCoupon = null;
       });
 
@@ -176,7 +180,8 @@ const couponSlice = createSlice({
       })
       .addCase(deleteSingleCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponError = action.payload;
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
       });
 
     //change coupon status
@@ -193,7 +198,8 @@ const couponSlice = createSlice({
       })
       .addCase(changeCouponStatus.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponError = action.payload;
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
       });
 
     builder
@@ -211,10 +217,8 @@ const couponSlice = createSlice({
       })
       .addCase(addCoupon.rejected, (state, action) => {
         state.isCouponLoading = false;
-        state.couponCreateError = getErrorMessage(
-          action.payload,
-          "Failed to update category",
-        );
+        state.couponError = getErrorMessage(action.payload);
+        state.couponErrorStatus = action.payload.status;
       });
   },
 });

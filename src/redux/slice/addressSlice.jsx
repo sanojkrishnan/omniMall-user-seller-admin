@@ -6,13 +6,14 @@ import { getErrorMessage } from "../../utils/getErrorMessage.js";
 const initialState = {
   address: [],
   addressError: null,
+  addressErrorStatus: null,
   isAddressLoading: false,
   message: null,
 };
 
 export const fetchAllAddress = createAsyncThunk(
   "address/fetchAllAddress",
-  async (_,{ rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const data = await addressAPI.fetchAddress();
       return data;
@@ -28,6 +29,7 @@ const addressSlice = createSlice({
   reducers: {
     clearSellerError(state) {
       state.addressError = null;
+      state.addressErrorStatus = null;
     },
     clearSellerState(state) {
       state.message = null;
@@ -48,7 +50,8 @@ const addressSlice = createSlice({
       })
       .addCase(fetchAllAddress.rejected, (state, action) => {
         state.isAddressLoading = false;
-        state.addressError = getErrorMessage(action.payload) || "Failed to fetch address";
+        state.addressError = getErrorMessage(action.payload);
+        state.addressErrorStatus = action.payload.status;
         state.address = [];
       });
   },

@@ -9,10 +9,10 @@ const COLORS = [
   "#0088FE", // Blue
 ];
 
-export default function PyChartCard({ category }) {
+export default function PyChartCard({ category, innerRadius = "0%" }) {
   return (
-    <div className="w-full h-30">
-      <ResponsiveContainer>
+    <div className="w-full h-full min-h-[200px]">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={category}
@@ -22,8 +22,8 @@ export default function PyChartCard({ category }) {
             cy="50%"
             fill="#8884d8"
             labelLine={false}
-            innerRadius={60}
-            outerRadius={100}
+            innerRadius={innerRadius}
+            outerRadius="85%"
           >
             {category.map((entry, index) => (
               <Cell

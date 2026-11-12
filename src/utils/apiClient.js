@@ -211,8 +211,16 @@ apiClient.interceptors.response.use(
     }
 
     if (status >= 500) {
-      toast.error("Server error. Please try again later.");
       console.error("Server error:", message);
+
+      // let any request opt out (e.g. background polling)
+      if (!error.config?.silent) {
+        window.dispatchEvent(
+          new CustomEvent("server-error", {
+            detail: { statusCode: status, message },
+          }),
+        );
+      }
     }
 
     return Promise.reject(error);

@@ -170,3 +170,34 @@
 .Toastify__slide-enter--top-right {
   animation-duration: 0.35s !important;
 }
+
+.phone-input-custom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid var(--edit-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: white;
+}
+
+.phone-input-custom:focus-within {
+  border-color: var(--edit-accent);
+  border-radius: 8px;
+}
+
+.phone-input-custom .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.phone-input-custom .PhoneInputInput {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+}

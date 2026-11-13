@@ -2,7 +2,7 @@ import * as Yup from "yup";
 
 export const addressSchema = Yup.object({
   label: Yup.string()
-    .oneOf(["Home", "Work", "Other"], "Select an address type")
+    .oneOf(["home", "work", "other"], "Select an address type")
     .required("Select an address type"),
   name: Yup.string().trim().required("Enter the full name"),
   phone: Yup.string()
@@ -15,5 +15,5 @@ export const addressSchema = Yup.object({
   pincode: Yup.string()
     .matches(/^\d{6}$/, "Pincode must be 6 digits")
     .required("Enter the pincode"),
-  isDefault: Yup.boolean(),
+  isDefault: Yup.boolean().default(false),
 });

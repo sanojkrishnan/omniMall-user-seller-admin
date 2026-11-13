@@ -113,7 +113,7 @@ const productSlice = createSlice({
   reducers: {
     clearProductError(state) {
       state.productError = null;
-      state.productStatusError = null;
+      state.productErrorStatus = null;
     },
     clearProductState(state) {
       state.message = null;
@@ -135,7 +135,7 @@ const productSlice = createSlice({
       })
       .addCase(addAProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productStatusError = action.payload.status;
+        state.productErrorStatus = action.payload.status;
         state.productError = getErrorMessage(action.payload);
       });
 
@@ -166,7 +166,8 @@ const productSlice = createSlice({
       .addCase(fetchAllProducts.rejected, (state, action) => {
         if (action.meta.aborted) return;
         state.isProductLoading = false;
-        state.productStatusError = action.payload.status;
+        state.hasNextPage = false;
+        state.productErrorStatus = action.payload.status;
         state.productError = getErrorMessage(action.payload);
         const page = action.meta.arg.pagination?.page ?? 1;
         if (page === 1) {
@@ -186,7 +187,7 @@ const productSlice = createSlice({
       })
       .addCase(singleProductFetch.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productStatusError = action.payload.status;
+        state.productErrorStatus = action.payload.status;
         state.productError = getErrorMessage(action.payload);
         state.singleProduct = {};
       });
@@ -205,7 +206,7 @@ const productSlice = createSlice({
       })
       .addCase(deleteSingleProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productStatusError = action.payload.status;
+        state.productErrorStatus = action.payload.status;
         state.productError = getErrorMessage(action.payload);
       });
     //update a product
@@ -220,7 +221,7 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.isProductLoading = false;
-        state.productStatusError = action.payload.status;
+        state.productErrorStatus = action.payload.status;
         state.productError = getErrorMessage(action.payload);
         state.singleProduct = {};
       });

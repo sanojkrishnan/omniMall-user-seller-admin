@@ -601,7 +601,10 @@ export default function PersonalInfo() {
                   disabled={sellerBusy || sellerCrash}
                   type="button"
                   onClick={() => {
-                    if (sellerCame) {
+                    if (sellerCame && seller.status === "pending") {
+                      navigate("/seller/profile", { replace: true });
+                      toast.success(sellerMessage);
+                    } else if (sellerCame && seller.status === "active") {
                       navigate("/seller", { replace: true });
                       toast.success(sellerMessage);
                     } else {

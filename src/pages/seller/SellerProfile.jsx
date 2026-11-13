@@ -7,6 +7,7 @@ import {
   Phone,
   Star,
   Store,
+  TriangleAlert,
   Truck,
   X,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { singleSellerFetch } from "../../redux/slice/sellerSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import { useDateFormatter } from "../../hooks/useDateFormatter";
+import { fetchAllCategories } from "../../redux/slice/categorySlice";
 
 /* ----------------------------- static data ----------------------------- */
 
@@ -80,16 +82,28 @@ function Section({ title, children }) {
 
 function SellerProfile() {
   const dispatch = useDispatch();
-  const dateFormatter = useDateFormatter();
+  const dateFormatter = useDateFormatter({ time: false });
   const { seller, isLoading, sellerError, sellerErrorCode } = useSelector(
     (state) => state.seller,
   );
+  const { category } = useSelector((state) => state.category);
   useEffect(() => {
     dispatch(singleSellerFetch());
   }, [dispatch]);
 
-  const hasSeller = !!seller?.storeName;
+  useEffect(() => {
+    const ids = seller?.productCategories;
+    if (!ids?.length) return;
 
+    dispatch(
+      fetchAllCategories({
+        pagination: { page: 1, limit: ids.length },
+        uniqueCategories: ids,
+      }),
+    );
+  }, [dispatch, seller?.productCategories]);
+
+  const hasSeller = !!seller?.storeName;
   const showError = !isLoading && !!sellerError;
   const showLoading = isLoading || (!hasSeller && !sellerError);
   const showProfile = !isLoading && !sellerError && hasSeller;
@@ -103,7 +117,7 @@ function SellerProfile() {
   return (
     <div className="max-w-6xl mx-auto px-2 pb-8">
       {showLoading && (
-        <div className="w-full h-[80vh] flex items-center justify-center">
+        <div className="w-full h-[90vh] flex items-center justify-center">
           <CartLoading />
         </div>
       )}
@@ -124,6 +138,20 @@ function SellerProfile() {
               </p>
             </div>
           </div>
+          {seller.status === "pending" && (
+            <div
+              role="alert"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-yellow-500 bg-yellow-500/10 rounded-lg p-3 mb-4 sm:mb-6 text-sm"
+            >
+              <div className="flex items-start gap-2 min-w-0">
+                <TriangleAlert className="size-4 mt-0.5 text-yellow-500 shrink-0" />
+                <p className="min-w-0 break-words">
+                  The seller profile is under review. we will let you know when
+                  you are ready to sell your products.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="shadow-md border rounded-lg overflow-hidden">
             <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div className="w-24 h-24 rounded-full border overflow-hidden shrink-0 flex items-center justify-center">
@@ -152,7 +180,10 @@ function SellerProfile() {
                 </span>
                 <p className="text-xs text-gray-500 mt-2">{status.note}</p>
               </div>
-              <Button className="w-fit mt-0 text-sm flex items-center gap-2">
+              <Button
+                disabled={seller.status !== "active"}
+                className="w-fit mt-0 text-sm flex items-center gap-2"
+              >
                 <Pencil className="size-4" /> Edit profile
               </Button>
             </div>
@@ -166,14 +197,15 @@ function SellerProfile() {
             <Row label="Store name">{seller.storeName}</Row>
             <Row label="Product categories">
               <div className="flex flex-wrap gap-2">
-                {seller.productCategories.map((c) => (
-                  <span
-                    key={c}
-                    className="text-xs border rounded-full px-2 py-1"
-                  >
-                    {c}
-                  </span>
-                ))}
+                {category?.length !== 0 &&
+                  category.map((cat) => (
+                    <span
+                      key={cat._id}
+                      className="text-xs border rounded-full px-2 py-1"
+                    >
+                      {cat.name}
+                    </span>
+                  ))}
               </div>
             </Row>
             <Row label="Description">{seller.description}</Row>

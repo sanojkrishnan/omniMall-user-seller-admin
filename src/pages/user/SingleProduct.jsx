@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
   Star,
@@ -7,7 +7,6 @@ import {
   Minus,
   Plus,
   ChevronDown,
-  ChevronRight,
   Check,
   TriangleAlert,
   ShoppingCart,
@@ -31,7 +30,6 @@ import {
   clearSellerState,
   singleSellerFetch,
 } from "../../redux/slice/sellerSlice";
-import { useToastError } from "../../hooks/useToastError";
 import H1 from "../../components/ui/H1";
 import P2 from "../../components/ui/P2";
 import P from "../../components/ui/P";
@@ -84,142 +82,136 @@ const relatedDefaults = [
 function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
   const dispatch = useDispatch();
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState("description");
   const [status, setStatus] = useState({});
-  const navigate = useNavigate();
+  const [fetched, setFetched] = useState(false); // first request for this id finished
 
-  //product selector
-  const { singleProduct, isProductLoading, productError } = useSelector(
-    (state) => state.product,
-  );
-  //seller selector
+  // product selector
+  const { singleProduct, isProductLoading, productError, productErrorStatus } =
+    useSelector((state) => state.product);
+  // seller selector
   const { singleSeller, isSellerLoading } = useSelector(
     (state) => state.seller,
   );
-  //category selector
+  // category selector
   const { singleCategory, isCategoryLoading } = useSelector(
     (state) => state.category,
   );
 
-  console.log("SINGLE SELLER :", singleSeller);
-  console.log("SINGLE CATEGORY :", singleCategory);
-  console.log("SINGLE PRODUCT error :", productError);
+  /* ------------------------------ fetching ------------------------------ */
 
-  //product fetch
+  const loadProduct = useCallback(() => {
+    dispatch(singleProductFetch({ id })).finally(() => setFetched(true));
+  }, [dispatch, id]);
+
   useEffect(() => {
-    dispatch(singleProductFetch({ id }));
+    setFetched(false);
+    loadProduct();
 
     return () => {
       dispatch(clearProductState());
       dispatch(clearSellerState());
       dispatch(clearCategoryState());
     };
-  }, [id]);
+  }, [id, loadProduct, dispatch]);
+
+  // seller and category are optional extras: if they fail, the cards just stay hidden
   useEffect(() => {
     if (singleProduct?.sellerId) {
-      dispatch(
-        singleSellerFetch({
-          id: singleProduct.sellerId,
-        }),
-      )
-        .unwrap()
-        .then((res) => {
-          console.log("SELLER FETCH SUCCESS:", res);
-        })
-        .catch((err) => {
-          console.log("SELLER FETCH FAILED:", err);
-        });
+      dispatch(singleSellerFetch({ id: singleProduct.sellerId }));
     }
-  }, [singleProduct?.sellerId]);
+  }, [dispatch, singleProduct?.sellerId]);
 
   useEffect(() => {
     if (singleProduct?.categoryId) {
-      dispatch(
-        singleCategoryFetch({
-          id: singleProduct.categoryId,
-        }),
-      )
-        .unwrap()
-        .then((res) => {
-          console.log("CATEGORY FETCH SUCCESS:", res);
-        })
-        .catch((err) => {
-          console.log("CATEGORY FETCH FAILED:", err);
-        });
+      dispatch(singleCategoryFetch({ id: singleProduct.categoryId }));
     }
-  }, [singleProduct?.categoryId]);
-
-  //toastify error
-  useToastError({
-    errorMessage: productError,
-    fallbackErrorMessage: "Failed to load products",
-  });
+  }, [dispatch, singleProduct?.categoryId]);
 
   useEffect(() => {
     return () => {
       dispatch(clearProductError());
+    };
+  }, [dispatch]);
+
+  /* ------------------------------ add to cart --------------------------- */
+
+  const timeoutsRef = useRef({});
+  const handleCartClick = useHandleCartClick();
+
+  const itemStatus = status[singleProduct?._id] || "idle";
+  const isAdded = itemStatus === "added";
+  const isLoading = itemStatus === "loading";
+  const isError = itemStatus === "error";
+
+  const handleAddToCart = async (e, item) => {
+    e.stopPropagation();
+    const setItemStatus = (itemId, value) => {
+      setStatus((prev) => ({ ...prev, [itemId]: value }));
+    };
+
+    if (status[item._id] === "loading") return;
+
+    if (timeoutsRef.current[item._id]) {
+      clearTimeout(timeoutsRef.current[item._id]);
+      delete timeoutsRef.current[item._id];
+    }
+
+    setItemStatus(item._id, "loading");
+
+    const result = await handleCartClick(item);
+    const succeeded = result?.meta?.requestStatus === "fulfilled";
+
+    if (succeeded) {
+      toast.success("Product added to cart");
+      setItemStatus(item._id, "added");
+      timeoutsRef.current[item._id] = setTimeout(() => {
+        setItemStatus(item._id, "idle");
+        delete timeoutsRef.current[item._id];
+      }, 1200);
+    } else {
+      toast.error(result?.payload || "Failed to add to cart");
+      setItemStatus(item._id, "error");
+      timeoutsRef.current[item._id] = setTimeout(() => {
+        setItemStatus(item._id, "idle");
+        delete timeoutsRef.current[item._id];
+      }, 1800);
+    }
+  };
+
+  // clear pending timers on unmount
+  useEffect(() => {
+    const timers = timeoutsRef.current;
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
     };
   }, []);
 
   const toggleSection = (key) =>
     setOpenSection((prev) => (prev === key ? null : key));
 
-  //add to cart
-  console.log("PRODUCTS :", singleProduct);
-  const itemStatus = status[singleProduct._id] || "idle";
-  const isAdded = itemStatus === "added";
-  const isLoading = itemStatus === "loading";
-  const isError = itemStatus === "error";
-  const timeoutsRef = useRef({});
-  const handleCartClick = useHandleCartClick();
-  const handleAddToCart = async (e, singleProduct) => {
-    e.stopPropagation();
-    const setItemStatus = (id, value) => {
-      setStatus((prev) => ({ ...prev, [id]: value }));
-    };
+  /* ------------------------------ ui state ------------------------------ */
 
-    if (status[singleProduct._id] === "loading") return;
-
-    if (timeoutsRef.current[singleProduct._id]) {
-      clearTimeout(timeoutsRef.current[singleProduct._id]);
-      delete timeoutsRef.current[singleProduct._id];
-    }
-
-    setItemStatus(singleProduct._id, "loading");
-
-    const result = await handleCartClick(singleProduct);
-    const succeeded = result?.meta?.requestStatus === "fulfilled";
-
-    if (succeeded) {
-      toast.success("Product added to cart");
-      setItemStatus(singleProduct._id, "added");
-      timeoutsRef.current[singleProduct._id] = setTimeout(() => {
-        setItemStatus(singleProduct._id, "idle");
-        delete timeoutsRef.current[singleProduct._id];
-      }, 1200);
-    } else {
-      toast.error(result?.payload || "Failed to add to cart");
-      setItemStatus(singleProduct._id, "error");
-      timeoutsRef.current[singleProduct._id] = setTimeout(() => {
-        setItemStatus(singleProduct._id, "idle");
-        delete timeoutsRef.current[singleProduct._id];
-      }, 1800);
-    }
-  };
+  const showLoader = !productError && (isProductLoading || !fetched);
+  const showProduct = !showLoader && !productError && !!singleProduct?._id;
+  const showNotFound = !showLoader && !productError && !singleProduct?._id;
 
   return (
     <>
       <div className="w-full h-16"></div>
-      {isProductLoading && (
+
+      {showLoader && (
         <div className="flex w-full h-screen items-center justify-center">
           <CartLoading />
         </div>
       )}
 
-      {!isProductLoading && singleProduct?._id && !productError && (
+      {showProduct && (
         <div className="min-h-screen bg-white text-black">
           {/* Breadcrumb */}
           <div className="mx-auto max-w-6xl pt-6">
@@ -231,7 +223,6 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
             <div>
               <div className="order-1 lg:order-2">
                 <div className="aspect-[16/9] relative rounded-xl w-full overflow-hidden border border-neutral-200">
-                  {/* Replace the single <img> with a sliding strip */}
                   <div
                     className="flex h-full transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${activeImage * 100}%)` }}
@@ -246,7 +237,6 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                     ))}
                   </div>
 
-                  {/* Add onClick to the existing buttons — everything else stays the same */}
                   <div
                     className={` ${singleProduct.productImage.length === 1 ? "hidden" : "block"}`}
                   >
@@ -267,7 +257,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                           ),
                         )
                       }
-                      className={`absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full z-10`}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-2 rounded-full z-10"
                     >
                       ❯
                     </button>
@@ -340,7 +330,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                 </span>
               </div>
 
-              {/* Spec tag — signature element: a catalog/garment-tag block */}
+              {/* Spec tag */}
               <div className="mt-6 border border-black font-mono text-[11px] uppercase tracking-wide">
                 <div className="grid grid-cols-3 divide-x divide-black">
                   <div className="px-3 py-2">
@@ -364,16 +354,16 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                   <div className="flex items-center gap-2">
                     <div
                       className="flex size-9 items-center justify-center rounded-full border border-black text-sm font-semibold overflow-hidden"
-                      onClick={() => navigate("user/seller-profile")}
+                      onClick={() => navigate("/user/seller-profile")}
                     >
-                      {singleSeller.profileImage.url ? (
+                      {singleSeller.profileImage?.url ? (
                         <img
                           src={singleSeller.profileImage.url}
                           alt={singleSeller.firstName}
                           className="size-full rounded-full object-cover"
                         />
                       ) : (
-                        singleSeller.firstName.charAt(0)
+                        singleSeller.firstName?.charAt(0)
                       )}
                     </div>
                     <div>
@@ -455,9 +445,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                   <span
                     key={itemStatus}
                     className="flex items-center gap-1.5"
-                    style={{
-                      animation: "pop-in 0.35s ease",
-                    }}
+                    style={{ animation: "pop-in 0.35s ease" }}
                   >
                     {isAdded ? (
                       <Check className="size-4" />
@@ -496,6 +484,7 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
               </div>
             </div>
           </div>
+
           {/* Accordion sections */}
           <div className="mt-8 divide-y mx-auto max-w-6xl divide-neutral-200 border-t border-neutral-200">
             <AccordionRow
@@ -539,7 +528,29 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
         </div>
       )}
 
-      <ErrorFallback loading={isProductLoading} error={productError} />
+      {/* Request failed: retry refetches only this product */}
+      {productError && (
+        <>
+          <div className="mx-auto max-w-6xl pt-6">
+            <BackButtonUser variant="secondary" />
+          </div>
+          <ErrorFallback
+            loading={isProductLoading}
+            error={productError}
+            statusCode={productErrorStatus}
+            onRetry={loadProduct}
+          />
+        </>
+      )}
+
+      {/* Request succeeded but there is no product */}
+      {showNotFound && (
+        <ErrorFallback
+          loading={false}
+          error="This product could not be found."
+          onRetry={() => navigate("/user/shop")}
+        />
+      )}
     </>
   );
 }

@@ -10,10 +10,10 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "./Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import P2 from "./P2";
-import { useDispatch } from "react-redux";
-import { logoutSeller } from "../../redux/slice/sellerSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutSeller, singleSellerFetch } from "../../redux/slice/sellerSlice";
 
 // `selection` values come from SellerLayout: home | dashboard | products | profile
 const navItems = [
@@ -49,6 +49,16 @@ function SellerHeader({
   const [ringKey, setRingKey] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { seller } = useSelector((state) => state.seller);
+
+  useEffect(() => {
+    dispatch(singleSellerFetch());
+  }, [dispatch]);
+
+  const isActive = seller?.status === "active";
+  const visibleNavItems = isActive
+    ? navItems
+    : navItems.filter((item) => item.key === "profile");
 
   return (
     <header
@@ -56,7 +66,10 @@ function SellerHeader({
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-3 py-3">
         {/* brand */}
-        <Link to="/seller" className="flex items-center gap-2 min-w-0">
+        <Link
+          to={seller?.status === "active" ? "/seller" : "/seller/profile"}
+          className="flex items-center gap-2 min-w-0"
+        >
           <div className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0">
             <Store className="size-4" />
           </div>
@@ -69,7 +82,7 @@ function SellerHeader({
         {/* nav (desktop) */}
         <nav aria-label="Seller navigation" className="hidden md:block">
           <ul className="flex gap-1 p-2 rounded-full border">
-            {navItems.map(({ key, label, to, icon: Icon }) => (
+            {visibleNavItems.map(({ key, label, to, icon: Icon }) => (
               <li key={key}>
                 <Link
                   to={to}
@@ -140,7 +153,7 @@ function SellerHeader({
       {/* nav (mobile): scrollable tabs under the top bar */}
       <nav aria-label="Seller navigation" className="md:hidden border-t">
         <ul className="flex items-center justify-evenly overflow-x-auto px-2 py-1 gap-1">
-          {navItems.map(({ key, label, to, icon: Icon }) => (
+          {visibleNavItems.map(({ key, label, to, icon: Icon }) => (
             <li key={key} className="shrink-0">
               <Link
                 to={to}

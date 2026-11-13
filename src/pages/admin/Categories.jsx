@@ -20,7 +20,6 @@ import { useNavigate } from "react-router-dom";
 import { useDateFormatter } from "../../hooks/useDateFormatter";
 import { CreatePanel } from "../../components/ui/CreatePanel";
 import { categorySchema } from "../../validation/categorySchema";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const PRIMARY = "#60001A";
 const PRIMARY_TINT = "#F8ECEE";

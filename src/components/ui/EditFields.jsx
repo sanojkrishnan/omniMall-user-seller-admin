@@ -19,6 +19,8 @@ import { createPortal } from "react-dom";
 import { Button } from "./Button";
 import { useAsyncSelectField } from "../../hooks/useAsyncSelectField";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export function FieldLabel({ children, required }) {
   return (
@@ -780,6 +782,20 @@ function TagsField({ field, value, onChange }) {
   );
 }
 
+function PhoneField({ field, value, onChange }) {
+  return (
+    <PhoneInput
+      international
+      defaultCountry="IN"
+      countryCallingCodeEditable={false}
+      placeholder="Enter phone number"
+      value={value || ""}
+      onChange={onChange}
+      className="phone-input-custom"
+    />
+  );
+}
+
 export function renderField(field, formik, variant = "admin") {
   const value = formik.values[field.name];
 
@@ -802,6 +818,9 @@ export function renderField(field, formik, variant = "admin") {
           className={cn(inputBase, "resize-none")}
         />
       );
+
+    case "phone":
+      return <PhoneField field={field} value={value} onChange={setValue} />;
 
     case "select": {
       const options = field.options ?? [];

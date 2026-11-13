@@ -1,9 +1,13 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { SearchBar } from "../../components/ui/SearchBar";
 import P2 from "../../components/ui/P2";
 import H1 from "../../components/ui/H1";
 import CartSellerSeparation from "../../components/CartSellerSeparation";
+import CartLoading from "../../components/ui/CartLoading";
+import ErrorFallback from "../../components/ui/ErrorFallback";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScrolling";
 import {
   fetchAllProducts,
   clearProductError,
@@ -14,8 +18,6 @@ import {
   clearSellerError,
   clearSellerState,
 } from "../../redux/slice/sellerSlice";
-import CartLoading from "../../components/ui/CartLoading";
-import ErrorFallback from "../../components/ui/ErrorFallback";
 import {
   clearCartError,
   clearCartMessages,
@@ -23,13 +25,16 @@ import {
   removeCart,
   updateQuantity,
 } from "../../redux/slice/cartSlice";
-import { toast } from "react-toastify";
+
+const PAGE_SIZE = 10;
 
 const getId = (val) => (val && typeof val === "object" ? val._id : val);
 
 function Cart() {
   const dispatch = useDispatch();
   const [searchInput, setSearchInput] = useState("");
+  const [page, setPage] = useState(1);
+  const [settledKey, setSettledKey] = useState("");
   const [filterValues, setFilterValues] = useState({
     category: "",
     minPrice: "",
@@ -37,7 +42,6 @@ function Cart() {
     priceSort: "",
   });
 
-  // raw cart entries: [{ productId, userId, sellerId, quantity }]
   const {
     cart,
     isCartLoading,
@@ -47,67 +51,73 @@ function Cart() {
     cartDeleteMessage,
   } = useSelector((state) => state.cart);
 
-  console.log("CART FROM CART PAGE :", cart);
-
   const {
     products = [],
     productError,
     isProductLoading,
   } = useSelector((state) => state.product);
-  const { seller } = useSelector((state) => state.seller);
+
+  // `sellers` = list key (if your slice has one), `seller` = may be a single object
+  const { sellers, seller, sellerError } = useSelector((state) => state.seller);
+
+  const hasCartData = Array.isArray(cart) && cart.length > 0;
+
+  const lastFetchedProductIdsRef = useRef("");
+  const lastFetchedSellerIdsRef = useRef("");
+
+  // identifies "which products + sellers this cart needs"
+  const cartKey = useMemo(() => {
+    if (!Array.isArray(cart) || cart.length === 0) return "";
+    const p = [...new Set(cart.map((i) => getId(i.productId)).filter(Boolean))]
+      .sort()
+      .join(",");
+    const s = [...new Set(cart.map((i) => getId(i.sellerId)).filter(Boolean))]
+      .sort()
+      .join(",");
+    return `${p}|${s}`;
+  }, [cart]);
+
+  /* ------------------------------ fetching ------------------------------ */
 
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
 
   useEffect(() => {
-    if (cartDeleteMessage) {
-      toast.success(cartDeleteMessage);
-      dispatch(clearCartMessages());
-    }
-    if (cartUpdateMessage) {
-      toast.success(cartUpdateMessage);
-      dispatch(clearCartMessages());
-    }
-    if (cartError) {
-      toast.error(cartError);
-      dispatch(clearCartError());
-    }
-  }, [dispatch, cartDeleteMessage, cartUpdateMessage, cartError]);
+    if (!Array.isArray(cart) || cart.length === 0) return;
 
-  const lastFetchedProductIdsRef = useRef("");
-  const lastFetchedSellerIdsRef = useRef("");
+    const uniqueProductIds = [
+      ...new Set(cart.map((item) => getId(item.productId)).filter(Boolean)),
+    ];
+    const uniqueSellerIds = [
+      ...new Set(cart.map((item) => getId(item.sellerId)).filter(Boolean)),
+    ];
 
-  useEffect(() => {
-    if (Array.isArray(cart) && cart.length > 0) {
-      const uniqueProductIds = [
-        ...new Set(cart.map((item) => getId(item.productId)).filter(Boolean)),
-      ];
-      const uniqueSellerIds = [
-        ...new Set(cart.map((item) => getId(item.sellerId)).filter(Boolean)),
-      ];
+    const productIdsKey = [...uniqueProductIds].sort().join(",");
+    const sellerIdsKey = [...uniqueSellerIds].sort().join(",");
+    const jobs = [];
 
-      const productIdsKey = uniqueProductIds.sort().join(",");
-      const sellerIdsKey = uniqueSellerIds.sort().join(",");
-
-      if (
-        uniqueProductIds.length > 0 &&
-        productIdsKey !== lastFetchedProductIdsRef.current
-      ) {
-        lastFetchedProductIdsRef.current = productIdsKey;
+    if (
+      uniqueProductIds.length > 0 &&
+      productIdsKey !== lastFetchedProductIdsRef.current
+    ) {
+      lastFetchedProductIdsRef.current = productIdsKey;
+      jobs.push(
         dispatch(
           fetchAllProducts({
             pagination: { page: 1, limit: uniqueProductIds.length },
             uniqueProducts: uniqueProductIds,
           }),
-        );
-      }
+        ),
+      );
+    }
 
-      if (
-        uniqueSellerIds.length > 0 &&
-        sellerIdsKey !== lastFetchedSellerIdsRef.current
-      ) {
-        lastFetchedSellerIdsRef.current = sellerIdsKey;
+    if (
+      uniqueSellerIds.length > 0 &&
+      sellerIdsKey !== lastFetchedSellerIdsRef.current
+    ) {
+      lastFetchedSellerIdsRef.current = sellerIdsKey;
+      jobs.push(
         dispatch(
           fetchAllSellers({
             pagination: { page: 1, limit: uniqueSellerIds.length },
@@ -118,10 +128,36 @@ function Cart() {
             maxPrice: null,
             priceSort: "",
           }),
-        );
-      }
+        ),
+      );
     }
-  }, [cart, dispatch]);
+
+    if (jobs.length > 0) {
+      // allSettled: runs whether the fetches succeed or fail
+      Promise.allSettled(jobs).then(() => setSettledKey(cartKey));
+    }
+  }, [cart, cartKey, dispatch]);
+
+  /* ------------------------------- toasts ------------------------------- */
+
+  useEffect(() => {
+    if (cartDeleteMessage) {
+      toast.success(cartDeleteMessage);
+      dispatch(clearCartMessages());
+    }
+    if (cartUpdateMessage) {
+      toast.success(cartUpdateMessage);
+      dispatch(clearCartMessages());
+    }
+    // failed update/remove (cart on screen) -> toast
+    // failed load (nothing to show) -> ErrorFallback
+    if (cartError && hasCartData) {
+      toast.error(cartError);
+      dispatch(clearCartError());
+    }
+  }, [dispatch, cartDeleteMessage, cartUpdateMessage, cartError, hasCartData]);
+
+  /* ------------------------------ cleanup ------------------------------- */
 
   useEffect(() => {
     return () => {
@@ -131,23 +167,44 @@ function Cart() {
       dispatch(clearSellerState());
       dispatch(clearCartMessages());
     };
-  }, []);
+  }, [dispatch]);
+
+  /* ------------------------------- retry -------------------------------- */
+
+  const handleRetry = () => {
+    lastFetchedProductIdsRef.current = "";
+    lastFetchedSellerIdsRef.current = "";
+    setSettledKey(""); // <- new
+    dispatch(clearProductError());
+    dispatch(clearSellerError());
+    dispatch(clearCartError());
+    setPage(1);
+    dispatch(fetchCart());
+  };
+
+  /* ------------------------------ derived data -------------------------- */
 
   const productMap = useMemo(() => {
     const map = {};
-    (products || []).forEach((p) => {
+    (Array.isArray(products) ? products : []).forEach((p) => {
       map[p._id] = p;
     });
     return map;
   }, [products]);
 
+  // never call .forEach on something that might be a single object or null
   const sellerMap = useMemo(() => {
+    const list = Array.isArray(sellers)
+      ? sellers
+      : Array.isArray(seller)
+        ? seller
+        : [];
     const map = {};
-    (seller || []).forEach((s) => {
+    list.forEach((s) => {
       map[s._id] = s;
     });
     return map;
-  }, [seller]);
+  }, [sellers, seller]);
 
   const groups = useMemo(() => {
     if (!Array.isArray(cart) || cart.length === 0) return [];
@@ -161,9 +218,11 @@ function Cart() {
       if (!product) return;
 
       const sellerId = getId(cartItem.sellerId);
-      const storeName = sellerData
-        ? `${sellerData.firstName} ${sellerData.lastName}`
-        : "Unknown Seller";
+      const storeName =
+        sellerData?.storeName ??
+        (sellerData?.firstName
+          ? `${sellerData.firstName} ${sellerData.lastName ?? ""}`.trim()
+          : "Unknown Seller");
 
       if (!bySeller[sellerId]) {
         bySeller[sellerId] = { store: storeName, sellerId, items: [] };
@@ -182,18 +241,6 @@ function Cart() {
 
     return Object.values(bySeller);
   }, [cart, productMap, sellerMap]);
-
-  // itemId here is the productId (see `id: product._id` above)
-
-  const handleQtyChange = (productId, newQty) => {
-    if (newQty < 0) return;
-    console.log("QUANTITY CHECK :", newQty);
-    dispatch(updateQuantity({ data: { productId, qnty: newQty } }));
-  };
-
-  const handleRemove = (productId) => {
-    dispatch(removeCart({ productId }));
-  };
 
   const filteredGroups = useMemo(() => {
     return groups
@@ -238,6 +285,51 @@ function Cart() {
   const total = subtotal + shipping;
   const isFiltering = searchInput || Object.values(filterValues).some(Boolean);
 
+  /* --------------------------- infinite scroll -------------------------- */
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchInput, filterValues]);
+
+  const pagedGroups = useMemo(() => {
+    let remaining = page * PAGE_SIZE;
+    const out = [];
+    for (const group of filteredGroups) {
+      if (remaining <= 0) break;
+      const items = group.items.slice(0, remaining);
+      remaining -= items.length;
+      out.push({ ...group, items });
+    }
+    return out;
+  }, [filteredGroups, page]);
+
+  const hasMore = visibleItems.length > page * PAGE_SIZE;
+
+  const triggerRef = useInfiniteScroll({
+    hasNextPage: hasMore,
+    isLoading: false,
+    onLoadMore: () => setPage((p) => p + 1),
+    recheckKey: page,
+  });
+
+  /* ------------------------------- handlers ----------------------------- */
+
+  const handleQtyChange = (productId, newQty) => {
+    if (newQty < 0) return;
+    dispatch(updateQuantity({ data: { productId, qnty: newQty } }));
+  };
+
+  const handleRemove = (productId) => {
+    dispatch(removeCart({ productId }));
+  };
+
+  /* -------------------------------- render ------------------------------ */
+
+  const isHydrating = hasCartData && settledKey !== cartKey;
+  const isLoading =
+    cartStatus === "idle" || isCartLoading || isProductLoading || isHydrating;
+  const hasError = (cartError && !hasCartData) || productError;
+
   return (
     <div className="min-h-screen bg-white">
       <div className="w-full h-24"></div>
@@ -255,14 +347,14 @@ function Cart() {
         />
       </div>
 
-      {cartStatus === "idle" || isCartLoading || isProductLoading ? (
+      {isLoading ? (
         <div className="h-[70vh] w-full flex items-center justify-center">
           <CartLoading />
         </div>
-      ) : cartError || productError ? (
+      ) : hasError ? (
         <ErrorFallback
-          loading={isProductLoading}
-          error={productError || cartError}
+          error={productError || sellerError || cartError}
+          onRetry={handleRetry}
         />
       ) : (
         <>
@@ -275,7 +367,7 @@ function Cart() {
             allItems={allItems}
             visibleItems={visibleItems}
             isFiltering={isFiltering}
-            filteredGroups={filteredGroups}
+            filteredGroups={pagedGroups}
             groups={groups}
             subtotal={subtotal}
             shipping={shipping}
@@ -283,6 +375,8 @@ function Cart() {
             onQtyChange={handleQtyChange}
             onRemove={handleRemove}
           />
+
+          {hasMore && <div ref={triggerRef} className="h-10" />}
         </>
       )}
     </div>

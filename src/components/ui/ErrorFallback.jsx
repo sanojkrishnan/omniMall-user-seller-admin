@@ -8,6 +8,7 @@ import {
 import P2 from "./P2";
 import P from "./P";
 import { Button } from "./Button";
+import { useToastError } from "../../hooks/useToastError";
 
 // accepts a string, an Error, an axios error, or { statusCode, message }
 const getStatusCode = (error, statusCode) =>
@@ -32,6 +33,7 @@ function ErrorFallback({
   onRetry,
   className = "",
 }) {
+  // remove useState, useDispatch, clearError, setPage
   const code = getStatusCode(error, statusCode);
   const isServerError = code !== null && Number(code) >= 500;
   const text = getErrorText(error, message);
@@ -39,15 +41,19 @@ function ErrorFallback({
     text ?? "",
   );
 
-  // if the caller gives onRetry, refetch; otherwise reload the page
   const handleRetry = () => (onRetry ? onRetry() : window.location.reload());
+
+  useToastError({
+    errorMessage: error,
+    fallbackErrorMessage: "Failed to load products",
+  });
 
   return (
     <>
       {!loading && error && (
         <div
           role="alert"
-          className={`w-full flex flex-col items-center justify-center gap-3 text-center px-4 py-12 ${className}`}
+          className={`w-full h-[80vh] flex flex-col items-center justify-center gap-3 text-center px-4 py-12 ${className}`}
         >
           <div className="relative">
             <span className="absolute inset-0 rounded-full bg-red-500/20 animate-ping" />

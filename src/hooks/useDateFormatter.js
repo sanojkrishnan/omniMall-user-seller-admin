@@ -1,10 +1,19 @@
-export function useDateFormatter() {
+export function useDateFormatter({ time = true } = {}) {
+  if (time) {
+    return (iso) =>
+      new Date(iso).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+  }
+
   return (iso) =>
     new Date(iso).toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
 }

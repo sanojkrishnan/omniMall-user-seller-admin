@@ -31,7 +31,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
     // Seller trying to access another role's pages
     if (isSellerAuthenticated) {
-      return <Navigate to="/seller/dashboard" replace />;
+      return <Navigate to="/seller" replace />;
     }
 
     // Admin
@@ -54,16 +54,13 @@ function PublicRoute({ children }) {
   const isSellerAuthenticated = !!sellerToken && !!seller;
 
   if (isSellerAuthenticated) {
-    return <Navigate to="/seller/dashboard" replace />;
+    return <Navigate to="/seller" replace />;
   }
 
   if (isAuthenticated) {
     switch (user.role) {
       case "admin":
         return <Navigate to="/admin/dashboard" replace />;
-
-      case "seller":
-        return <Navigate to="/seller/dashboard" replace />;
 
       case "user":
         return <Navigate to="/user" replace />;
@@ -86,16 +83,13 @@ function RestrictRoles({ children, blockedRoles = [] }) {
   const isSellerAuthenticated = !!sellerToken && !!seller;
 
   if (isSellerAuthenticated && blockedRoles.includes("seller")) {
-    return <Navigate to="/seller/dashboard" replace />;
+    return <Navigate to="/seller" replace />;
   }
 
   if (isAuthenticated && blockedRoles.includes(user.role)) {
     switch (user.role) {
       case "admin":
         return <Navigate to="/admin/dashboard" replace />;
-
-      case "seller":
-        return <Navigate to="/seller/dashboard" replace />;
 
       default:
         return <Navigate to="/user" replace />;

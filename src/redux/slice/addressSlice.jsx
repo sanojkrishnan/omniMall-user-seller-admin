@@ -8,7 +8,7 @@ const initialState = {
   addressError: null,
   addressErrorStatus: null,
   isAddressLoading: false,
-  message: null,
+  addressMessage: null,
 };
 
 export const fetchAllAddress = createAsyncThunk(
@@ -22,6 +22,17 @@ export const fetchAllAddress = createAsyncThunk(
     }
   },
 );
+export const addAddress = createAsyncThunk(
+  "address/addAddress",
+  async ({ values }, { rejectWithValue }) => {
+    try {
+      const data = await addressAPI.addAddress(values);
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Add address failed"));
+    }
+  },
+);
 
 const addressSlice = createSlice({
   name: "address",
@@ -32,7 +43,7 @@ const addressSlice = createSlice({
       state.addressErrorStatus = null;
     },
     clearSellerState(state) {
-      state.message = null;
+      state.addressMessage = null;
       state.addressError = null;
       state.address = [];
     },
@@ -46,13 +57,29 @@ const addressSlice = createSlice({
       })
       .addCase(fetchAllAddress.fulfilled, (state, action) => {
         state.isAddressLoading = false;
-        state.address = action.payload?.data?.data ?? [];
+        state.address = action.payload?.data ?? [];
+        console.log("ADDDRESS: ", action.payload);
       })
       .addCase(fetchAllAddress.rejected, (state, action) => {
         state.isAddressLoading = false;
         state.addressError = getErrorMessage(action.payload);
         state.addressErrorStatus = action.payload.status;
         state.address = [];
+      });
+    //add address
+    builder
+      .addCase(addAddress.pending, (state) => {
+        state.addressError = null;
+        state.isAddressLoading = true;
+      })
+      .addCase(addAddress.fulfilled, (state, action) => {
+        state.isAddressLoading = false;
+        state.addressMessage = action.payload?.message;
+      })
+      .addCase(addAddress.rejected, (state, action) => {
+        state.isAddressLoading = false;
+        state.addressError = getErrorMessage(action.payload);
+        state.addressErrorStatus = action.payload.status;
       });
   },
 });

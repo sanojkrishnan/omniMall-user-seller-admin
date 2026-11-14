@@ -7,4 +7,7 @@ export const addressAPI = {
   addAddress: async (values) => {
     return api.post("address/add-address", values);
   },
+  setDefaultAddress: async (addressId) => {
+    api.patch("address/set-default", addressId);
+  },
 };

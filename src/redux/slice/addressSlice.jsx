@@ -34,6 +34,17 @@ export const addAddress = createAsyncThunk(
   },
 );
 
+export const setDefaultAddress = createAsyncThunk(
+  "address/setDefaultAddress",
+  async (addressId, { rejectWithValue }) => {
+    try {
+      return await addressAPI.setDefaultAddress(addressId);
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Set default address failed"));
+    }
+  },
+);
+
 const addressSlice = createSlice({
   name: "address",
   initialState,
@@ -80,6 +91,23 @@ const addressSlice = createSlice({
         state.isAddressLoading = false;
         state.addressError = getErrorMessage(action.payload);
         state.addressErrorStatus = action.payload.status;
+      });
+
+    // set default
+    builder
+      .addCase(setDefaultAddress.pending, (state) => {
+        state.addressError = null;
+        state.isAddressLoading = true;
+      })
+      .addCase(setDefaultAddress.fulfilled, (state, action) => {
+        state.isAddressLoading = false;
+        state.addressMessage = action.payload?.message;
+        state.address = action.payload?.data ?? state.address;
+      })
+      .addCase(setDefaultAddress.rejected, (state, action) => {
+        state.isAddressLoading = false;
+        state.addressError = getErrorMessage(action.payload);
+        state.addressErrorStatus = action.payload?.status;
       });
   },
 });

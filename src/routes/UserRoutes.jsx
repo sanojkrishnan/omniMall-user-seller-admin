@@ -17,6 +17,7 @@ import LikesReviews from "../components/LikesReviews";
 import ShoppingPreferences from "../components/ShoppingPreferences";
 import SellerRegister from "../components/SellerRegister";
 import SellerStore from "../pages/user/SellerStore";
+import PlaceOrder from "../components/PlaceOrder";
 
 const userRoutes = (
   <>
@@ -52,6 +53,7 @@ const userRoutes = (
       <Route path={`profile/likes-reviews`} element={<LikesReviews />} />
       <Route path={`profile/seller-register`} element={<SellerRegister />} />
       <Route path={`shop/seller-profile`} element={<SellerStore />} />
+      <Route path={`shop/place-order/:id`} element={<PlaceOrder />} />
     </Route>
   </>
 );

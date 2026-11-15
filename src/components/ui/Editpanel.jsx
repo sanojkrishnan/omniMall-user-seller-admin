@@ -42,6 +42,7 @@ export function EditPanel({
   cancelLabel = "Cancel",
   isSubmitting,
   error,
+  id,
 }) {
   const theme = THEMES[variant] ?? THEMES.admin;
   const [shouldRender, setShouldRender] = useState(open);
@@ -53,7 +54,7 @@ export function EditPanel({
     validateOnBlur: false,
     initialValues,
     validationSchema: validationSchema ?? buildValidationSchema(fields),
-    onSubmit: (values) => onSubmit?.(values),
+    onSubmit: (values) => onSubmit?.(values, id), // returns the promise, so isSubmitting still works
   });
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export function EditPanel({
                   <FieldLabel required={field.required}>
                     {field.label}
                   </FieldLabel>
-                  {renderField(field, formik , variant)}
+                  {renderField(field, formik, variant)}
                   {field.helperText &&
                     !(formik.submitCount > 0 && formik.errors[field.name]) && (
                       <p className="mt-1 text-[12px] text-[var(--edit-muted)]">

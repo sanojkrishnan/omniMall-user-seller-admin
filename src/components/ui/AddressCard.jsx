@@ -17,6 +17,7 @@ export default function AddressCard({
   onEdit,
   onDelete,
   onSetDefault,
+  disabled,
 }) {
   const Icon = labelIcons[address.label] ?? MapPin;
 
@@ -69,6 +70,7 @@ export default function AddressCard({
         </Button>
         {!address.isDefault && (
           <button
+            disabled={disabled}
             onClick={onSetDefault}
             className="ml-auto text-xs font-semibold underline underline-offset-4 hover:opacity-60"
           >

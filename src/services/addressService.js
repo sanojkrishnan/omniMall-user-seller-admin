@@ -8,6 +8,12 @@ export const addressAPI = {
     return api.post("address/add-address", values);
   },
   setDefaultAddress: async (addressId) => {
-    api.patch("address/set-default", addressId);
+    return api.patch("address/set-default", addressId);
+  },
+  deleteAddress: async ({ addressId }) => {
+    return api.delete(`address/delete-address/${addressId}`);
+  },
+  updateAddress: async (addressId, values) => {
+    return api.patch(`address/update-address/${addressId}`, values);
   },
 };

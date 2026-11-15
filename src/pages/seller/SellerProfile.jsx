@@ -1,12 +1,15 @@
 import {
   BadgeCheck,
   Clock,
+  FlagOff,
+  GlobeOff,
   Mail,
   MapPin,
   Pencil,
   Phone,
   Star,
   Store,
+  Trash2,
   TriangleAlert,
   Truck,
   X,
@@ -40,6 +43,18 @@ const statusMeta = {
     cls: "bg-red-500/10 text-red-500 border-red-500",
     icon: X,
     note: "Your store is hidden. Contact support.",
+  },
+  banned: {
+    label: "Banned",
+    cls: "bg-red-500/10 text-red-500 border-red-500",
+    icon: FlagOff,
+    note: "Your store is banned. You can't sell products in this website anymore.",
+  },
+  inactive: {
+    label: "Inactive",
+    cls: "bg-red-500/10 text-red-500 border-red-500",
+    icon: X,
+    note: "Your store is hidden. Activate your seller account to continue.",
   },
 };
 
@@ -228,6 +243,18 @@ function SellerProfile() {
               {seller.pickupLocation}
             </Row>
           </Section>{" "}
+          <div className="flex mt-6 gap-4">
+            <Button variant="secondary" className={"text-red-500"}>
+              <Trash2 /> Delete seller profile
+            </Button>
+            {["active", "inactive"].includes(seller.status) && (
+              <Button>
+                <GlobeOff />
+                {seller.status === "active" ? "Deactivate" : "Activate"} seller
+                profile
+              </Button>
+            )}
+          </div>
         </>
       )}
     </div>

@@ -9,6 +9,7 @@ function ConfirmProvider({
   open,
   onResult,
   setOpen,
+  id,
 }) {
   const confirmCardRef = useRef();
 
@@ -55,13 +56,13 @@ function ConfirmProvider({
         <P>{children}</P>
         <div className="flex items-center justify-between mt-4">
           <Button
-            onClick={() => onResult(true)}
+            onClick={() => onResult(true, id)}
             className={`${variant === "user" ? "" : "bg-[#5f0000]"} w-fit`}
           >
             Confirm
           </Button>
           <Button
-            onClick={() => onResult(false)}
+            onClick={() => onResult(false, id)}
             variant="secondary"
             className={`${
               variant === "user" ? "" : "border-[#5f0000] text-[#5f0000]"

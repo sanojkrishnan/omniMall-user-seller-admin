@@ -125,7 +125,10 @@ function ProductCard({ products }) {
               <div className="flex gap-2 pt-1 mt-auto pb-2">
                 <Button
                   className="flex-1 text-sm py-2"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/user/shop/place-order/${item._id}`);
+                  }}
                 >
                   Buy now
                 </Button>

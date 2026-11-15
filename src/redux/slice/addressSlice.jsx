@@ -7,7 +7,7 @@ const initialState = {
   address: [],
   addressError: null,
   addressErrorStatus: null,
-  isAddressLoading: false,
+  isAddressLoading: true, // true until the first fetch finishes
   addressMessage: null,
 };
 
@@ -15,30 +15,60 @@ export const fetchAllAddress = createAsyncThunk(
   "address/fetchAllAddress",
   async (_, { rejectWithValue }) => {
     try {
-      const data = await addressAPI.fetchAddress();
-      return data;
+      return await addressAPI.fetchAddress();
     } catch (err) {
       return rejectWithValue(extractError(err, "Fetch address failed"));
     }
   },
 );
+
+// add, then fetch the fresh list, and return both
 export const addAddress = createAsyncThunk(
   "address/addAddress",
   async ({ values }, { rejectWithValue }) => {
     try {
-      const data = await addressAPI.addAddress(values);
-      return data;
+      const res = await addressAPI.addAddress(values);
+      const list = await addressAPI.fetchAddress();
+      return { message: res?.message, data: list?.data ?? [] };
     } catch (err) {
       return rejectWithValue(extractError(err, "Add address failed"));
     }
   },
 );
+// delete address
+export const deleteAddress = createAsyncThunk(
+  "address/deleteAddress",
+  async ({ addressId }, { rejectWithValue }) => {
+    try {
+      const res = await addressAPI.deleteAddress({ addressId });
+      const list = await addressAPI.fetchAddress();
+      return { message: res?.message, data: list?.data ?? [] };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Add address failed"));
+    }
+  },
+);
+export const updateAddress = createAsyncThunk(
+  "address/updateAddress",
+  async ({ addressId, values }, { rejectWithValue }) => {
+    try {
+      const res = await addressAPI.updateAddress(addressId, values);
+      const list = await addressAPI.fetchAddress();
+      return { message: res?.message, data: list?.data ?? [] };
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Update address failed"));
+    }
+  },
+);
 
+// set default, then fetch the fresh list, and return both
 export const setDefaultAddress = createAsyncThunk(
   "address/setDefaultAddress",
-  async (addressId, { rejectWithValue }) => {
+  async ({ addressId }, { rejectWithValue }) => {
     try {
-      return await addressAPI.setDefaultAddress(addressId);
+      const res = await addressAPI.setDefaultAddress({ addressId });
+      const list = await addressAPI.fetchAddress();
+      return { message: res?.message, data: list?.data ?? [] };
     } catch (err) {
       return rejectWithValue(extractError(err, "Set default address failed"));
     }
@@ -60,7 +90,7 @@ const addressSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    //fetching all seller
+    // fetch: a failure here is a page-level error (shows ErrorFallback)
     builder
       .addCase(fetchAllAddress.pending, (state) => {
         state.addressError = null;
@@ -69,46 +99,32 @@ const addressSlice = createSlice({
       .addCase(fetchAllAddress.fulfilled, (state, action) => {
         state.isAddressLoading = false;
         state.address = action.payload?.data ?? [];
-        console.log("ADDDRESS: ", action.payload);
       })
       .addCase(fetchAllAddress.rejected, (state, action) => {
         state.isAddressLoading = false;
         state.addressError = getErrorMessage(action.payload);
-        state.addressErrorStatus = action.payload.status;
+        state.addressErrorStatus = action.payload?.status;
         state.address = [];
       });
-    //add address
-    builder
-      .addCase(addAddress.pending, (state) => {
-        state.addressError = null;
-        state.isAddressLoading = true;
-      })
-      .addCase(addAddress.fulfilled, (state, action) => {
-        state.isAddressLoading = false;
-        state.addressMessage = action.payload?.message;
-      })
-      .addCase(addAddress.rejected, (state, action) => {
-        state.isAddressLoading = false;
-        state.addressError = getErrorMessage(action.payload);
-        state.addressErrorStatus = action.payload.status;
-      });
 
-    // set default
-    builder
-      .addCase(setDefaultAddress.pending, (state) => {
-        state.addressError = null;
-        state.isAddressLoading = true;
-      })
-      .addCase(setDefaultAddress.fulfilled, (state, action) => {
-        state.isAddressLoading = false;
-        state.addressMessage = action.payload?.message;
-        state.address = action.payload?.data ?? state.address;
-      })
-      .addCase(setDefaultAddress.rejected, (state, action) => {
-        state.isAddressLoading = false;
-        state.addressError = getErrorMessage(action.payload);
-        state.addressErrorStatus = action.payload?.status;
-      });
+    // add + set default: same loading flag, the page shows the spinner.
+    // Failures are shown as toasts by the page, so the old list stays.
+    [addAddress, setDefaultAddress, deleteAddress, updateAddress].forEach(
+      (thunk) => {
+        builder
+          .addCase(thunk.pending, (state) => {
+            state.isAddressLoading = true;
+          })
+          .addCase(thunk.fulfilled, (state, action) => {
+            state.isAddressLoading = false;
+            state.address = action.payload.data;
+            state.addressMessage = action.payload.message;
+          })
+          .addCase(thunk.rejected, (state) => {
+            state.isAddressLoading = false;
+          });
+      },
+    );
   },
 });
 

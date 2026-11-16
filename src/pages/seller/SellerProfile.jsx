@@ -16,12 +16,16 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { singleSellerFetch } from "../../redux/slice/sellerSlice";
+import { useEffect, useState } from "react";
+import { singleSellerFetch, updateSeller } from "../../redux/slice/sellerSlice";
 import CartLoading from "../../components/ui/CartLoading";
 import ErrorFallback from "../../components/ui/ErrorFallback";
 import { useDateFormatter } from "../../hooks/useDateFormatter";
 import { fetchAllCategories } from "../../redux/slice/categorySlice";
+import { EditPanel } from "../../components/ui/EditPanel";
+import { sellerSchema } from "../../validation/sellerSchema";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 /* ----------------------------- static data ----------------------------- */
 
@@ -57,6 +61,55 @@ const statusMeta = {
     note: "Your store is hidden. Activate your seller account to continue.",
   },
 };
+
+const SELLER_EDIT_FIELDS = [
+  {
+    name: "businessLogo",
+    label: "Company Logo",
+    type: "image",
+    imageType: "user",
+    required: true,
+  },
+  { name: "storeName", label: "Store Name", type: "text", required: true },
+
+  {
+    name: "businessPhone",
+    label: "Phone Number",
+    type: "phone",
+    required: true,
+  },
+  {
+    name: "productCategories",
+    label: "Product categories",
+    type: "async-multiselect",
+    asyncEntity: "category",
+    span: "full",
+    required: true,
+  },
+
+  {
+    name: "description",
+    label: "Description",
+    type: "textarea",
+    span: "full",
+    required: true,
+  },
+
+  {
+    name: "businessAddress",
+    label: "Business Address",
+    type: "text",
+    required: true,
+    span: "full",
+  },
+  {
+    name: "pickupLocation",
+    label: "Business Address",
+    type: "text",
+    required: true,
+    span: "full",
+  },
+];
 
 /* ---------------------------- small helpers ---------------------------- */
 
@@ -98,6 +151,7 @@ function Section({ title, children }) {
 function SellerProfile() {
   const dispatch = useDispatch();
   const dateFormatter = useDateFormatter({ time: false });
+  const [editOpen, setEditOpen] = useState(false);
   const { seller, isLoading, sellerError, sellerErrorCode } = useSelector(
     (state) => state.seller,
   );
@@ -129,6 +183,19 @@ function SellerProfile() {
     : null;
   const StatusIcon = status?.icon;
 
+  async function handleEditSubmit(values) {
+    try {
+      console.log("BUSINESS LOGO:", values.businessLogo);
+      console.log("IS FILE:", values.businessLogo instanceof File);
+      console.log("FILE NAME:", values.businessLogo?.name);
+      const res = await dispatch(updateSeller(values)).unwrap();
+      toast.success(res?.message || "Address updated");
+      setEditOpen(false);
+    } catch (err) {
+      toast.error(getErrorMessage(err) || "Failed to update address");
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-2 pb-8">
       {showLoading && (
@@ -153,16 +220,24 @@ function SellerProfile() {
               </p>
             </div>
           </div>
-          {seller.status === "pending" && (
+          {seller.status !== "active" && (
             <div
               role="alert"
               className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-yellow-500 bg-yellow-500/10 rounded-lg p-3 mb-4 sm:mb-6 text-sm"
             >
               <div className="flex items-start gap-2 min-w-0">
                 <TriangleAlert className="size-4 mt-0.5 text-yellow-500 shrink-0" />
+
                 <p className="min-w-0 break-words">
-                  The seller profile is under review. we will let you know when
-                  you are ready to sell your products.
+                  {seller.status === "pending"
+                    ? "The seller profile is under review. we will let you know when you are ready to sell your products."
+                    : seller.status === "inactive"
+                      ? "The seller is inactive. Make it active to sell products or show your seller profile to users"
+                      : seller.status === "banned"
+                        ? "Your seller account is banned deu to our community guidelines violations. You can't sell any products in this profile"
+                        : seller.status === "suspended"
+                          ? "Your seller account is suspended for 6 months deu to our community guidelines violations. For more information contact our helpline"
+                          : ""}
                 </p>
               </div>
             </div>
@@ -197,6 +272,7 @@ function SellerProfile() {
               </div>
               <Button
                 disabled={seller.status !== "active"}
+                onClick={() => setEditOpen(true)}
                 className="w-fit mt-0 text-sm flex items-center gap-2"
               >
                 <Pencil className="size-4" /> Edit profile
@@ -257,6 +333,18 @@ function SellerProfile() {
           </div>
         </>
       )}
+      <EditPanel
+        variant="user"
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title={`Edit seller details`}
+        subtitle={"Clear your mistakes or give us your new profile"}
+        fields={SELLER_EDIT_FIELDS}
+        initialValues={seller}
+        validationSchema={sellerSchema}
+        submitLabel="Save changes"
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 }

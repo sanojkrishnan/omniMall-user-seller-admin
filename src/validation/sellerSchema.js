@@ -8,7 +8,7 @@ export const sellerSchema = Yup.object({
     .email("Invalid email")
     .required("Write your business email"),
   businessPhone: Yup.string()
-    .matches(/^[0-9]{10}$/, "Invalid phone number")
+    .matches(/^\+?[\d\s-]{10,15}$/, "Enter a valid phone number")
     .required("Write your business phone number"),
   businessAddress: Yup.string().required("Give us your business address"),
   pickupLocation: Yup.string().required("Give us your pickup location"),

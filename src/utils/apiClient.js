@@ -254,6 +254,14 @@ export const api = {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((res) => res.data),
+  // for multipart/form-data (file uploads)
+  update: (url, formData, config) =>
+    apiClient
+      .patch(url, formData, {
+        ...config,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => res.data),
 };
 
 export default apiClient;

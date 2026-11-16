@@ -14,7 +14,7 @@ export const AuthAPI = {
   //update profile
   updateProfile: async (data) => {
     console.log("Update profile data:", data);
-    return api.patch("auth/update-profile", data);
+    return api.update("auth/update-profile", data);
   },
   // verify otp
   verifyOTP: async (data) => {

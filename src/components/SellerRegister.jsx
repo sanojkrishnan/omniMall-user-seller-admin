@@ -4,7 +4,6 @@ import BackButtonUser from "./ui/BackButtonUser";
 import { Button } from "./ui/Button";
 import { FieldLabel, renderField } from "./ui/EditFields";
 import { cn } from "../utils/CN";
-import { inputBase } from "../utils/inputBase";
 import { sellerSchema } from "../validation/sellerSchema";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,24 +19,6 @@ const THEME_VARS = {
   "--edit-accent": "black",
   "--edit-accent-soft": "#F5F5F5",
   "--edit-danger": "#b3261e",
-};
-
-const COUNTRY_CODES = [
-  { code: "+91", label: "IN +91" },
-  { code: "+971", label: "AE +971" },
-  { code: "+966", label: "SA +966" },
-  { code: "+974", label: "QA +974" },
-  { code: "+968", label: "OM +968" },
-  { code: "+965", label: "KW +965" },
-  { code: "+973", label: "BH +973" },
-  { code: "+44", label: "UK +44" },
-  { code: "+1", label: "US +1" },
-];
-
-const COUNTRY_CODE_FIELD = {
-  name: "countryCode",
-  type: "select",
-  options: COUNTRY_CODES.map((c) => ({ label: c.label, value: c.code })),
 };
 
 const initialValues = {
@@ -108,9 +89,8 @@ const sections = [
       {
         name: "businessPhone",
         label: "Business phone",
-        type: "phone", // handled by PhoneField below
+        type: "phone",
         required: true,
-        placeholder: "10-digit number",
       },
     ],
   },
@@ -147,32 +127,6 @@ const termsField = {
   checkboxLabel:
     "I agree to the seller terms and conditions and commission policy.",
 };
-
-// Country code select + number input.
-function PhoneField({ field, formik }) {
-  return (
-    <div className="flex gap-2">
-      <div className="w-32 shrink-0">
-        {renderField(COUNTRY_CODE_FIELD, formik, "user")}
-      </div>
-
-      <input
-        type="tel"
-        inputMode="numeric"
-        name={field.name}
-        value={formik.values[field.name] ?? ""}
-        placeholder={field.placeholder}
-        onChange={(e) =>
-          formik.setFieldValue(
-            field.name,
-            e.target.value.replace(/\D/g, "").slice(0, 10),
-          )
-        }
-        className={inputBase}
-      />
-    </div>
-  );
-}
 
 // Formik errors can be strings, arrays or nested objects; flatten to messages.
 function flattenErrors(value) {
@@ -245,11 +199,7 @@ export default function SellerRegister() {
       className={cn(field.span === "full" && "sm:col-span-2")}
     >
       <FieldLabel required={field.required}>{field.label}</FieldLabel>
-      {field.type === "phone" ? (
-        <PhoneField field={field} formik={formik} />
-      ) : (
-        renderField(field, formik, "user")
-      )}
+      {renderField(field, formik, "user")}
       {field.helperText && (
         <p className="mt-1 text-[12px] text-[var(--edit-muted)]">
           {field.helperText}

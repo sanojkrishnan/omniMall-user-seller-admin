@@ -12,4 +12,8 @@ export const sellerAPI = {
   fetchOneSeller: async () => {
     return api.get(`seller/fetch-single`);
   },
+  //update seller
+  updateSeller: async (values) => {
+    return api.update("seller/update-seller", values, { authRole: "seller" });
+  },
 };

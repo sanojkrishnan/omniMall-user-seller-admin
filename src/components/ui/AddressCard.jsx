@@ -18,6 +18,7 @@ export default function AddressCard({
   onDelete,
   onSetDefault,
   disabled,
+  order = false,
 }) {
   const Icon = labelIcons[address.label] ?? MapPin;
 
@@ -56,28 +57,29 @@ export default function AddressCard({
           </p>
         </div>
       </div>
-
-      <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 sm:pl-[60px]">
-        <Button onClick={onEdit} className="w-fit">
-          <Pencil className="h-3 w-3" /> Edit
-        </Button>
-        <Button
-          onClick={onDelete}
-          variant="secondary"
-          className="text-red-400 hover:text-red-500 w-fit"
-        >
-          <Trash2 className="h-3 w-3" /> Delete
-        </Button>
-        {!address.isDefault && (
-          <button
-            disabled={disabled}
-            onClick={onSetDefault}
-            className="ml-auto text-xs font-semibold underline underline-offset-4 hover:opacity-60"
+      {!order && (
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/10 pt-4 sm:pl-[60px]">
+          <Button onClick={onEdit} className="w-fit">
+            <Pencil className="h-3 w-3" /> Edit
+          </Button>
+          <Button
+            onClick={onDelete}
+            variant="secondary"
+            className="text-red-400 hover:text-red-500 w-fit"
           >
-            Set as default
-          </button>
-        )}
-      </div>
+            <Trash2 className="h-3 w-3" /> Delete
+          </Button>
+          {!address.isDefault && (
+            <button
+              disabled={disabled}
+              onClick={onSetDefault}
+              className="ml-auto text-xs font-semibold underline underline-offset-4 hover:opacity-60"
+            >
+              Set as default
+            </button>
+          )}
+        </div>
+      )}
     </article>
   );
 }

@@ -20,13 +20,7 @@ export const categoryAPI = {
   },
   //update category
   updateCategory: async (id, values) => {
-    const { categoryImage, ...fields } = values; // name, isActive
-    const fd = new FormData();
-    fd.append("data", JSON.stringify(fields));
-    if (categoryImage instanceof File) {
-      fd.append("categoryImage", categoryImage); // only a newly picked file
-    }
-    return api.patch(`admin/category/update/${id}`, fd, {
+    return api.update(`admin/category/update/${id}`, values, {
       authRole: "admin",
     });
   },

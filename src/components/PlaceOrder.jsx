@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Briefcase,
   Check,
   CreditCard,
-  Home,
   Landmark,
-  MapPin,
   Minus,
   Package,
-  Phone,
   Plus,
   ShieldCheck,
   Smartphone,
@@ -22,34 +18,14 @@ import {
 import { Button } from "./ui/Button";
 import BackButtonUser from "./ui/BackButtonUser";
 import { FormCard } from "./ui/FormCard";
-
-/* ---------- static data ---------- */
-const ADDRESSES = [
-  {
-    _id: "a1",
-    label: "home",
-    name: "Sanoj Krishnan M",
-    phone: "+916238883964",
-    line1: "Marankavalappil house, Arayi, Kanhangad South PO",
-    line2: "erathumundya temple",
-    city: "Kanhangad",
-    state: "Kerala",
-    pincode: "671531",
-    isDefault: true,
-  },
-  {
-    _id: "a2",
-    label: "work",
-    name: "Sanoj Krishnan M",
-    phone: "+916238883964",
-    line1: "Kanhangad Town, Near Bus Stand",
-    line2: "",
-    city: "Kanhangad",
-    state: "Kerala",
-    pincode: "671315",
-    isDefault: false,
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { clearSellerError, fetchAllAddress } from "../redux/slice/addressSlice";
+import AddressCard from "./ui/AddressCard";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  clearProductError,
+  singleProductFetch,
+} from "../redux/slice/productSlice";
 
 const ITEMS = [
   {
@@ -132,7 +108,6 @@ const PAYMENTS = [
 const FREE_DELIVERY_ABOVE = 999;
 const COD_FEE = 30;
 const GST_RATE = 0.18;
-const labelIcons = { home: Home, work: Briefcase, other: MapPin };
 const inr = (n) => `₹${n.toLocaleString("en-IN")}`;
 
 /* ---------- small pieces ---------- */
@@ -178,18 +153,46 @@ const inputCls =
 
 /* ---------- page ---------- */
 export default function PlaceOrder() {
-  const [addressId, setAddressId] = useState(
-    ADDRESSES.find((a) => a.isDefault)?._id,
-  );
-  const [items, setItems] = useState(ITEMS);
+  const dispatch = useDispatch();
+
   const [deliveryId, setDeliveryId] = useState("standard");
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState(null); // { code, ...COUPONS[code] }
   const [couponError, setCouponError] = useState("");
   const [paymentId, setPaymentId] = useState("upi");
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [note, setNote] = useState("");
+  const {
+    address = [],
+    isAddressLoading,
+    addressError,
+  } = useSelector((state) => state.address);
+  const { singleProduct, isProductLoading, productError } = useSelector(
+    (state) => state.product,
+  );
+  const [addressId, setAddressId] = useState(
+    address.find((a) => a.isDefault)?._id,
+  );
+  const [items, setItems] = useState(singleProduct);
+  const sortedAddresses = [...address].sort(
+    (a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0),
+  );
 
-  const address = ADDRESSES.find((a) => a._id === addressId);
+  useEffect(() => {
+    dispatch(fetchAllAddress());
+    return () => {
+      dispatch(clearSellerError());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(singleProductFetch({ id }));
+    return () => {
+      dispatch(clearProductError());
+    };
+  }, [dispatch]);
+
   const delivery = DELIVERY_OPTIONS.find((d) => d.id === deliveryId);
 
   function changeQty(id, diff) {
@@ -260,106 +263,85 @@ export default function PlaceOrder() {
             {/* 1. address */}
             <Section step={1} title="Delivery address">
               <div className="space-y-3">
-                {ADDRESSES.map((a) => {
-                  const Icon = labelIcons[a.label] ?? MapPin;
-                  return (
-                    <Radio
-                      key={a._id}
-                      selected={addressId === a._id}
-                      onClick={() => setAddressId(a._id)}
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        <span className="font-bold capitalize">{a.label}</span>
-                        {a.isDefault && (
-                          <span className="rounded-full bg-black px-2 py-0.5 text-[11px] font-semibold text-white">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-2 text-sm font-semibold">{a.name}</p>
-                      <p className="mt-0.5 text-sm leading-relaxed text-neutral-600">
-                        {a.line1}
-                        {a.line2 && `, ${a.line2}`}
-                        <br />
-                        {a.city}, {a.state} {a.pincode}
-                      </p>
-                      <p className="mt-2 flex items-center gap-1.5 text-sm text-neutral-600">
-                        <Phone className="h-3.5 w-3.5" /> {a.phone}
-                      </p>
-                    </Radio>
-                  );
+                {sortedAddresses.map((a) => {
+                  return <AddressCard order key={a._id} address={a} />;
                 })}
+              </div>
+              <div className="w-full flex items-end">
+                <button
+                  onClick={() => navigate("/user/profile/addresses")}
+                  className="mt-4 ml-auto text-xs font-semibold underline underline-offset-4 hover:opacity-60"
+                >
+                  Edit address
+                </button>
               </div>
             </Section>
 
             {/* 2. items */}
             <Section step={2} title="Review items">
-              {items.length === 0 ? (
+              {!items ? (
                 <p className="py-6 text-center text-sm text-neutral-500">
                   Your order is empty.
                 </p>
               ) : (
                 <div className="divide-y divide-black/10">
-                  {items.map((i) => (
-                    <div
-                      key={i._id}
-                      className="flex gap-4 py-4 first:pt-0 last:pb-0"
-                    >
-                      <img
-                        src={i.image}
-                        alt={i.name}
-                        className="h-20 w-20 shrink-0 rounded-xl border border-black/15 object-cover"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-semibold leading-snug">
-                              {i.name}
-                            </p>
-                            <p className="mt-0.5 text-xs text-neutral-500">
-                              {i.variant} · Sold by {i.seller}
-                            </p>
-                          </div>
+                  <div
+                    key={items._id}
+                    className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                  >
+                    <img
+                      src={items.image}
+                      alt={items.name}
+                      className="h-20 w-20 shrink-0 rounded-xl border border-black/15 object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold leading-snug">
+                            {items.name}
+                          </p>
+                          <p className="mt-0.5 text-xs text-neutral-500">
+                            {items.variant} · Sold by {items.seller}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeItem(items._id)}
+                          className="text-neutral-400 hover:text-red-500"
+                          aria-label="Remove item"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center rounded-full border border-black/20">
                           <button
-                            onClick={() => removeItem(i._id)}
-                            className="text-neutral-400 hover:text-red-500"
-                            aria-label="Remove item"
+                            onClick={() => changeQty(items._id, -1)}
+                            className="grid h-8 w-8 place-items-center hover:opacity-60"
                           >
-                            <X className="h-4 w-4" />
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-semibold">
+                            {items.qty}
+                          </span>
+                          <button
+                            onClick={() => changeQty(items._id, 1)}
+                            className="grid h-8 w-8 place-items-center hover:opacity-60"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
                           </button>
                         </div>
-
-                        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center rounded-full border border-black/20">
-                            <button
-                              onClick={() => changeQty(i._id, -1)}
-                              className="grid h-8 w-8 place-items-center hover:opacity-60"
-                            >
-                              <Minus className="h-3.5 w-3.5" />
-                            </button>
-                            <span className="w-6 text-center text-sm font-semibold">
-                              {i.qty}
-                            </span>
-                            <button
-                              onClick={() => changeQty(i._id, 1)}
-                              className="grid h-8 w-8 place-items-center hover:opacity-60"
-                            >
-                              <Plus className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-bold">
-                              {inr(i.price * i.qty)}
-                            </span>
-                            <span className="ml-2 text-xs text-neutral-400 line-through">
-                              {inr(i.mrp * i.qty)}
-                            </span>
-                          </div>
+                        <div className="text-right">
+                          <span className="font-bold">
+                            {inr(items.price * items.qty)}
+                          </span>
+                          <span className="ml-2 text-xs text-neutral-400 line-through">
+                            {inr(items.mrp * items.qty)}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </Section>

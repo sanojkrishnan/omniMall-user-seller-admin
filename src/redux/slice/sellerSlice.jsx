@@ -49,6 +49,20 @@ export const fetchAllSellers = createAsyncThunk(
   },
 );
 
+export const updateSeller = createAsyncThunk(
+  "seller/updateSeller",
+  async (values, { rejectWithValue }) => {
+    try {
+      console.log("VALUES FROM THE SLICE : ", values);
+      const data = await sellerAPI.updateSeller(values);
+
+      return data;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Failed to fetch sellers"));
+    }
+  },
+);
+
 // Fetch the seller belonging to the logged-in user
 export const singleSellerFetch = createAsyncThunk(
   "seller/fetchSingleSeller",
@@ -58,6 +72,9 @@ export const singleSellerFetch = createAsyncThunk(
     } catch (err) {
       if (err.response?.status === 401) {
         dispatch(logoutSeller());
+      }
+      if (err.response?.status === 404) {
+        return null; // not a seller yet, not an error
       }
       return rejectWithValue(extractError(err, "Failed to fetch seller"));
     }

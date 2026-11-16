@@ -24,7 +24,7 @@ export const productAPI = {
   },
   //update product
   updateProduct: async (data, id) => {
-    return api.patch(`product/update/${id}`, data, {
+    return api.update(`product/update/${id}`, data, {
       authRole: "admin",
     });
   },

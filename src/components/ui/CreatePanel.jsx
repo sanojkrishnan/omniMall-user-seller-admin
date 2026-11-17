@@ -7,6 +7,7 @@ import { FormCard } from "./FormCard";
 import { TriangleAlert } from "lucide-react";
 import buildValidationSchema from "../../validation/editValidayionSchema";
 import { FieldError, FieldLabel, renderField } from "./EditFields";
+import useScrollLock from "../../hooks/useScrollLock";
 
 const THEMES = {
   admin: {
@@ -69,6 +70,7 @@ export function CreatePanel({
   const theme = THEMES[variant] ?? THEMES.admin;
   const [shouldRender, setShouldRender] = useState(open);
   const [isVisible, setIsVisible] = useState(false);
+  useScrollLock(open);
 
   const defaultValues = initialValues ?? buildDefaultValues(fields);
 

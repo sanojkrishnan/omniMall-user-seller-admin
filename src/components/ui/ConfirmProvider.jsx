@@ -2,6 +2,7 @@ import { FormCard } from "./FormCard";
 import { Button } from "./Button";
 import P from "./P";
 import { useEffect, useRef } from "react";
+import useScrollLock from "../../hooks/useScrollLock";
 
 function ConfirmProvider({
   children,
@@ -12,6 +13,7 @@ function ConfirmProvider({
   id,
 }) {
   const confirmCardRef = useRef();
+  useScrollLock(open);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -27,17 +29,6 @@ function ConfirmProvider({
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
     };
   }, [open]);
 

@@ -62,13 +62,15 @@ export default function AddressCard({
           <Button onClick={onEdit} className="w-fit">
             <Pencil className="h-3 w-3" /> Edit
           </Button>
-          <Button
-            onClick={onDelete}
-            variant="secondary"
-            className="text-red-400 hover:text-red-500 w-fit"
-          >
-            <Trash2 className="h-3 w-3" /> Delete
-          </Button>
+          {!address.isDefault && (
+            <Button
+              onClick={onDelete}
+              variant="secondary"
+              className="text-red-400 hover:text-red-500 w-fit"
+            >
+              <Trash2 className="h-3 w-3" /> Delete
+            </Button>
+          )}
           {!address.isDefault && (
             <button
               disabled={disabled}

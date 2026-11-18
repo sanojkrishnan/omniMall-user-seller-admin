@@ -18,3 +18,7 @@ export const AUTH_CONFIG = {
   maxLoginAttempts: 5,
   lockoutDuration: 15 * 60 * 1000, // 15 minutes
 };
+
+export const RAZORPAY_CONFIG = {
+  razorpayScript: import.meta.env.RAZORPAY_SCRIPT,
+};

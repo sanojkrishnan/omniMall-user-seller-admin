@@ -307,7 +307,7 @@ function SellerProfile() {
               {seller.businessEmail}
             </Row>
             <Row icon={Phone} label="Business phone">
-              +91 {seller.businessPhone}
+              {seller.businessPhone}
             </Row>
           </Section>
           {/* address */}

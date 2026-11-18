@@ -1,71 +1,116 @@
-import { useCallback, useRef, useState } from "react";
-import { providers } from "../payment/providers";
-import { enabledMethods, getMethod } from "../payment/methords";
+import { useCallback, useState } from "react";
+import { RAZORPAY_CONFIG } from "../config/app";
+import { paymentAPI } from "../services/paymentService";
 
-/**
- * const { pay, methods, isProcessing, status, error, orderId, reset } = usePayment();
- *
- * const result = await pay({
- *   methodId: "upi",                         // any id from payment/methods.js
- *   payload: { productId, qty, addressId, deliveryId, couponCode, note },
- *   prefill: { name, email, contact },       // optional
- * });
- * result -> { ok, orderId?, message?, cancelled? }
- */
-export default function usePayment() {
-  const [status, setStatus] = useState("idle"); // idle | processing | success | failed | cancelled
-  const [error, setError] = useState("");
-  const [orderId, setOrderId] = useState(null);
-  const busy = useRef(false); // blocks double clicks
-
-  const pay = useCallback(async ({ methodId, payload, prefill }) => {
-    if (busy.current)
-      return { ok: false, message: "Payment already in progress" };
-
-    const method = getMethod(methodId);
-    const provider = method?.enabled && providers[method.provider];
-    if (!provider) {
-      const message = "This payment method is not available";
-      setStatus("failed");
-      setError(message);
-      return { ok: false, message };
+const loadRazorpay = () => {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      return resolve(true);
     }
 
-    busy.current = true;
-    setStatus("processing");
-    setError("");
+    const script = document.createElement("script");
+    script.src = RAZORPAY_CONFIG.razorpayScript;
 
-    let result;
+    script.onload = () => resolve(true);
+    script.onerror = () => reject(new Error("Failed to load Razorpay"));
+
+    document.body.appendChild(script);
+  });
+};
+
+const usePayment = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const initiatePayment = useCallback(async (payload = {}) => {
     try {
-      result = await provider({ methodId, payload, prefill });
-    } catch (e) {
-      result = { ok: false, message: e?.message || "Something went wrong" };
-    }
+      setLoading(true);
+      setError(null);
 
-    busy.current = false;
-    if (result.ok) {
-      setStatus("success");
-      setOrderId(result.orderId ?? null);
-    } else {
-      setStatus(result.cancelled ? "cancelled" : "failed");
-      setError(result.message || "Payment failed");
-    }
-    return result;
-  }, []);
+      // 1. Load Razorpay checkout
+      await loadRazorpay();
 
-  const reset = useCallback(() => {
-    setStatus("idle");
-    setError("");
-    setOrderId(null);
+      // 2. Create payment order on backend
+      const { data } = paymentAPI.createPaymentOrder(payload);
+
+      const { keyId, orderId, amount, currency } = data.data;
+
+      // 3. Open Razorpay checkout
+      return await new Promise((resolve, reject) => {
+        const options = {
+          key: keyId,
+          amount,
+          currency,
+          name: "OmniMall",
+          description: "Order Payment",
+          order_id: orderId,
+
+          handler: async (response) => {
+            try {
+              // 4. Verify payment on backend
+              const verification = paymentAPI.paymentVerify(response);
+
+              resolve(verification.data);
+            } catch (err) {
+              setError(
+                err.response?.data?.message || "Payment verification failed",
+              );
+
+              reject(err);
+            }
+          },
+
+          modal: {
+            ondismiss: () => {
+              resolve({
+                success: false,
+                cancelled: true,
+                message: "Payment cancelled",
+              });
+            },
+          },
+
+          theme: {
+            color: "#2563eb",
+          },
+        };
+
+        const razorpay = new window.Razorpay(options);
+
+        razorpay.on("payment.failed", (response) => {
+          const message = response.error?.description || "Payment failed";
+
+          setError(message);
+
+          resolve({
+            success: false,
+            cancelled: false,
+            message,
+          });
+        });
+
+        razorpay.open();
+      });
+    } catch (err) {
+      const message =
+        err.response?.data?.message || err.message || "Something went wrong";
+
+      setError(message);
+
+      return {
+        success: false,
+        message,
+      };
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return {
-    pay,
-    reset,
-    status,
+    initiatePayment,
+    loading,
     error,
-    orderId,
-    isProcessing: status === "processing",
-    methods: enabledMethods(),
   };
-}
+};
+
+export default usePayment;

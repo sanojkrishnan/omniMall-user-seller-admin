@@ -79,11 +79,11 @@ const addressSlice = createSlice({
   name: "address",
   initialState,
   reducers: {
-    clearSellerError(state) {
+    clearAddressError(state) {
       state.addressError = null;
       state.addressErrorStatus = null;
     },
-    clearSellerState(state) {
+    clearAddressState(state) {
       state.addressMessage = null;
       state.addressError = null;
       state.address = [];

@@ -15,6 +15,16 @@ const luhn = (num) => {
   return sum % 10 === 0;
 };
 
+const isExpired = (expiry) => {
+  const [mm, yy] = expiry.split("/").map(Number);
+  const now = new Date();
+  const year = 2000 + yy;
+  return (
+    year < now.getFullYear() ||
+    (year === now.getFullYear() && mm < now.getMonth() + 1)
+  );
+};
+
 export const cardNumberSchema = Yup.string()
   .required("Enter the card number")
   .test("card-number", "Enter a valid card number", (v) => {

@@ -80,7 +80,7 @@ export default function OrderSummary({
           Includes GST of {inr(gstIncluded)}
         </p>
         {productDiscount + couponDiscount > 0 && (
-          <p className="rounded-lg bg-black/[0.04] px-3 py-2 text-xs font-semibold">
+          <p className="rounded-lg bg-black/[0.04] text-yellow-700 px-3 py-2 text-xs font-semibold">
             You save {inr(productDiscount + couponDiscount)} on this order
           </p>
         )}

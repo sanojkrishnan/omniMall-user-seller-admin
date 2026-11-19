@@ -22,3 +22,8 @@ export const AUTH_CONFIG = {
 export const RAZORPAY_CONFIG = {
   razorpayScript: import.meta.env.RAZORPAY_SCRIPT,
 };
+export const PAYMENT_METHODS = ["card", "upi", "wallet", "netBanking", "cod"];
+
+export const MERCHANT_ADDRESS = {
+  UPI_ID: import.meta.env.VITE_MERCHANT_UPI_ID,
+};

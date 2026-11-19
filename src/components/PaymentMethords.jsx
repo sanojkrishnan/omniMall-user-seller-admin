@@ -17,51 +17,26 @@ import { EditPanel } from "./ui/EditPanel";
 import ConfirmProvider from "./ui/ConfirmProvider";
 import { Button } from "./ui/Button";
 import usePayment from "../hooks/usePayment";
-import { cardNumberSchema, expirySchema, upiSchema } from "../validation/paymentSchema";
+import { UPI_APPS } from "../utils/paymentApps";
+import {
+  cardNumberSchema,
+  expirySchema,
+  phoneSchema,
+  upiSchema,
+} from "../validation/paymentSchema";
+import UpiAppButton, { buildUpiLink } from "./ui/UpiAppButton";
 
-/* ---------- static data ---------- */
 // Note: only the last 4 digits are ever kept. Never store full card numbers or CVV.
-const initialMethods = [
-  {
-    id: 1,
-    type: "card",
-    brand: "Visa",
-    last4: "4417",
-    nameOnCard: "Aarav Menon",
-    expiry: "08/28",
-    isDefault: true,
-  },
-  {
-    id: 2,
-    type: "card",
-    brand: "Mastercard",
-    last4: "3086",
-    nameOnCard: "Aarav Menon",
-    expiry: "09/26",
-    isDefault: false,
-  },
-  {
-    id: 3,
-    type: "upi",
-    upiId: "aarav@okaxis",
-    nickname: "Personal UPI",
-    isDefault: false,
-  },
-  {
-    id: 4,
-    type: "upi",
-    upiId: "meera.menon@oksbi",
-    nickname: "",
-    isDefault: false,
-  },
-  {
-    id: 5,
-    type: "wallet",
-    provider: "Paytm",
-    phone: "+91 98765 43210",
-    isDefault: false,
-  },
-];
+const initialMethods = [];
+
+const openUpiApp = (app) => {
+  // amount / txnRef should come from your order (ideally created by the backend)
+  const link = buildUpiLink(app.scheme, {
+    amount: 1,
+    note: "OmniMall payment",
+  });
+  window.location.href = link;
+};
 
 const SECTIONS = [
   {
@@ -90,7 +65,7 @@ const SECTIONS = [
     title: "Net Banking",
     icon: Landmark,
     addLabel: "Link net banking",
-    empty: "No net banking attached yet.",
+    empty: "No bank attached yet.",
   },
 ];
 
@@ -107,17 +82,6 @@ const detectBrand = (digits) => {
   if (/^(5[1-5]|2[2-7])/.test(digits)) return "Mastercard";
   if (/^3[47]/.test(digits)) return "Amex";
   return "RuPay";
-};
-
-
-const isExpired = (expiry) => {
-  const [mm, yy] = expiry.split("/").map(Number);
-  const now = new Date();
-  const year = 2000 + yy;
-  return (
-    year < now.getFullYear() ||
-    (year === now.getFullYear() && mm < now.getMonth() + 1)
-  );
 };
 
 const methodTitle = (m) =>
@@ -196,7 +160,6 @@ const phoneField = {
   span: "full",
   required: true,
 };
-
 
 const CREATE_CONFIG = {
   card: {
@@ -326,7 +289,7 @@ const buildMethod = (kind, values, id) => {
 /* ---------- method card ---------- */
 function MethodCard({ method, onEdit, onRemove, onSetDefault }) {
   const Icon = typeIcon[method.type];
-  const expired = method.type === "card" && isExpired(method.expiry);
+  const expired = method.type === "card";
 
   return (
     <article
@@ -481,6 +444,17 @@ export default function PaymentMethods() {
                 </div>
 
                 <div className="space-y-4">
+                  {type === "upi" && (
+                    <div className="mb-4 grid w-fit grid-cols-2 gap-3 sm:grid-cols-4">
+                      {UPI_APPS.map((app) => (
+                        <UpiAppButton
+                          key={app.id}
+                          app={app}
+                          onOpen={openUpiApp}
+                        />
+                      ))}
+                    </div>
+                  )}
                   {list.map((m) => (
                     <MethodCard
                       key={m.id}

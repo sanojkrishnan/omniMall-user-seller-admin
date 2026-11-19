@@ -1,39 +1,52 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import BackButtonUser from "./ui/BackButtonUser";
-import { clearSellerError, fetchAllAddress } from "../redux/slice/addressSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useFormik } from "formik";
+import { toast } from "react-toastify";
+import { ShieldCheck } from "lucide-react";
 import {
-  clearProductError,
-  singleProductFetch,
-} from "../redux/slice/productSlice";
+  addOrder,
+  clearOrderError,
+  clearOrderState,
+} from "../redux/slice/orderSlice";
+import BackButtonUser from "./ui/BackButtonUser";
+import ItemsSection from "./ui/ItemsSection";
+import NoteSection from "./ui/NoteSection";
+import OrderSummary from "./ui/OrderSummary";
+import AddressCard from "./ui/AddressCard";
+import Section from "./ui/Section";
+import Radio from "./ui/Radio";
 import {
   COD_FEE,
   COUPONS,
   DELIVERY_OPTIONS,
   FREE_DELIVERY_ABOVE,
   GST_RATE,
-  inputCls,
   PAYMENTS,
 } from "./ui/Constant";
-import ItemsSection from "./ui/ItemsSection";
-import NoteSection from "./ui/NoteSection";
-import OrderSummary from "./ui/OrderSummary";
-import { useNavigate } from "react-router-dom";
-import AddressCard from "./ui/AddressCard";
-import Section from "./ui/Section";
-import Radio from "./ui/Radio";
-// import DeliverySection from "./ui/DeliverySection";
+import { clearSellerError, fetchAllAddress } from "../redux/slice/addressSlice";
+import {
+  clearProductError,
+  singleProductFetch,
+} from "../redux/slice/productSlice";
 import usePayment from "../hooks/usePayment";
+import {
+  placeOrderInitialValues,
+  placeOrderSchema,
+} from "../validation/placeOrderSchema";
+import { useToastError } from "../hooks/useToastError.js";
 
-function PaymentSection({ step, paymentId, onChange }) {
+/* ---------- payment ---------- */
+// PAYMENTS ids must match the schema enum: card | upi | wallet | netBanking | cod
+function PaymentSection({ step, value, onChange, error }) {
+  const navigate = useNavigate();
   return (
     <Section step={step} title="Payment method">
       <div className="space-y-3">
         {PAYMENTS.map((p) => (
           <Radio
             key={p.id}
-            selected={paymentId === p.id}
+            selected={value === p.id}
             onClick={() => onChange(p.id)}
           >
             <div className="flex items-center gap-2">
@@ -41,47 +54,39 @@ function PaymentSection({ step, paymentId, onChange }) {
               <span className="font-semibold">{p.label}</span>
             </div>
             <p className="mt-1 text-xs text-neutral-500">{p.hint}</p>
-
-            {paymentId === p.id && p.id === "upi" && (
-              <input
-                className={`${inputCls} mt-3`}
-                placeholder="yourname@upi"
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-
-            {paymentId === p.id && p.id === "card" && (
-              <div
-                className="mt-3 grid grid-cols-2 gap-3"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  className={`${inputCls} col-span-2`}
-                  placeholder="Card number"
-                  inputMode="numeric"
-                />
-                <input
-                  className={`${inputCls} col-span-2`}
-                  placeholder="Name on card"
-                />
-                <input className={inputCls} placeholder="MM / YY" />
-                <input className={inputCls} placeholder="CVV" type="password" />
-              </div>
-            )}
           </Radio>
         ))}
+      </div>
+
+      {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
+
+      <p className="mt-4 flex items-start gap-2 text-xs text-neutral-500">
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+        Card, UPI and wallet details are entered on the secure payment screen.
+        We never see or store your card number or CVV.
+      </p>
+
+      <div className="flex w-full items-end">
+        <button
+          type="button"
+          onClick={() => navigate("/user/profile/payments")}
+          className="ml-auto mt-4 text-xs font-semibold underline underline-offset-4 hover:opacity-60"
+        >
+          Add payment options
+        </button>
       </div>
     </Section>
   );
 }
 
+/* ---------- address ---------- */
 function AddressSection({
   step,
   addresses,
   selectedId,
   onSelect,
   loading,
-  error,
+  formError,
 }) {
   const navigate = useNavigate();
 
@@ -89,11 +94,6 @@ function AddressSection({
     <Section step={step} title="Delivery address">
       {loading && (
         <p className="text-sm text-neutral-500">Loading addresses...</p>
-      )}
-      {error && (
-        <p className="text-sm text-red-500">
-          {typeof error === "string" ? error : "Could not load addresses"}
-        </p>
       )}
       {!loading && addresses.length === 0 && (
         <p className="text-sm text-neutral-500">
@@ -115,33 +115,34 @@ function AddressSection({
         ))}
       </div>
 
+      {formError && <p className="mt-3 text-xs text-red-500">{formError}</p>}
+
       <div className="flex w-full items-end">
         <button
           type="button"
           onClick={() => navigate("/user/profile/addresses")}
           className="ml-auto mt-4 text-xs font-semibold underline underline-offset-4 hover:opacity-60"
         >
-          Edit address
+          {addresses.length === 0 ? "Add address" : "Edit address"}
         </button>
       </div>
     </Section>
   );
 }
 
+/* ---------- page ---------- */
 export default function PlaceOrder() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const [deliveryId, setDeliveryId] = useState("standard");
-  const [paymentId, setPaymentId] = useState("upi");
-  const [couponInput, setCouponInput] = useState("");
-  const [coupon, setCoupon] = useState(null); // { code, ...COUPONS[code] }
-  const [couponError, setCouponError] = useState("");
-  const [note, setNote] = useState("");
-  const [qty, setQty] = useState(1);
-  const [addressId, setAddressId] = useState(null);
   const { pay, isProcessing } = usePayment();
+
+  // coupon UI state (the server re-validates the code on submit)
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState(null); // { code, type, value }
+  const [couponError, setCouponError] = useState("");
+
+  const { isOrderLoading, orderError } = useSelector((state) => state.order);
 
   const {
     address = [],
@@ -152,6 +153,58 @@ export default function PlaceOrder() {
     (state) => state.product,
   );
 
+  /* ---------- form (matches placeOrderSchema) ---------- */
+  const formik = useFormik({
+    initialValues: placeOrderInitialValues, // { items, addressId, paymentMethod, couponCode, notes }
+    validationSchema: placeOrderSchema,
+    onSubmit: async (values) => {
+      try {
+        // create the order (the slice stores any failure in orderError)
+        const res = await dispatch(addOrder({ values })).unwrap();
+        const order = res.data;
+
+        // COD is complete, so show the backend message and go to the order
+        if (values.paymentMethod === "cod") {
+          toast.success(res.message);
+          navigate(`/user/orders/${order._id}`);
+          return;
+        }
+
+        const result = await pay({ methodId: values.paymentMethod, order });
+        if (result.ok) {
+          toast.success(res.message);
+          navigate(`/user/orders/${order._id}`);
+        } else if (!result.cancelled) {
+          toast.error(result.message); // message returned by usePayment / gateway
+        }
+        // if cancelled, the order stays "pending" and can be retried from My Orders
+      } catch {
+        // addOrder failure: orderError is set in the store and shown by
+        // useToastError below, so there is nothing to show here
+      }
+    },
+  });
+
+  const { values, errors, setFieldValue } = formik;
+  const quantity = values.items[0]?.quantity ?? 1;
+
+  /* ---------- backend errors -> toasts ---------- */
+  useToastError({
+    errorMessage: !isAddressLoading ? addressError : null,
+    fallbackErrorMessage: "Failed to load addresses",
+  });
+
+  useToastError({
+    errorMessage: !isProductLoading ? productError : null,
+    fallbackErrorMessage: "Failed to load the product",
+  });
+
+  useToastError({
+    errorMessage: !isOrderLoading ? orderError : null,
+    fallbackErrorMessage: "Failed to place the order",
+  });
+
+  /* ---------- load data ---------- */
   useEffect(() => {
     dispatch(fetchAllAddress());
     return () => {
@@ -166,66 +219,78 @@ export default function PlaceOrder() {
     };
   }, [dispatch, id]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(clearOrderError());
+      dispatch(clearOrderState());
+    };
+  }, [dispatch]);
+
+  /* ---------- sync store data into the form ---------- */
+  // product -> items
+  useEffect(() => {
+    if (singleProduct?._id) {
+      setFieldValue("items", [
+        { productId: singleProduct._id, quantity: 1, variant: {} },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [singleProduct?._id]);
+
+  // default address -> addressId
   const sortedAddresses = [...address].sort(
     (a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0),
   );
+  useEffect(() => {
+    if (!values.addressId && sortedAddresses.length) {
+      setFieldValue("addressId", sortedAddresses[0]._id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
+
   const selectedAddress =
-    address.find((a) => a._id === addressId) ||
-    address.find((a) => a.isDefault) ||
-    address[0] ||
-    null;
+    address.find((a) => a._id === values.addressId) || null;
 
-  const delivery = DELIVERY_OPTIONS.find((d) => d.id === deliveryId);
+  /* ---------- handlers ---------- */
+  const changeQty = (diff) =>
+    setFieldValue(
+      "items.0.quantity",
+      Math.min(10, Math.max(1, quantity + diff)),
+    );
 
-  function changeQty(diff) {
-    setQty((q) => Math.min(10, Math.max(1, q + diff)));
-  }
-
-  function applyCoupon() {
+  const applyCoupon = () => {
     const code = couponInput.trim().toUpperCase();
     if (COUPONS[code]) {
       setCoupon({ code, ...COUPONS[code] });
+      setFieldValue("couponCode", code);
       setCouponError("");
       setCouponInput("");
     } else {
       setCoupon(null);
+      setFieldValue("couponCode", "");
       setCouponError("Invalid coupon code");
     }
-  }
+  };
 
-  async function handlePlace() {
-    const result = await pay({
-      methodId: paymentId,
-      payload: {
-        productId: singleProduct._id,
-        qty,
-        addressId: selectedAddress._id,
-        deliveryId,
-        couponCode: coupon?.code,
-        note,
-      },
-    });
-    if (result.ok)
-      navigate(`/user/orders/${result.orderId}`); // your success page
-    else if (!result.cancelled) alert(result.message); // swap for your toast
-  }
+  const removeCoupon = () => {
+    setCoupon(null);
+    setFieldValue("couponCode", "");
+  };
 
-  /* ---------- totals ---------- */
-  const mrpTotal = (singleProduct?.mrp ?? 0) * qty;
-  const subtotal = (singleProduct?.offerPrice ?? 0) * qty;
+  /* ---------- totals (display only, the server recalculates) ---------- */
+  const delivery = DELIVERY_OPTIONS.find((d) => d.id === "standard");
+  const mrpTotal = (singleProduct?.mrp ?? 0) * quantity;
+  const subtotal = (singleProduct?.offerPrice ?? 0) * quantity;
   const couponDiscount = coupon
     ? coupon.type === "percent"
       ? Math.round((subtotal * coupon.value) / 100)
       : Math.min(coupon.value, subtotal)
     : 0;
-  const deliveryFee =
-    deliveryId === "standard" && subtotal >= FREE_DELIVERY_ABOVE
-      ? 0
-      : delivery.fee;
-  const codFee = paymentId === "cod" ? COD_FEE : 0;
+  const deliveryFee = subtotal >= FREE_DELIVERY_ABOVE ? 0 : delivery.fee;
+  const codFee = values.paymentMethod === "cod" ? COD_FEE : 0;
 
   const totals = {
-    itemCount: singleProduct ? qty : 0,
+    itemCount: singleProduct ? quantity : 0,
     mrpTotal,
     productDiscount: mrpTotal - subtotal,
     couponDiscount,
@@ -237,9 +302,11 @@ export default function PlaceOrder() {
     ),
   };
 
+  // show a schema error only after submit was tried
+  const showErr = (msg) => (formik.submitCount > 0 ? msg : undefined);
+
   return (
     <div className="relative min-h-screen bg-white text-black">
-      {/* spacer for the fixed navbar */}
       <div className="h-20 w-full" />
 
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-1 sm:px-6">
@@ -253,37 +320,46 @@ export default function PlaceOrder() {
           </p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <form
+          onSubmit={formik.handleSubmit}
+          className="grid gap-6 lg:grid-cols-[1fr_380px]"
+        >
           <div className="space-y-6">
-            <ItemsSection
-              step={2}
-              product={singleProduct}
-              qty={qty}
-              loading={isProductLoading}
-              error={productError}
-              onChangeQty={changeQty}
-            />
             <AddressSection
               step={1}
               addresses={sortedAddresses}
-              selectedId={selectedAddress?._id}
-              onSelect={setAddressId}
+              selectedId={values.addressId}
+              onSelect={(aid) => setFieldValue("addressId", aid)}
               loading={isAddressLoading}
-              error={addressError}
+              formError={showErr(errors.addressId)}
             />
 
-            {/* <DeliverySection
-              step={3}
-              deliveryId={deliveryId}
-              onChange={setDeliveryId}
-              subtotal={subtotal}
-            /> */}
-            <PaymentSection
-              step={4}
-              paymentId={paymentId}
-              onChange={setPaymentId}
+            <ItemsSection
+              step={2}
+              product={singleProduct}
+              qty={quantity}
+              loading={isProductLoading}
+              error={showErr(
+                typeof errors.items === "string" ? errors.items : undefined,
+              )}
+              onChangeQty={changeQty}
             />
-            <NoteSection step={5} note={note} onChange={setNote} />
+
+            <PaymentSection
+              step={3}
+              value={values.paymentMethod}
+              onChange={(m) => setFieldValue("paymentMethod", m)}
+              error={showErr(errors.paymentMethod)}
+            />
+
+            <NoteSection
+              step={4}
+              note={values.notes}
+              onChange={(n) => setFieldValue("notes", n)}
+            />
+            {showErr(errors.notes) && (
+              <p className="text-xs text-red-500">{errors.notes}</p>
+            )}
           </div>
 
           <OrderSummary
@@ -294,15 +370,21 @@ export default function PlaceOrder() {
               error: couponError,
               onInputChange: setCouponInput,
               onApply: applyCoupon,
-              onRemove: () => setCoupon(null),
+              onRemove: removeCoupon,
             }}
             delivery={delivery}
-            paymentId={paymentId}
+            paymentId={values.paymentMethod}
             selectedAddress={selectedAddress}
-            canPlace={!!singleProduct && !!selectedAddress && !isProcessing}
-            onPlace={handlePlace}
+            canPlace={
+              !!singleProduct &&
+              !!values.addressId &&
+              !isProcessing &&
+              !isOrderLoading &&
+              !formik.isSubmitting
+            }
+            onPlace={formik.handleSubmit}
           />
-        </div>
+        </form>
       </main>
     </div>
   );

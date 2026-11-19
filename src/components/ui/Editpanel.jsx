@@ -48,6 +48,7 @@ export function EditPanel({
   const theme = THEMES[variant] ?? THEMES.admin;
   const [shouldRender, setShouldRender] = useState(open);
   const [isVisible, setIsVisible] = useState(false);
+
   useScrollLock(open);
 
   const formik = useFormik({

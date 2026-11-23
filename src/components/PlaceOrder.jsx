@@ -24,7 +24,10 @@ import {
   GST_RATE,
   PAYMENTS,
 } from "./ui/Constant";
-import { clearSellerError, fetchAllAddress } from "../redux/slice/addressSlice";
+import {
+  clearAddressError,
+  fetchAllAddress,
+} from "../redux/slice/addressSlice";
 import {
   clearProductError,
   singleProductFetch,
@@ -35,6 +38,15 @@ import {
   placeOrderSchema,
 } from "../validation/placeOrderSchema";
 import { useToastError } from "../hooks/useToastError.js";
+
+const flattenErrors = (e) =>
+  Object.values(e ?? {}).flatMap((v) =>
+    typeof v === "string"
+      ? [v]
+      : v && typeof v === "object"
+        ? flattenErrors(v)
+        : [],
+  );
 
 /* ---------- payment ---------- */
 // PAYMENTS ids must match the schema enum: card | upi | wallet | netBanking | cod
@@ -208,7 +220,7 @@ export default function PlaceOrder() {
   useEffect(() => {
     dispatch(fetchAllAddress());
     return () => {
-      dispatch(clearSellerError());
+      dispatch(clearAddressError());
     };
   }, [dispatch]);
 
@@ -304,6 +316,8 @@ export default function PlaceOrder() {
 
   // show a schema error only after submit was tried
   const showErr = (msg) => (formik.submitCount > 0 ? msg : undefined);
+  
+  const errorMessages = formik.submitCount > 0 ? flattenErrors(errors) : [];
 
   return (
     <div className="relative min-h-screen bg-white text-black">
@@ -372,6 +386,7 @@ export default function PlaceOrder() {
               onApply: applyCoupon,
               onRemove: removeCoupon,
             }}
+            validationErrors={errorMessages}
             delivery={delivery}
             paymentId={values.paymentMethod}
             selectedAddress={selectedAddress}

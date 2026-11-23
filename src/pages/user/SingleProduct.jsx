@@ -480,7 +480,13 @@ function ProductPage({ product = defaultProduct, related = relatedDefaults }) {
                 </button>
               </div>
               <div className="mt-4">
-                <Button>Buy Now</Button>
+                <Button
+                  onClick={() => {
+                    navigate(`/user/shop/place-order/${singleProduct._id}`);
+                  }}
+                >
+                  Buy Now
+                </Button>
               </div>
             </div>
           </div>

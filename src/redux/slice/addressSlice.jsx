@@ -128,5 +128,5 @@ const addressSlice = createSlice({
   },
 });
 
-export const { clearSellerError, clearSellerState } = addressSlice.actions;
+export const { clearAddressError, clearAddressState } = addressSlice.actions;
 export default addressSlice.reducer;

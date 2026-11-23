@@ -1,4 +1,4 @@
-import { Package, ShieldCheck } from "lucide-react";
+import { Package, ShieldCheck, TriangleAlert } from "lucide-react";
 import { Button } from "../ui/Button";
 import { FormCard } from "../ui/FormCard";
 import CouponBox from "./CouponBox";
@@ -15,6 +15,7 @@ export default function OrderSummary({
   selectedAddress,
   canPlace,
   onPlace,
+  validationErrors,
 }) {
   const {
     itemCount,
@@ -35,7 +36,6 @@ export default function OrderSummary({
       <h2 className="flex items-center gap-2 text-lg font-bold">
         <Package className="h-5 w-5" /> Order summary
       </h2>
-
       <div>
         <CouponBox coupon={coupon} {...couponProps} />
         <div className="flex w-full items-end">
@@ -48,7 +48,6 @@ export default function OrderSummary({
           </button>
         </div>
       </div>
-
       <dl className="space-y-2 border-t border-black/10 pt-4 text-sm">
         <Row
           label={`Price (${itemCount} ${itemCount === 1 ? "item" : "items"})`}
@@ -85,7 +84,6 @@ export default function OrderSummary({
           </p>
         )}
       </dl>
-
       {selectedAddress && (
         <div className="border-t border-black/10 pt-4 text-xs text-neutral-600">
           <p className="font-semibold text-black">Delivering to</p>
@@ -98,11 +96,24 @@ export default function OrderSummary({
           </p>
         </div>
       )}
-
+      {/* //alert */}
+      {validationErrors.length > 0 && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-yellow-500 bg-yellow-500/10 p-3 text-sm"
+        >
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-yellow-500" />
+          <ul className="min-w-0 space-y-1 break-words">
+            {validationErrors.map((msg, i) => (
+              <li key={i}>{msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {/* //confirm button */}
       <Button className="w-full" disabled={!canPlace} onClick={onPlace}>
         {paymentId === "cod" ? "Place order" : `Pay ${inr(total)}`}
       </Button>
-
       <p className="flex items-center justify-center gap-1.5 text-xs text-neutral-500">
         <ShieldCheck className="h-3.5 w-3.5" /> Secure checkout · Easy 7-day
         returns

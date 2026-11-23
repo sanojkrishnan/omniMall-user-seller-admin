@@ -11,7 +11,7 @@ import CartLoading from "./ui/CartLoading";
 import ErrorFallback from "./ui/ErrorFallback";
 import {
   addAddress,
-  clearSellerError,
+  clearAddressError,
   deleteAddress,
   fetchAllAddress,
   setDefaultAddress,
@@ -100,7 +100,7 @@ export default function AddressBook() {
   useEffect(() => {
     dispatch(fetchAllAddress());
     return () => {
-      dispatch(clearSellerError());
+      dispatch(clearAddressError());
     };
   }, [dispatch]);
 

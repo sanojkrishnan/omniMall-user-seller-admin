@@ -4,7 +4,8 @@ import { getErrorMessage } from "../../utils/getErrorMessage.js";
 import { orderAPI } from "../../services/orderService.js";
 
 const initialState = {
-  order: null, // the order just created
+  orders: null,
+  orderId: null,
   orderError: null,
   orderErrorStatus: null,
   isOrderLoading: false,
@@ -22,6 +23,17 @@ export const addOrder = createAsyncThunk(
   },
 );
 
+export const fetchSingleOrder = createAsyncThunk(
+  "orders/fetchSingleOrder",
+  async ({ orderId }, { rejectWithValue }) => {
+    try {
+      return await orderAPI.fetchSingleOrder(orderId);
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Fetching order failed"));
+    }
+  },
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState,
@@ -31,7 +43,8 @@ const orderSlice = createSlice({
       state.orderErrorStatus = null;
     },
     clearOrderState(state) {
-      state.order = null;
+      state.orders = null;
+      state.orderId = null;
       state.orderMessage = null;
       state.orderError = null;
       state.orderErrorStatus = null;
@@ -46,7 +59,7 @@ const orderSlice = createSlice({
       })
       .addCase(addOrder.fulfilled, (state, action) => {
         state.isOrderLoading = false;
-        state.order = action.payload?.data ?? null;
+        state.orderId = action.payload?.data ?? null;
         state.orderMessage = action.payload?.message ?? null;
       })
       .addCase(addOrder.rejected, (state, action) => {

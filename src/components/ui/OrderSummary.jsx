@@ -5,6 +5,10 @@ import CouponBox from "./CouponBox";
 import Row from "./Row";
 import { useCurrency } from "../../hooks/useCurrency";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { clearOrderState } from "../../redux/slice/orderSlice";
 
 export default function OrderSummary({
   totals,
@@ -16,6 +20,8 @@ export default function OrderSummary({
   canPlace,
   onPlace,
   validationErrors,
+  orderId,
+  orderMessage,
 }) {
   const {
     itemCount,
@@ -30,6 +36,16 @@ export default function OrderSummary({
 
   const inr = useCurrency();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!orderId) return;
+    if (orderMessage) {
+      toast.success(orderMessage);
+    }
+    dispatch(clearOrderState());
+    navigate(`/user/shop/order/${orderId}`);
+  }, [orderId, orderMessage, dispatch, navigate]);
 
   return (
     <FormCard className="space-y-3 lg:sticky lg:top-24">
@@ -41,7 +57,7 @@ export default function OrderSummary({
         <div className="flex w-full items-end">
           <button
             type="button"
-            onClick={() => navigate("/user/profile/coupons")}
+            onClick={() => navigate(`/user/profile/coupons`)}
             className="ml-auto mt-4 text-xs font-semibold underline underline-offset-4 hover:opacity-60"
           >
             Check for coupons

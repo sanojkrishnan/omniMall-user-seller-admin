@@ -154,7 +154,9 @@ export default function PlaceOrder() {
   const [coupon, setCoupon] = useState(null); // { code, type, value }
   const [couponError, setCouponError] = useState("");
 
-  const { isOrderLoading, orderError } = useSelector((state) => state.order);
+  const { orderId, isOrderLoading, orderError, orderMessage } = useSelector(
+    (state) => state.order,
+  );
 
   const {
     address = [],
@@ -316,7 +318,7 @@ export default function PlaceOrder() {
 
   // show a schema error only after submit was tried
   const showErr = (msg) => (formik.submitCount > 0 ? msg : undefined);
-  
+
   const errorMessages = formik.submitCount > 0 ? flattenErrors(errors) : [];
 
   return (
@@ -379,6 +381,7 @@ export default function PlaceOrder() {
           <OrderSummary
             totals={totals}
             coupon={coupon}
+            orderMessage={orderMessage}
             couponProps={{
               input: couponInput,
               error: couponError,
@@ -386,6 +389,7 @@ export default function PlaceOrder() {
               onApply: applyCoupon,
               onRemove: removeCoupon,
             }}
+            orderId={orderId}
             validationErrors={errorMessages}
             delivery={delivery}
             paymentId={values.paymentMethod}

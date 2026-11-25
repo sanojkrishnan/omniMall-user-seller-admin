@@ -18,6 +18,7 @@ import ShoppingPreferences from "../components/ShoppingPreferences";
 import SellerRegister from "../components/SellerRegister";
 import SellerStore from "../pages/user/SellerStore";
 import PlaceOrder from "../components/PlaceOrder";
+import SingleOrderUser from "../components/ui/SingleOrderUser";
 
 const userRoutes = (
   <>
@@ -54,6 +55,7 @@ const userRoutes = (
       <Route path={`profile/seller-register`} element={<SellerRegister />} />
       <Route path={`shop/seller-profile`} element={<SellerStore />} />
       <Route path={`shop/place-order/:id`} element={<PlaceOrder />} />
+      <Route path={`shop/order/:orderId`} element={<SingleOrderUser />} />
     </Route>
   </>
 );

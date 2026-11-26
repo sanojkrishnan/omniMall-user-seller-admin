@@ -5,6 +5,6 @@ export const orderAPI = {
     return api.post("orders/create-order", values);
   },
   fetchSingleOrder: async (orderId) => {
-    return api.post("orders/fetch-single-order", orderId);
+    return api.get(`orders/fetch-single-order/${orderId}`);
   },
 };

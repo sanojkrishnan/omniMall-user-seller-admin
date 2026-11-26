@@ -127,9 +127,18 @@ export default function OrderSummary({
         </div>
       )}
       {/* //confirm button */}
-      <Button className="w-full" disabled={!canPlace} onClick={onPlace}>
-        {paymentId === "cod" ? "Place order" : `Pay ${inr(total)}`}
-      </Button>
+
+      {orderId ? (
+        <div>
+          <p className="rounded-lg bg-black/[0.04] text-yellow-700 px-3 py-2 text-xs font-semibold">
+            You save {inr(productDiscount + couponDiscount)} on this order
+          </p>
+        </div>
+      ) : (
+        <Button className="w-full" disabled={!canPlace} onClick={onPlace}>
+          {paymentId === "cod" ? "Place order" : `Pay ${inr(total)}`}
+        </Button>
+      )}
       <p className="flex items-center justify-center gap-1.5 text-xs text-neutral-500">
         <ShieldCheck className="h-3.5 w-3.5" /> Secure checkout · Easy 7-day
         returns

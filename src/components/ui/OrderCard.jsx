@@ -11,6 +11,7 @@ import {
 import { Button } from "./Button";
 import ProductTracker from "./ProductTracker";
 import { useCurrency } from "../../hooks/useCurrency";
+import { useNavigate } from "react-router-dom";
 
 const ORDER_STEPS = [
   { label: "Placed", icon: ClipboardCheck },
@@ -64,14 +65,9 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function OrderCard({
-  order,
-  onCancel,
-  onReturn,
-  onBuyAgain,
-  onInvoice,
-}) {
+export default function OrderCard({ order }) {
   const inr = useCurrency();
+  const navigate = useNavigate();
 
   const { status } = order;
   const active = ["pending", "confirmed", "shipped"].includes(status);
@@ -81,6 +77,19 @@ export default function OrderCard({
   const eta = fmtDate(addDays(order.createdAt, DELIVERY_DAYS));
   const returnBy = addDays(order.updatedAt, RETURN_WINDOW_DAYS);
   const canReturn = status === "delivered" && new Date() <= returnBy;
+
+  const handleCancel = (o) => {
+    // dispatch(cancelOrder(o.orderId));
+  };
+  const handleReturn = (o) => {
+    // dispatch(returnOrder(o.orderId));
+  };
+  const handleBuyAgain = (o) => {
+    // dispatch(buyAgain(o.orderId));
+  };
+  const handleInvoice = (o) => {
+    // dispatch(downloadInvoice(o.orderId));
+  };
 
   return (
     <article className="rounded-2xl border border-black/15 bg-white transition hover:border-black/60">
@@ -126,10 +135,16 @@ export default function OrderCard({
                 {item.variant?.size && ` · ${item.variant.size}`}
                 {item.variant?.color && ` · ${item.variant.color}`}
               </p>
+              <p className="text-sm font-medium">
+                {inr(item.price * item.quantity)}
+              </p>
             </div>
-            <p className="text-sm font-medium">
-              {inr(item.price * item.quantity)}
-            </p>
+            <Button
+              onClick={() => navigate(`/user/shop/product/${item.productId}`)}
+              className={"w-fit"}
+            >
+              Check product
+            </Button>
           </li>
         ))}
       </ul>
@@ -173,18 +188,12 @@ export default function OrderCard({
       {/* actions */}
       <div className="flex flex-wrap items-center gap-2 border-t border-black/10 px-5 py-4 sm:px-6">
         {canCancel && (
-          <Button
-            className="w-fit shadow-none"
-            onClick={() => onCancel?.(order)}
-          >
+          <Button className="w-fit shadow-none" onClick={() => handleCancel}>
             <X className="h-3 w-3" /> Cancel order
           </Button>
         )}
         {canReturn && (
-          <Button
-            className="w-fit shadow-none"
-            onClick={() => onReturn?.(order)}
-          >
+          <Button className="w-fit shadow-none" onClick={() => handleReturn}>
             <RotateCcw className="h-3 w-3" /> Return items
           </Button>
         )}
@@ -192,7 +201,7 @@ export default function OrderCard({
           <Button
             className="w-fit shadow-none"
             variant="secondary"
-            onClick={() => onBuyAgain?.(order)}
+            onClick={() => handleBuyAgain}
           >
             <Repeat className="h-3 w-3" /> Buy again
           </Button>
@@ -201,7 +210,7 @@ export default function OrderCard({
           <Button
             className="w-fit shadow-none"
             variant="secondary"
-            onClick={() => onInvoice?.(order)}
+            onClick={() => handleInvoice}
           >
             <Download className="h-3 w-3" /> Invoice
           </Button>

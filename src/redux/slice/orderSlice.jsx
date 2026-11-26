@@ -9,7 +9,17 @@ const initialState = {
   orderError: null,
   orderErrorStatus: null,
   isOrderLoading: false,
+  isOrderFetched: false,
   orderMessage: null,
+};
+
+// handles: order object, [order], or { "0": order }
+const unwrapOrder = (data) => {
+  if (!data) return null;
+  if (Array.isArray(data)) return data[0] ?? null;
+  if (data.orderId) return data;
+  if (data["0"]) return data["0"];
+  return null;
 };
 
 export const addOrder = createAsyncThunk(
@@ -25,7 +35,7 @@ export const addOrder = createAsyncThunk(
 
 export const fetchSingleOrder = createAsyncThunk(
   "orders/fetchSingleOrder",
-  async ({ orderId }, { rejectWithValue }) => {
+  async (orderId, { rejectWithValue }) => {
     try {
       return await orderAPI.fetchSingleOrder(orderId);
     } catch (err) {
@@ -48,6 +58,7 @@ const orderSlice = createSlice({
       state.orderMessage = null;
       state.orderError = null;
       state.orderErrorStatus = null;
+      state.isOrderFetched = false;
     },
   },
   extraReducers: (builder) => {
@@ -64,6 +75,25 @@ const orderSlice = createSlice({
       })
       .addCase(addOrder.rejected, (state, action) => {
         state.isOrderLoading = false;
+        state.orderError = getErrorMessage(action.payload);
+        state.orderErrorStatus = action.payload?.status ?? null;
+      });
+    builder
+      .addCase(fetchSingleOrder.pending, (state) => {
+        state.isOrderLoading = true;
+        state.isOrderFetched = false;
+        state.orderError = null;
+        state.orderErrorStatus = null;
+      })
+      .addCase(fetchSingleOrder.fulfilled, (state, action) => {
+        state.isOrderLoading = false;
+        state.isOrderFetched = true;
+        state.orders = unwrapOrder(action.payload?.data);
+        state.orderMessage = action.payload?.message ?? null;
+      })
+      .addCase(fetchSingleOrder.rejected, (state, action) => {
+        state.isOrderLoading = false;
+        state.isOrderFetched = true;
         state.orderError = getErrorMessage(action.payload);
         state.orderErrorStatus = action.payload?.status ?? null;
       });

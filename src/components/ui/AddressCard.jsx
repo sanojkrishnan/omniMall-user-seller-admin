@@ -72,13 +72,13 @@ export default function AddressCard({
             </Button>
           )}
           {!address.isDefault && (
-            <button
+            <Button
+              variant={"third"}
               disabled={disabled}
               onClick={onSetDefault}
-              className="ml-auto text-xs font-semibold underline underline-offset-4 hover:opacity-60"
             >
               Set as default
-            </button>
+            </Button>
           )}
         </div>
       )}

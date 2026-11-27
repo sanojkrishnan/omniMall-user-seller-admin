@@ -7,4 +7,10 @@ export const orderAPI = {
   fetchSingleOrder: async (orderId) => {
     return api.get(`orders/fetch-single-order/${orderId}`);
   },
+  downloadOrderInvoice: async (orderId) => {
+    return api.get(`orders/invoice/${orderId}`);
+  },
+  cancelOrder: async (orderId) => {
+    return api.patch(`orders/cancel-order/${orderId}`);
+  },
 };

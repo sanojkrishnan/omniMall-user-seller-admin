@@ -6,6 +6,8 @@ const variants = {
     "bg-black text-white w-full hover:shadow-lg shadow-black rounded-lg text-center flex items-center justify-center gap-2",
   secondary:
     "border-[0.5px] border-black/40 shadow-lg w-full rounded-lg text-center flex items-center justify-center gap-2",
+  third:
+    "ml-auto md:text-xs font-semibold underline underline-offset-4 hover:opacity-60 w-fit p-0 mt-0",
 };
 
 export const Button = forwardRef(

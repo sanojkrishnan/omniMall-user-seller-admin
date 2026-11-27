@@ -12,6 +12,11 @@ import { Button } from "./Button";
 import ProductTracker from "./ProductTracker";
 import { useCurrency } from "../../hooks/useCurrency";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { downloadOrderInvoice } from "../../redux/slice/orderSlice";
+import { useToastError } from "../../hooks/useToastError";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const ORDER_STEPS = [
   { label: "Placed", icon: ClipboardCheck },
@@ -65,9 +70,19 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function OrderCard({ order }) {
+export default function OrderCard({
+  order,
+  handleCancel,
+  handleReturn,
+  handleBuyAgain,
+}) {
   const inr = useCurrency();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { orderError, isInvoiceLoading, invoiceMessage } = useSelector(
+    (state) => state.order,
+  );
 
   const { status } = order;
   const active = ["pending", "confirmed", "shipped"].includes(status);
@@ -78,19 +93,20 @@ export default function OrderCard({ order }) {
   const returnBy = addDays(order.updatedAt, RETURN_WINDOW_DAYS);
   const canReturn = status === "delivered" && new Date() <= returnBy;
 
-  const handleCancel = (o) => {
-    // dispatch(cancelOrder(o.orderId));
-  };
-  const handleReturn = (o) => {
-    // dispatch(returnOrder(o.orderId));
-  };
-  const handleBuyAgain = (o) => {
-    // dispatch(buyAgain(o.orderId));
-  };
-  const handleInvoice = (o) => {
-    // dispatch(downloadInvoice(o.orderId));
+  const handleInvoice = () => {
+    dispatch(downloadOrderInvoice(order.orderId));
   };
 
+  useToastError({
+    errorMessage: !isInvoiceLoading ? orderError : null,
+    fallbackErrorMessage: "Failed to download invoice",
+  });
+
+  useEffect(() => {
+    if (!isInvoiceLoading && !orderError && invoiceMessage) {
+      toast.success(invoiceMessage);
+    }
+  }, [dispatch, isInvoiceLoading, orderError, invoiceMessage]);
   return (
     <article className="rounded-2xl border border-black/15 bg-white transition hover:border-black/60">
       {/* header */}
@@ -140,6 +156,7 @@ export default function OrderCard({ order }) {
               </p>
             </div>
             <Button
+              variant="third"
               onClick={() => navigate(`/user/shop/product/${item.productId}`)}
               className={"w-fit"}
             >
@@ -188,12 +205,12 @@ export default function OrderCard({ order }) {
       {/* actions */}
       <div className="flex flex-wrap items-center gap-2 border-t border-black/10 px-5 py-4 sm:px-6">
         {canCancel && (
-          <Button className="w-fit shadow-none" onClick={() => handleCancel}>
+          <Button className="w-fit shadow-none" onClick={handleCancel}>
             <X className="h-3 w-3" /> Cancel order
           </Button>
         )}
         {canReturn && (
-          <Button className="w-fit shadow-none" onClick={() => handleReturn}>
+          <Button className="w-fit shadow-none" onClick={handleReturn}>
             <RotateCcw className="h-3 w-3" /> Return items
           </Button>
         )}
@@ -201,7 +218,7 @@ export default function OrderCard({ order }) {
           <Button
             className="w-fit shadow-none"
             variant="secondary"
-            onClick={() => handleBuyAgain}
+            onClick={handleBuyAgain}
           >
             <Repeat className="h-3 w-3" /> Buy again
           </Button>
@@ -210,9 +227,16 @@ export default function OrderCard({ order }) {
           <Button
             className="w-fit shadow-none"
             variant="secondary"
-            onClick={() => handleInvoice}
+            onClick={handleInvoice}
+            disabled={isInvoiceLoading}
           >
-            <Download className="h-3 w-3" /> Invoice
+            {isInvoiceLoading ? (
+              "Preparing..."
+            ) : (
+              <>
+                <Download className="h-3 w-3" /> Invoice
+              </>
+            )}
           </Button>
         )}
       </div>

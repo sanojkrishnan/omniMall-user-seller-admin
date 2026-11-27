@@ -9,6 +9,7 @@ import { useCurrency } from "../../hooks/useCurrency";
 import CartLoading from "./CartLoading";
 import ErrorFallback from "./ErrorFallback";
 import {
+  cancelOrder,
   clearOrderState,
   fetchSingleOrder,
 } from "../../redux/slice/orderSlice";
@@ -53,6 +54,16 @@ export default function SingleOrderUser() {
     };
   }, [dispatch, orderId]);
 
+  const handleCancel = () => {
+    dispatch(cancelOrder(order.orderId));
+  };
+  const handleReturn = () => {
+    // dispatch(returnOrder(o.orderId));
+  };
+  const handleBuyAgain = () => {
+    // dispatch(buyAgain(o.orderId));
+  };
+
   // loading: request in flight, or not finished yet
   if (isOrderLoading || (!isOrderFetched && !orderError)) {
     return (
@@ -71,7 +82,6 @@ export default function SingleOrderUser() {
         <ErrorFallback
           loading={false}
           error={orderError || "Order not found"}
-          message={orderMessage}
           statusCode={orderErrorStatus}
           fallbackErrorMessage="Failed to load order"
           onRetry={() => dispatch(fetchSingleOrder(orderId))}
@@ -88,6 +98,9 @@ export default function SingleOrderUser() {
       <BackButtonUser variant="secondary" />
       <OrderCard
         order={order}
+        handleCancel={handleCancel}
+        handleReturn={handleReturn}
+        handleBuyAgain={handleBuyAgain}
       />
 
       <div className="grid gap-4 md:grid-cols-2 items-center justify-center">

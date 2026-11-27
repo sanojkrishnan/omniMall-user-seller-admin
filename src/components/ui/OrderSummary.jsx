@@ -1,6 +1,7 @@
 import { Package, ShieldCheck, TriangleAlert } from "lucide-react";
 import { Button } from "../ui/Button";
 import { FormCard } from "../ui/FormCard";
+import Loading from "../ui/Loading";
 import CouponBox from "./CouponBox";
 import Row from "./Row";
 import { useCurrency } from "../../hooks/useCurrency";
@@ -44,7 +45,7 @@ export default function OrderSummary({
       toast.success(orderMessage);
     }
     dispatch(clearOrderState());
-    navigate(`/user/shop/order/${orderId}`);
+    navigate(`/user/shop/order/${orderId}`, { replace: true });
   }, [orderId, orderMessage, dispatch, navigate]);
 
   return (
@@ -136,7 +137,13 @@ export default function OrderSummary({
         </div>
       ) : (
         <Button className="w-full" disabled={!canPlace} onClick={onPlace}>
-          {paymentId === "cod" ? "Place order" : `Pay ${inr(total)}`}
+          {!canPlace ? (
+            <Loading className={"size-6"} />
+          ) : paymentId === "cod" ? (
+            "Place order"
+          ) : (
+            `Pay ${inr(total)}`
+          )}
         </Button>
       )}
       <p className="flex items-center justify-center gap-1.5 text-xs text-neutral-500">
